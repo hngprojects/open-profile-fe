@@ -1,4 +1,14 @@
-import { getCurrentUser, login, signup } from "@/api/auth/auth.service";
+import {
+  getCurrentUser,
+  login,
+  signup,
+  forgotPassword,
+  verifyResetOtp,
+  resetPassword,
+  verifyEmailOtp,
+  resendOtp,
+  logoutApi,
+} from "@/api/auth/auth.service";
 import { QueryStaleTime } from "@/api/base/base.const";
 import { mutationOptions, queryOptions } from "@tanstack/react-query";
 
@@ -10,6 +20,36 @@ export const loginOption = mutationOptions({
 export const signupOption = mutationOptions({
   mutationKey: ["auth", "signup"],
   mutationFn: signup,
+});
+
+export const forgotPasswordOption = mutationOptions({
+  mutationKey: ["auth", "forgot-password"],
+  mutationFn: forgotPassword,
+});
+
+export const verifyResetOtpOption = mutationOptions({
+  mutationKey: ["auth", "verify-reset-otp"],
+  mutationFn: verifyResetOtp,
+});
+
+export const resetPasswordOption = mutationOptions({
+  mutationKey: ["auth", "reset-password"],
+  mutationFn: resetPassword,
+});
+
+export const verifyEmailOtpOption = mutationOptions({
+  mutationKey: ["auth", "verify-otp"],
+  mutationFn: verifyEmailOtp,
+});
+
+export const resendOtpOption = mutationOptions({
+  mutationKey: ["auth", "resend-otp"],
+  mutationFn: resendOtp,
+});
+
+export const logoutOption = mutationOptions({
+  mutationKey: ["auth", "logout"],
+  mutationFn: logoutApi,
 });
 
 export const getCurrentUserOption = () =>

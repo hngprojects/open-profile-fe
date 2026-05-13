@@ -3,9 +3,13 @@ export type LoginRequest = {
   password: string;
 };
 
-// TODO: Add the correct response type
 export type LoginResponse = {
-  token: string;
+  accessToken: string;
+  refreshToken: string;
+  data?: {
+    accessToken: string;
+    refreshToken: string;
+  };
 };
 
 export type SignupRequest = {
@@ -14,12 +18,12 @@ export type SignupRequest = {
   fullName: string;
 };
 
-// TODO: Add the correct response type
 export type SignupResponse = {
-  token: string;
+  message?: string;
 };
 
-// TODO: Add the correct response type
 export type User = {
   id: string;
+  email: string;
+  fullName?: string;
 };

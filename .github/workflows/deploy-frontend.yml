@@ -1,0 +1,151 @@
+name: Frontend CI/CD
+
+on:
+  push:
+    branches:
+      - feat/ci-cd
+      - dev
+      - staging
+      - production
+  pull_request:
+    branches:
+      - feat/ci-cd
+      - dev
+      - staging
+      - production
+
+jobs:
+  ci:
+    name: CI — Lint, Typecheck & Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 8
+
+      - name: Install dependencies
+        run: pnpm install --no-frozen-lockfile
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Lint
+        run: pnpm lint
+        continue-on-error: true
+
+      - name: Build
+        run: pnpm build
+        env:
+          NODE_ENV: production
+
+  deploy-staging:
+    name: Deploy — Staging
+    needs: ci
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/staging' && github.event_name == 'push'
+    environment: staging
+    
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Copy files to server
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          password: ${{ secrets.EC2_PASSWORD }}
+          source: "./"
+          target: /var/www/openprofile-fe/staging
+
+      - name: Copy env file
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          password: ${{ secrets.EC2_PASSWORD }}
+          script: |
+            cp /var/www/openprofile-fe/envfile/.env.staging /var/www/openprofile-fe/staging/.env
+      - name: Install dependencies and build
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          password: ${{ secrets.EC2_PASSWORD }}
+          script: |
+            cd /var/www/openprofile-fe/staging
+            rm -rf .next || true
+            pnpm install
+            pnpm install react-icons
+            pnpm build
+      - name: Start app with PM2
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          password: ${{ secrets.EC2_PASSWORD }}
+          script: |
+            cd /var/www/openprofile-fe/staging
+            pm2 restart openprofile-staging-fe || PORT=3001 pm2 start "pnpm start" --name openprofile-staging-fe
+            pm2 save
+  deploy-production:
+    name: Deploy — production
+    needs: ci
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/production' && github.event_name == 'push'
+    environment: production
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Copy files to server
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          password: ${{ secrets.EC2_PASSWORD }}
+          source: "./"
+          target: /var/www/openprofile-fe/production
+
+      - name: Copy env file
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          password: ${{ secrets.EC2_PASSWORD }}
+          script: |
+            cp /var/www/openprofile-fe/envfile/.env.prod /var/www/openprofile-fe/production/.env
+      - name: Install dependencies and build
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          password: ${{ secrets.EC2_PASSWORD }}
+          script: |
+            cd /var/www/openprofile-fe/production
+            rm -rf .next || true
+            pnpm install
+            pnpm install react-icons
+            pnpm build
+      - name: Start app with PM2
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          password: ${{ secrets.EC2_PASSWORD }}
+          script: |
+            cd /var/www/openprofile-fe/production
+            pm2 restart openprofile-production-fe || pm2 start "pnpm" --name "openprofile-production-fe" -- start --env PORT=3001
+            pm2 save

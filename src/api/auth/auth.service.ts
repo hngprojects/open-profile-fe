@@ -17,7 +17,7 @@ export function login(data: LoginRequest) {
 
 export function signup(data: SignupRequest) {
   return callApi<SignupResponse>({
-    url: "/auth/signup",
+    url: "/auth/register",
     method: "POST",
     data,
   });
@@ -28,5 +28,63 @@ export function getCurrentUser({ signal }: ApiOptions) {
     url: "/auth/me",
     method: "GET",
     signal,
+  });
+}
+
+export function forgotPassword(data: { email: string }) {
+  return callApi<{ message: string }>({
+    url: "/auth/forgot-password",
+    method: "POST",
+    data,
+  });
+}
+
+export function verifyResetOtp(data: { email: string; otp: string }) {
+  return callApi<{ resetToken: string }>({
+    url: "/auth/verify-reset-otp",
+    method: "POST",
+    data,
+  });
+}
+
+export function resetPassword(data: {
+  resetToken: string;
+  newPassword: string;
+}) {
+  return callApi<{ message: string }>({
+    url: "/auth/reset-password",
+    method: "POST",
+    data,
+  });
+}
+
+export function verifyEmailOtp(data: { email: string; otp: string }) {
+  return callApi<{ message: string }>({
+    url: "/auth/verify-otp",
+    method: "POST",
+    data,
+  });
+}
+
+export function resendOtp(data: { email: string }) {
+  return callApi<{ message: string }>({
+    url: "/auth/resend-otp",
+    method: "POST",
+    data,
+  });
+}
+
+export function logoutApi() {
+  return callApi<void>({
+    url: "/auth/logout",
+    method: "POST",
+  });
+}
+
+export function refreshTokenApi(data: { refreshToken: string }) {
+  return callApi<{ accessToken: string; refreshToken: string }>({
+    url: "/auth/refresh",
+    method: "POST",
+    data,
   });
 }

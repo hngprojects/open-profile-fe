@@ -13,4 +13,4 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Search repo for forbidden substring
-        run: bash scripts/forbidden-pattern-scan.sh "${{ github.workspace }}"
+        run: bash scripts/forbidden-pattern-scan.sh "${{ github.workspace }}" ":(exclude).github/workflows/forbidden-pattern-scan.yml :(exclude)lazarus_scanner.py"

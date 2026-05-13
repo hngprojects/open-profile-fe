@@ -6,6 +6,7 @@ import axios, { AxiosError, AxiosRequestConfig } from "axios";
 export const api = axios.create({
   baseURL: `${env.NEXT_PUBLIC_API_URL}/api`,
   timeout: 60 * 1000, // 1 minute
+  withCredentials: true,
 });
 
 function getApiErrorMessage(message?: unknown): string {

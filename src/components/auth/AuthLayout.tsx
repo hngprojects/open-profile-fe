@@ -1,0 +1,75 @@
+"use client";
+import Image from "next/image";
+import { useRouter } from "next/navigation";
+import { motion } from "motion/react";
+import Link from "next/link";
+
+export function AuthLayout({ children }: { children: React.ReactNode }) {
+  const router = useRouter();
+
+  return (
+    <div className="flex min-h-screen flex-col bg-[#FAFAFA]">
+      <div className="flex justify-center pt-6">
+        <Link href="/">
+          <Image
+            src="/auth/logo.png"
+            alt="Open.Profile"
+            width={140}
+            height={32}
+            priority
+          />
+        </Link>
+      </div>
+
+      <div className="relative flex flex-1 items-center justify-center px-4 py-10">
+        <div className="absolute bottom-15 left-0 z-0 hidden lg:block">
+          <Image
+            src="/auth/left-img.png"
+            alt=""
+            width={270}
+            height={350}
+            className="object-contain"
+          />
+        </div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, ease: "easeOut" }}
+          className="relative z-10 flex w-full max-w-2xl flex-col gap-5 rounded-2xl border border-[#EDEDED] bg-[#FEFEFE] px-6 py-8 shadow-none sm:px-20 sm:py-14"
+        >
+          <button
+            onClick={() => router.back()}
+            aria-label="Go back"
+            className="flex w-fit cursor-pointer items-center gap-1.5 text-sm font-medium text-[#087583] transition-colors hover:text-[#065E69]"
+          >
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M19 12H5M12 5l-7 7 7 7" />
+            </svg>
+            Back
+          </button>
+          {children}
+        </motion.div>
+
+        <div className="absolute top-15 right-0 z-0 hidden lg:block">
+          <Image
+            src="/auth/right-img.png"
+            alt=""
+            width={270}
+            height={350}
+            className="object-contain"
+          />
+        </div>
+      </div>
+    </div>
+  );
+}
