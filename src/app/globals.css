@@ -48,6 +48,178 @@
   --radius-2xl: calc(var(--radius) * 1.8);
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
+
+  /* text colors */
+  --color-primary-text: var(--primary-text);
+  --color-secondary-text: var(--secondary-text);
+  --color-tertiary-text: var(--tertiary-text);
+  --color-inverse-text: var(--inverse-text);
+  --color-disabled-text: var(--disabled-text);
+  --color-brand-text: var(--brand-text);
+  --color-brand-subtle-text: var(--brand-subtle-text);
+  --color-link-text: var(--link-text);
+  --color-link-hover-text: var(--link-hover-text);
+  --color-link-active-text: var(--link-active-text);
+  --color-info-text: var(--info-text);
+  --color-info-bold-text: var(--info-bold-text);
+  --color-notice-text: var(--notice-text);
+  --color-notice-bold-text: var(--notice-bold-text);
+  --color-negative-text: var(--negative-text);
+  --color-negative-bold-text: var(--negative-bold-text);
+  --color-positive-text: var(--positive-text);
+  --color-positive-bold-text: var(--positive-bold-text);
+  --color-input-text: var(--input-text);
+  --color-label-text: var(--label-text);
+  --color-selected-text: var(--selected-text);
+
+  /* bg colors */
+  --color-primary-bg: var(--primary-bg);
+  --color-secondary-bg: var(--secondary-bg);
+  --color-hover-bg: var(--hover-bg);
+  --color-active-bg: var(--active-bg);
+  --color-selected-bg: var(--selected-bg);
+  --color-disabled-bg: var(--disabled-bg);
+  --color-inverse-bg: var(--inverse-bg);
+  --color-neutral-bg: var(--neutral-bg);
+  --color-brand-bg: var(--brand-bg);
+  --color-brand-hover-bg: var(--brand-hover-bg);
+  --color-brand-active-bg: var(--brand-active-bg);
+  --color-brand-subtle-bg: var(--brand-subtle-bg);
+  --color-brand-light-subtle-bg: var(--brand-light-subtle-bg);
+  --color-info-bg: var(--info-bg);
+  --color-info-subtle-bg: var(--info-subtle-bg);
+  --color-info-hover-bg: var(--info-hover-bg);
+  --color-notice-bg: var(--notice-bg);
+  --color-notice-subtle-bg: var(--notice-subtle-bg);
+  --color-notice-hover-bg: var(--notice-hover-bg);
+  --color-negative-bg: var(--negative-bg);
+  --color-negative-subtle-bg: var(--negative-subtle-bg);
+  --color-negative-hover-bg: var(--negative-hover-bg);
+  --color-positive-bg: var(--positive-bg);
+  --color-positive-subtle-bg: var(--positive-subtle-bg);
+  --color-positive-hover-bg: var(--positive-hover-bg);
+
+  /* border colors */
+  --color-primary-b: var(--primary-b);
+  --color-secondary-b: var(--secondary-b);
+  --color-tertiary-b: var(--tertiary-b);
+  --color-disabled-b: var(--disabled-b);
+  --color-inverse-b: var(--inverse-b);
+  --color-inverse-bold-b: var(--inverse-bold-b);
+  --color-brand-b: var(--brand-b);
+  --color-brand-subtle-b: var(--brand-subtle-b);
+  --color-info-b: var(--info-b);
+  --color-notice-b: var(--notice-b);
+  --color-warning-b: var(--warning-b);
+  --color-positive-b: var(--positive-b);
+  --color-input-b: var(--input-b);
+  --color-button-b: var(--button-b);
+  --color-selected-b: var(--selected-b);
+
+  /* typography */
+  /* heading */
+  --text-heading-4xl: 64px;
+  --text-heading-4xl--line-height: 72px;
+  --text-heading-4xl--font-weight: 600;
+  --text-heading-4xl--letter-spacing: -1px;
+
+  --text-heading-3xl: 56px;
+  --text-heading-3xl--line-height: 64px;
+  --text-heading-3xl--font-weight: 600;
+  --text-heading-3xl--letter-spacing: -1px;
+
+  --text-heading-2xl: 48px;
+  --text-heading-2xl--line-height: 48px;
+  --text-heading-2xl--font-weight: 600;
+  --text-heading-2xl--letter-spacing: -1px;
+
+  --text-heading-xl: 40px;
+  --text-heading-xl--line-height: 48px;
+  --text-heading-xl--font-weight: 600;
+  --text-heading-xl--letter-spacing: -1px;
+
+  --text-heading-l: 32px;
+  --text-heading-l--line-height: 40px;
+  --text-heading-l--font-weight: 600;
+  --text-heading-l--letter-spacing: -1px;
+
+  --text-heading-m: 24px;
+  --text-heading-m--line-height: 32px;
+  --text-heading-m--font-weight: 600;
+  --text-heading-m--letter-spacing: -0.5px;
+
+  --text-heading-s: 20px;
+  --text-heading-s--line-height: 28px;
+  --text-heading-s--font-weight: 600;
+  --text-heading-s--letter-spacing: -0.5px;
+
+  --text-heading-xs: 16px;
+  --text-heading-xs--line-height: 24px;
+  --text-heading-xs--font-weight: 600;
+  --text-heading-xs--letter-spacing: -0.5px;
+
+  /* text */
+  --text-2xl-regular: 20px;
+  --text-2xl-regular--line-height: 28px;
+
+  --text-2xl-semibold: 20px;
+  --text-2xl-semibold--line-height: 28px;
+  --text-2xl-semibold--font-weight: 600;
+
+  --text-xl-regular: 18px;
+  --text-xl-regular--line-height: 26px;
+
+  --text-xl-semibold: 18px;
+  --text-xl-semibold--line-height: 26px;
+  --text-xl-semibold--font-weight: 500;
+
+  --text-l-regular: 16px;
+  --text-l-regular--line-height: 24px;
+
+  --text-l-medium: 16px;
+  --text-l-medium--line-height: 24px;
+  --text-l-medium--font-weight: 500;
+
+  --text-m-regular: 14px;
+  --text-m-regular--line-height: 20px;
+
+  --text-m-medium: 14px;
+  --text-m-medium--line-height: 20px;
+  --text-m-medium--font-weight: 500;
+
+  /* label */
+  --text-label-xl-semibold: 18px;
+  --text-label-xl-semibold--line-height: 26px;
+  --text-label-xl-semibold--font-weight: 600;
+
+  --text-label-l-regular: 16px;
+  --text-label-l-regular--line-height: 24px;
+
+  --text-label-l-medium: 16px;
+  --text-label-l-medium--line-height: 24px;
+  --text-label-l-medium--font-weight: 500;
+
+  --text-label-m-regular: 14px;
+  --text-label-m-regular--line-height: 20px;
+
+  --text-label-m-medium: 14px;
+  --text-label-m-medium--line-height: 20px;
+  --text-label-m-medium--font-weight: 500;
+
+  --text-label-s-regular: 12px;
+  --text-label-s-regular--line-height: 16px;
+
+  --text-label-s-medium: 12px;
+  --text-label-s-medium--line-height: 16px;
+  --text-label-s-medium--font-weight: 500;
+
+  /* caption */
+  --text-caption-s-regular: 12px;
+  --text-caption-s-regular--line-height: 16px;
+
+  --text-caption-s-medium: 12px;
+  --text-caption-s-medium--line-height: 16px;
+  --text-caption-s-medium--font-weight: 500;
 }
 
 :root {
@@ -84,6 +256,73 @@
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
+
+  /* text */
+  --primary-text: #6e6e6e;
+  --secondary-text: #ededed;
+  --tertiary-text: #f1f1f1;
+  --inverse-text: #fdfdfd;
+  --disabled-text: #f6f6f6;
+  --brand-text: #0a92a4;
+  --brand-subtle-text: #daf2f5;
+  --link-text: #0a92a4;
+  --link-hover-text: #087583;
+  --link-active-text: #065862;
+  --info-text: #0a92a4;
+  --info-bold-text: #043a42;
+  --notice-text: #fd6c01;
+  --notice-bold-text: #6e2f00;
+  --negative-text: #ff4d4d;
+  --negative-bold-text: #7c1f1f;
+  --positive-text: #31e47f;
+  --positive-bold-text: #145b33;
+  --input-text: #747474;
+  --label-text: #454545;
+  --selected-text: #171717;
+
+  /* bg */
+  --primary-bg: #d1d1d1;
+  --secondary-bg: #a2a2a2;
+  --hover-bg: #747474;
+  --active-bg: #454545;
+  --selected-bg: #171717;
+  --disabled-bg: #d1d1d1;
+  --inverse-bg: #e8e8e8;
+  --neutral-bg: #fdfdfd;
+  --brand-bg: #0a92a4;
+  --brand-hover-bg: #087583;
+  --brand-active-bg: #065862;
+  --brand-subtle-bg: #daf2f5;
+  --brand-light-subtle-bg: #f1fdfe;
+  --info-bg: #95d2da;
+  --info-subtle-bg: #daf2f5;
+  --info-hover-bg: #c3e8ec;
+  --notice-bg: #fd6c01;
+  --notice-subtle-bg: #ffe8d7;
+  --notice-hover-bg: #fea360;
+  --negative-bg: #ff4d4d;
+  --negative-subtle-bg: #ffeded;
+  --negative-hover-bg: #ff9494;
+  --positive-bg: #31e47f;
+  --positive-subtle-bg: #eafcf2;
+  --positive-hover-bg: #83efb2;
+
+  /* border */
+  --primary-b: #1d894c;
+  --secondary-b: #27b666;
+  --tertiary-b: #5ae999;
+  --disabled-b: #83efb2;
+  --inverse-b: #e8e8e8;
+  --inverse-bold-b: #fdfdfd;
+  --brand-b: #0a92a4;
+  --brand-subtle-b: #c3e8ec;
+  --info-b: #0a92a4;
+  --notice-b: #fd6c01;
+  --warning-b: #ff4d4d;
+  --positive-b: #31e47f;
+  --input-b: #ededed;
+  --button-b: #454545;
+  --selected-b: #171717;
 }
 
 .dark {

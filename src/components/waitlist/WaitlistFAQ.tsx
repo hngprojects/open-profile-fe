@@ -95,7 +95,7 @@ export function WaitlistFAQ() {
                     </span>
                   </AccordionTrigger>
                   <AccordionContent
-                    className="pb-6 text-[15px] leading-relaxed text-[#454545] md:text-[16px]"
+                    className="text-label-text pb-6 text-[15px] leading-relaxed md:text-[16px]"
                     style={{ fontFamily: "'Afacad', sans-serif" }}
                   >
                     {item.answer}

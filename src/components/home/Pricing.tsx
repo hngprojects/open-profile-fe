@@ -107,7 +107,7 @@ export function Pricing() {
               variants={itemVariants}
               className={`flex h-full flex-col rounded-[16px] border p-4 xl:p-8 ${
                 plan.highlighted
-                  ? "border-[#087583] bg-[#087583] text-white"
+                  ? "bg-brand-hover-bg border-[#087583] text-white"
                   : "border-[#E5E5E5] bg-white text-[#050505]"
               }`}
             >
@@ -151,7 +151,9 @@ export function Pricing() {
                     >
                       <Check
                         className={`mt-0.5 h-4 w-4 shrink-0 ${
-                          plan.highlighted ? "text-white" : "text-[#087583]"
+                          plan.highlighted
+                            ? "text-white"
+                            : "text-link-hover-text"
                         }`}
                       />
                       <span
@@ -170,8 +172,8 @@ export function Pricing() {
                 variant="outline"
                 className={`h-auto w-full rounded-[8px] py-4 text-[14px] font-bold transition-all duration-300 ${
                   plan.highlighted
-                    ? "border-transparent bg-white text-[#087583] hover:bg-white/95"
-                    : "border-[#087583] bg-white text-[#087583] hover:bg-[#087583]/5"
+                    ? "text-link-hover-text border-transparent bg-white hover:bg-white/95"
+                    : "text-link-hover-text hover:bg-brand-hover-bg/5 border-[#087583] bg-white"
                 }`}
               >
                 {plan.buttonText}

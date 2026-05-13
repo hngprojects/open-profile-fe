@@ -45,12 +45,14 @@ export default function VerifyEmailPage() {
       <form onSubmit={handleSubmit} className="flex flex-col gap-3">
         <input type="hidden" name="email" value={email} />
         <input type="hidden" name="otp" value={code.join("")} />
-        <label className="text-sm font-medium text-[#454545]">Enter code</label>
+        <label className="text-label-text text-sm font-medium">
+          Enter code
+        </label>
         <OtpInput onChange={setCode} />
         <Button
           type="submit"
           disabled={!isComplete || pending}
-          className="w-full h-11 font-semibold rounded-lg shadow-none transition-opacity bg-[#087583] hover:bg-[#065E69] text-white border-0 disabled:opacity-50"
+          className="bg-brand-hover-bg h-11 w-full rounded-lg border-0 font-semibold text-white shadow-none transition-opacity hover:bg-[#065E69] disabled:opacity-50"
         >
           {pending ? "Verifying…" : "Continue"}
         </Button>

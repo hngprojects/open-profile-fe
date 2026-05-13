@@ -137,7 +137,7 @@ jobs:
             cd /var/www/openprofile-fe/production
             rm -rf .next || true
             pnpm install
-            pnpm install react-icons
+            pnpm install --config.ignore-scripts=true
             pnpm build
       - name: Start app with PM2
         uses: appleboy/ssh-action@v1.0.3

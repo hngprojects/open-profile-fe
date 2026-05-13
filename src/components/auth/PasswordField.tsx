@@ -32,7 +32,7 @@ export function PasswordField({
 
   return (
     <div className="flex flex-col gap-1.5">
-      <label className="text-sm font-medium text-[#454545]">Password</label>
+      <label className="text-label-text text-sm font-medium">Password</label>
       <div className="relative">
         <Input
           name="password"
@@ -45,12 +45,12 @@ export function PasswordField({
             : {})}
           onFocus={() => setFocused(true)}
           onBlur={() => setFocused(false)}
-          className="h-11 pr-10 bg-[#FAFAFA] border border-[#EDEDED] shadow-none placeholder:text-[#747474] transition-all duration-200 hover:border-[#ABABAB] hover:bg-white hover:shadow-sm"
+          className="border-input-b placeholder:text-input-text h-11 border bg-[#FAFAFA] pr-10 shadow-none transition-all duration-200 hover:border-[#ABABAB] hover:bg-white hover:shadow-sm"
         />
         <button
           type="button"
           onClick={() => setShow((v) => !v)}
-          className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 cursor-pointer"
+          className="absolute top-1/2 right-3 -translate-y-1/2 cursor-pointer text-gray-400 hover:text-gray-600"
           aria-label={show ? "Hide password" : "Show password"}
         >
           {show ? (
@@ -113,7 +113,7 @@ export function PasswordField({
             >
               <div className="flex flex-col">
                 {!allMet && (
-                  <p className="text-xs text-[#454545] mb-[16px]">{label}</p>
+                  <p className="text-label-text mb-[16px] text-xs">{label}</p>
                 )}
                 <div className="flex flex-col gap-[12px]">
                   {rules.map((rule) => {
@@ -122,7 +122,7 @@ export function PasswordField({
                       <div key={rule.label} className="flex items-center gap-2">
                         <div
                           style={{ borderRadius: "2px" }}
-                          className={`w-4 h-4 border flex items-center justify-center transition-colors ${met ? "border-[#171717]" : "border-gray-300"}`}
+                          className={`flex h-4 w-4 items-center justify-center border transition-colors ${met ? "border-selected-b" : "border-gray-300"}`}
                         >
                           {met && (
                             <svg
@@ -133,7 +133,7 @@ export function PasswordField({
                             >
                               <path
                                 d="M1.5 5l2.5 2.5 4.5-4.5"
-                                stroke="#171717"
+                                stroke="var(--selected-bg)"
                                 strokeWidth="1.5"
                                 strokeLinecap="round"
                                 strokeLinejoin="round"
@@ -142,7 +142,7 @@ export function PasswordField({
                           )}
                         </div>
                         <span
-                          className={`text-xs ${met ? "text-[#171717]" : "text-[#747474]"}`}
+                          className={`text-xs ${met ? "text-selected-text" : "text-input-text"}`}
                         >
                           {rule.label}
                         </span>

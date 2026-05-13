@@ -13,7 +13,7 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import Footer from "@/components/layout/Footer";
 
-export default function Page() {
+export default function FaqPage() {
   const faqData = [
     {
       question: "Is OpenProfile free to Use ?",
@@ -117,7 +117,7 @@ export default function Page() {
         <p className="text-[36px] leading-18 font-semibold tracking-[-1.51px] lg:text-[60px] lg:leading-18">
           Frequently asked questions
         </p>
-        <p className="max-w-82.5 text-[18px] leading-6.5 text-[#454545] lg:max-w-full">
+        <p className="text-label-text max-w-82.5 text-[18px] leading-6.5 lg:max-w-full">
           Still have questions? Our support team is here to assist.
         </p>
       </motion.div>

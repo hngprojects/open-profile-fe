@@ -74,7 +74,7 @@ export function WaitlistCTA() {
         />
       </div>
 
-      <div className="relative mx-auto flex max-w-[1280px] flex-col items-center overflow-hidden rounded-[24px] bg-[#171717] px-6 py-16 text-center md:px-12">
+      <div className="bg-selected-bg relative mx-auto flex max-w-[1280px] flex-col items-center overflow-hidden rounded-[24px] px-6 py-16 text-center md:px-12">
         <div className="relative z-10 flex w-full max-w-[700px] flex-col items-center">
           <motion.h2
             {...fadeUp(0)}
@@ -120,7 +120,7 @@ export function WaitlistCTA() {
             <button
               type="submit"
               disabled={isPending}
-              className="h-[54px] rounded-[10px] bg-[#087583] px-8 font-medium whitespace-nowrap text-white transition-colors hover:bg-[#065E69] disabled:opacity-50"
+              className="bg-brand-hover-bg h-[54px] rounded-[10px] px-8 font-medium whitespace-nowrap text-white transition-colors hover:bg-[#065E69] disabled:opacity-50"
               style={{ fontFamily: "'Afacad', sans-serif" }}
             >
               {isPending ? "Joining..." : "Get Early Access"}

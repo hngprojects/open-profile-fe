@@ -120,7 +120,7 @@ export default function ContactPage() {
   }
 
   return (
-    <div className="min-h-screen overflow-hidden bg-white font-sans text-[#050505] selection:bg-[#065E69] selection:text-white">
+    <div className="selection:bg-brand min-h-screen overflow-hidden bg-white font-sans text-[#050505] selection:text-white">
       <Navbar />
       <div className="pt-[76px]">
         <main className="mx-auto max-w-7xl px-4 py-16 md:px-8 md:py-24">
@@ -145,8 +145,7 @@ export default function ContactPage() {
                   <li className="flex items-start gap-3">
                     <Mail
                       size={18}
-                      style={{ color: "#087583" }}
-                      className="mt-0.5 shrink-0"
+                      className="text-link-hover-text mt-0.5 shrink-0"
                     />
                     <div>
                       <p className="text-[13px] font-medium text-[#050505]">
@@ -160,8 +159,7 @@ export default function ContactPage() {
                   <li className="flex items-start gap-3">
                     <Phone
                       size={18}
-                      style={{ color: "#087583" }}
-                      className="mt-0.5 shrink-0"
+                      className="text-link-hover-text mt-0.5 shrink-0"
                     />
                     <div>
                       <p className="text-[13px] font-medium text-[#050505]">
@@ -175,8 +173,7 @@ export default function ContactPage() {
                   <li className="flex items-start gap-3">
                     <MapPin
                       size={18}
-                      style={{ color: "#087583" }}
-                      className="mt-0.5 shrink-0"
+                      className="text-link-hover-text mt-0.5 shrink-0"
                     />
                     <div>
                       <p className="text-[13px] font-medium text-[#050505]">

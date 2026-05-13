@@ -2,11 +2,11 @@
 export function LeftAuthCard() {
   return (
     <div
-      className="w-64 bg-white rounded-2xl shadow-lg border border-gray-100 p-6 flex flex-col gap-3"
+      className="flex w-64 flex-col gap-3 rounded-2xl border border-gray-100 bg-white p-6 shadow-lg"
       style={{ transform: "rotate(-8deg)" }}
     >
       {/* Icon */}
-      <div className="w-12 h-12 rounded-xl bg-[#087583] flex items-center justify-center self-center">
+      <div className="bg-brand-hover-bg flex h-12 w-12 items-center justify-center self-center rounded-xl">
         <svg
           width="24"
           height="24"
@@ -25,27 +25,27 @@ export function LeftAuthCard() {
       </div>
 
       <div className="text-center">
-        <p className="font-semibold text-sm text-[#050505]">
+        <p className="text-sm font-semibold text-[#050505]">
           Create Your Profile
         </p>
-        <p className="text-xs text-gray-400 mt-1 leading-relaxed">
+        <p className="mt-1 text-xs leading-relaxed text-gray-400">
           Sign up in seconds with email, Google, or LinkedIn. Craft your bio,
           and link your work.
         </p>
       </div>
 
-      <div className="h-px bg-gray-100 my-1" />
+      <div className="my-1 h-px bg-gray-100" />
 
       {/* Mock profile preview */}
       <div className="flex flex-col gap-2">
         <div className="flex items-center gap-2">
-          <div className="w-7 h-7 rounded-full bg-[#087583]/20 flex items-center justify-center">
+          <div className="bg-brand-hover-bg/20 flex h-7 w-7 items-center justify-center rounded-full">
             <svg
               width="14"
               height="14"
               viewBox="0 0 24 24"
               fill="none"
-              stroke="#087583"
+              stroke="var(--link-hover-text)"
               strokeWidth="2"
             >
               <circle cx="12" cy="8" r="4" />
@@ -53,15 +53,15 @@ export function LeftAuthCard() {
             </svg>
           </div>
           <div className="flex flex-col gap-0.5">
-            <div className="h-2 w-20 bg-gray-200 rounded-full" />
-            <div className="h-1.5 w-28 bg-gray-100 rounded-full" />
+            <div className="h-2 w-20 rounded-full bg-gray-200" />
+            <div className="h-1.5 w-28 rounded-full bg-gray-100" />
           </div>
         </div>
-        <div className="h-1.5 w-full bg-gray-100 rounded-full" />
-        <div className="h-1.5 w-4/5 bg-gray-100 rounded-full" />
+        <div className="h-1.5 w-full rounded-full bg-gray-100" />
+        <div className="h-1.5 w-4/5 rounded-full bg-gray-100" />
         <div className="mt-1 flex gap-2">
-          <div className="h-6 w-16 bg-[#087583]/10 rounded-md border border-[#087583]/20 flex items-center justify-center">
-            <span className="text-[10px] text-[#087583] font-medium">
+          <div className="bg-brand-hover-bg/10 border-brand-hover-bg/20 flex h-6 w-16 items-center justify-center rounded-md border">
+            <span className="text-link-hover-text text-[10px] font-medium">
               Contact
             </span>
           </div>
@@ -75,17 +75,17 @@ export function LeftAuthCard() {
 export function RightAuthCard() {
   return (
     <div
-      className="w-64 bg-white rounded-2xl shadow-lg border border-gray-100 p-6 flex flex-col gap-3"
+      className="flex w-64 flex-col gap-3 rounded-2xl border border-gray-100 bg-white p-6 shadow-lg"
       style={{ transform: "rotate(8deg)" }}
     >
       {/* Icon */}
-      <div className="w-12 h-12 rounded-xl border-2 border-[#087583] flex items-center justify-center self-center">
+      <div className="border-brand-hover-bg flex h-12 w-12 items-center justify-center self-center rounded-xl border-2">
         <svg
           width="22"
           height="22"
           viewBox="0 0 24 24"
           fill="none"
-          stroke="#087583"
+          stroke="var(--link-hover-text)"
           strokeWidth="2"
           strokeLinecap="round"
           strokeLinejoin="round"
@@ -96,16 +96,16 @@ export function RightAuthCard() {
       </div>
 
       <div className="text-center">
-        <p className="font-semibold text-sm text-[#050505]">
+        <p className="text-sm font-semibold text-[#050505]">
           Verify Your Identity
         </p>
-        <p className="text-xs text-gray-400 mt-1 leading-relaxed">
+        <p className="mt-1 text-xs leading-relaxed text-gray-400">
           Verify your email and connect social accounts. Build credibility with
           verification badges.
         </p>
       </div>
 
-      <div className="h-px bg-gray-100 my-1" />
+      <div className="my-1 h-px bg-gray-100" />
 
       {/* Mock social links */}
       <div className="flex flex-col gap-2">
@@ -122,14 +122,14 @@ export function RightAuthCard() {
         ].map(({ label, icon }) => (
           <div
             key={label}
-            className="flex items-center gap-2 px-2 py-1.5 rounded-lg border border-gray-100 bg-gray-50"
+            className="flex items-center gap-2 rounded-lg border border-gray-100 bg-gray-50 px-2 py-1.5"
           >
             <svg
               width="14"
               height="14"
               viewBox="0 0 24 24"
               fill="none"
-              stroke="#087583"
+              stroke="var(--link-hover-text)"
               strokeWidth="2"
               strokeLinecap="round"
               strokeLinejoin="round"

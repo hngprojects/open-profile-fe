@@ -71,7 +71,7 @@ export function AuthForm({ mode, googleAuthUrl }: Props) {
   }
 
   const inputClass =
-    "h-11 bg-[#FAFAFA] border border-[#EDEDED] shadow-none placeholder:text-[#747474]";
+    "h-11 bg-[#FAFAFA] border border-input-b shadow-none placeholder:text-input-text";
 
   return (
     <AuthLayout>
@@ -89,7 +89,7 @@ export function AuthForm({ mode, googleAuthUrl }: Props) {
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         {isSignup && (
           <div className="flex flex-col gap-1.5">
-            <label className="text-sm font-medium text-[#454545]">
+            <label className="text-label-text text-sm font-medium">
               Full Name
             </label>
             <Input
@@ -113,7 +113,7 @@ export function AuthForm({ mode, googleAuthUrl }: Props) {
         )}
 
         <div className="flex flex-col gap-1.5">
-          <label className="text-sm font-medium text-[#454545]">
+          <label className="text-label-text text-sm font-medium">
             Email Address
           </label>
           <Input
@@ -145,7 +145,7 @@ export function AuthForm({ mode, googleAuthUrl }: Props) {
           <div className="-mt-2 flex justify-end">
             <Link
               href="/forgot-password"
-              className="text-sm font-medium text-[#087583] hover:underline"
+              className="text-link-hover-text text-sm font-medium hover:underline"
             >
               Forgot password?
             </Link>
@@ -157,8 +157,8 @@ export function AuthForm({ mode, googleAuthUrl }: Props) {
           disabled={pending || (isSignup && !isValid)}
           className={`mt-1 h-[52px] w-full rounded-[10px] text-[16px] font-medium shadow-none transition-colors ${
             isSignup && !isValid
-              ? "border border-[#454545] bg-white text-[#454545]"
-              : "border-0 bg-[#087583] text-[#FEFEFE] hover:bg-[#065E69]"
+              ? "border-button-b text-label-text border bg-white"
+              : "bg-brand-hover-bg border-0 text-[#FEFEFE] hover:bg-[#065E69]"
           }`}
         >
           {pending ? "Please wait…" : "Continue"}
@@ -166,29 +166,29 @@ export function AuthForm({ mode, googleAuthUrl }: Props) {
       </form>
 
       {isSignup && (
-        <p className="text-center text-xs text-[#454545]">
+        <p className="text-label-text text-center text-xs">
           By Continuing, you agree to Openprofile&apos;s{" "}
           <Link
             href="/privacy"
-            className="font-semibold text-[#087583] hover:underline"
+            className="text-link-hover-text font-semibold hover:underline"
           >
             privacy policy
           </Link>
           , and{" "}
           <Link
             href="/terms"
-            className="font-semibold text-[#087583] hover:underline"
+            className="text-link-hover-text font-semibold hover:underline"
           >
             Terms and Conditions
           </Link>
         </p>
       )}
 
-      <div className="text-center text-xs text-[#454545]">OR</div>
+      <div className="text-label-text text-center text-xs">OR</div>
 
       <a
         href={googleAuthUrl}
-        className="flex h-11 w-full items-center justify-center gap-3 rounded-lg border border-[#EDEDED] bg-[#FAFAFA] text-sm font-medium transition-colors hover:bg-[#f0f0f0]"
+        className="border-input-b flex h-11 w-full items-center justify-center gap-3 rounded-lg border bg-[#FAFAFA] text-sm font-medium transition-colors hover:bg-[#f0f0f0]"
       >
         <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true">
           <path
@@ -217,7 +217,7 @@ export function AuthForm({ mode, googleAuthUrl }: Props) {
             Already have an account?{" "}
             <Link
               href="/login"
-              className="font-medium text-[#087583] hover:underline"
+              className="text-link-hover-text font-medium hover:underline"
             >
               Sign In here
             </Link>
@@ -227,7 +227,7 @@ export function AuthForm({ mode, googleAuthUrl }: Props) {
             Don&apos;t have an account?{" "}
             <Link
               href="/signup"
-              className="font-medium text-[#087583] hover:underline"
+              className="text-link-hover-text font-medium hover:underline"
             >
               Sign up here
             </Link>

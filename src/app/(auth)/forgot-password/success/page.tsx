@@ -7,7 +7,7 @@ export default function ResetPasswordSuccessPage() {
   return (
     <AuthLayout>
       <div className="flex flex-col items-center gap-5 py-4">
-        <BadgeCheck size={80} className="text-[#087583]" />
+        <BadgeCheck size={80} className="text-link-hover-text" />
 
         <div className="text-center">
           <h1 className="text-2xl font-bold text-[#050505]">
@@ -21,7 +21,7 @@ export default function ResetPasswordSuccessPage() {
 
         <Button
           asChild
-          className="h-11 w-full rounded-lg border-0 bg-[#087583] font-semibold text-white shadow-none hover:bg-[#065E69]"
+          className="bg-brand-hover-bg h-11 w-full rounded-lg border-0 font-semibold text-white shadow-none hover:bg-[#065E69]"
         >
           <Link href="/login">Continue</Link>
         </Button>

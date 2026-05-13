@@ -152,9 +152,9 @@ export default function Impression() {
                 cx={SVG_W / 2 + 20}
                 cy={SVG_H / 2 + 20}
                 r="11"
-                fill="#FF4D4D"
                 stroke="white"
                 strokeWidth="2"
+                className="fill-negative-bg"
               />
               {/* question icon */}
               <QuestionIcon x={SVG_W / 2 + 14} y={SVG_H / 2 + 14} />
@@ -174,11 +174,11 @@ export default function Impression() {
               whileInView="show"
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: 0.3 + i * 0.15 }}
-              className="flex h-18 w-[143px] rotate-[0.82deg] items-center justify-start gap-2 rounded-[16px] border border-[#EDEDED] bg-[#FEFEFE] pl-4"
+              className="border-input-b flex h-18 w-[143px] rotate-[0.82deg] items-center justify-start gap-2 rounded-[16px] border bg-[#FEFEFE] pl-4"
             >
               <div
                 style={{ backgroundColor: bg }}
-                className="flex h-8.5 w-8.5 shrink-0 items-center justify-center rounded-[4px] border border-[#EDEDED]"
+                className="border-input-b flex h-8.5 w-8.5 shrink-0 items-center justify-center rounded-[4px] border"
               >
                 <Image src={icon} alt={label} width={24} height={24} />
               </div>
@@ -200,11 +200,11 @@ export default function Impression() {
               whileInView="show"
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: 0.5 + i * 0.15 }}
-              className="flex h-18 w-[143px] rotate-[0.82deg] items-center justify-start gap-2 rounded-[16px] border border-[#EDEDED] bg-[#FEFEFE] pl-4"
+              className="border-input-b flex h-18 w-[143px] rotate-[0.82deg] items-center justify-start gap-2 rounded-[16px] border bg-[#FEFEFE] pl-4"
             >
               <div
                 style={{ backgroundColor: bg }}
-                className="flex h-8.5 w-8.5 shrink-0 items-center justify-center rounded-[4px] border border-[#EDEDED]"
+                className="border-input-b flex h-8.5 w-8.5 shrink-0 items-center justify-center rounded-[4px] border"
               >
                 <Image src={icon} alt={label} width={24} height={24} />
               </div>
@@ -236,7 +236,7 @@ export default function Impression() {
             className="font-afacad text-[28px] leading-9 font-semibold tracking-[-1px] md:text-[34px] md:leading-11 lg:text-[40px] lg:leading-12"
           >
             Your Links Are Scattered.{" "}
-            <span className="text-[#087583]">
+            <span className="text-link-hover-text">
               Your First Impression Should Not Be
             </span>
           </motion.p>

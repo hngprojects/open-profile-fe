@@ -57,7 +57,7 @@ export function OtpInput({ length = 6, onChange }: Props) {
           value={val}
           onChange={(e) => handleChange(i, e.target.value)}
           onKeyDown={(e) => handleKeyDown(i, e)}
-          className="w-full h-10 text-center text-lg font-semibold bg-[#FAFAFA] border border-[#EDEDED] rounded-lg outline-none focus:border-[#087583] transition-colors"
+          className="border-input-b h-10 w-full rounded-lg border bg-[#FAFAFA] text-center text-lg font-semibold transition-colors outline-none focus:border-[#087583]"
         />
       ))}
     </div>

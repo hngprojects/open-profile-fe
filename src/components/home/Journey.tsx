@@ -195,7 +195,7 @@ export function Journey() {
 
             {/* Content */}
             <div className="relative z-10 pt-[10px] lg:pl-[20px] xl:pl-[40px]">
-              <h3 className="leading-[1.05] font-semibold tracking-[-0.04em] text-[#454545] lg:text-[28px] xl:text-[32px]">
+              <h3 className="text-label-text leading-[1.05] font-semibold tracking-[-0.04em] lg:text-[28px] xl:text-[32px]">
                 {steps[1].title}
               </h3>
 

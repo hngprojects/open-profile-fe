@@ -112,7 +112,7 @@ export default function Target() {
               </p>
 
               {/* description */}
-              <p className="font-afacad text-[#454545]">{description}</p>
+              <p className="font-afacad text-label-text">{description}</p>
 
               {/* checklist — pushed to bottom */}
               <div className="mt-auto space-y-2">
@@ -127,7 +127,7 @@ export default function Target() {
                     className="flex items-center gap-2"
                   >
                     <Image src={checkIcon} alt="check" width={16} height={16} />
-                    <p className="font-afacad text-[#454545]">{item}</p>
+                    <p className="font-afacad text-label-text">{item}</p>
                   </motion.div>
                 ))}
               </div>

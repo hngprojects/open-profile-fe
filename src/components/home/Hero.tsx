@@ -66,11 +66,11 @@ export function Hero() {
           >
             Create{" "}
             <span className="relative mx-2 inline-block">
-              <span className="absolute -top-5 left-1/2 -translate-x-1/2 text-xl leading-none tracking-wider whitespace-nowrap text-[#087583]">
+              <span className="text-link-hover-text absolute -top-5 left-1/2 -translate-x-1/2 text-xl leading-none tracking-wider whitespace-nowrap">
                 \ | /
               </span>
               <span
-                className="text-[#087583] italic"
+                className="text-link-hover-text italic"
                 style={{ fontFamily: "'Dancing Script', cursive" }}
               >
                 One
@@ -99,11 +99,11 @@ export function Hero() {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="open.profile/"
-              className="h-[50px] flex-1 rounded-[5.57px] border border-[#C9C9C9] bg-[#FAFAFA] px-[12px] py-4 text-[16px] leading-[24px] text-[#454545] transition outline-none placeholder:text-[#454545] focus:ring-2 focus:ring-[#087583]/40 sm:py-0"
+              className="text-label-text placeholder:text-label-text h-[50px] flex-1 rounded-[5.57px] border border-[#C9C9C9] bg-[#FAFAFA] px-[12px] py-4 text-[16px] leading-[24px] transition outline-none focus:ring-2 focus:ring-[#087583]/40 sm:py-0"
               style={{ fontFamily: "'Afacad', sans-serif" }}
             />
             <button
-              className="h-[56px] w-full rounded-[8px] bg-[#087583] px-[16px] text-[16px] leading-[24px] whitespace-nowrap text-white transition-colors hover:bg-[#065E69] sm:h-[50px] sm:w-auto"
+              className="bg-brand-hover-bg h-[56px] w-full rounded-[8px] px-[16px] text-[16px] leading-[24px] whitespace-nowrap text-white transition-colors hover:bg-[#065E69] sm:h-[50px] sm:w-auto"
               style={{ fontFamily: "'Afacad', sans-serif" }}
             >
               Search a Profile
@@ -141,7 +141,7 @@ export function Hero() {
               ))}
             </div>
             <p
-              className="text-[14px] leading-[24px] font-normal text-[#454545] md:text-[16px]"
+              className="text-label-text text-[14px] leading-[24px] font-normal md:text-[16px]"
               style={{ fontFamily: "'Afacad', sans-serif" }}
             >
               Join over Creators and freelancers that trusts us all over the

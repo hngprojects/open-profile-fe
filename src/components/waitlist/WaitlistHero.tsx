@@ -97,12 +97,12 @@ export function WaitlistHero() {
           style={{ fontFamily: "'Afacad', sans-serif" }}
         >
           Join the waitlist for <br className="hidden md:block" />
-          <span className="text-[#087583]">Openprofile</span>
+          <span className="text-link-hover-text">Openprofile</span>
         </motion.h1>
 
         <motion.p
           {...fadeUp(0.2)}
-          className="mb-10 max-w-[740px] text-[16px] leading-[26px] text-[#454545] md:text-[18px]"
+          className="text-label-text mb-10 max-w-[740px] text-[16px] leading-[26px] md:text-[18px]"
           style={{ fontFamily: "'Afacad', sans-serif" }}
         >
           Stop losing clients to identity doubt. Open Profile is the first
@@ -171,7 +171,7 @@ export function WaitlistHero() {
             />
           </div>
           <p
-            className="text-[14px] text-[#454545] md:text-[15px]"
+            className="text-label-text text-[14px] md:text-[15px]"
             style={{ fontFamily: "'Afacad', sans-serif" }}
           >
             <span className="hidden md:inline">

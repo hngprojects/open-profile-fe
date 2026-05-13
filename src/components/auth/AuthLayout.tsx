@@ -36,12 +36,12 @@ export function AuthLayout({ children }: { children: React.ReactNode }) {
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3, ease: "easeOut" }}
-          className="relative z-10 flex w-full max-w-2xl flex-col gap-5 rounded-2xl border border-[#EDEDED] bg-[#FEFEFE] px-6 py-8 shadow-none sm:px-20 sm:py-14"
+          className="border-input-b relative z-10 flex w-full max-w-2xl flex-col gap-5 rounded-2xl border bg-[#FEFEFE] px-6 py-8 shadow-none sm:px-20 sm:py-14"
         >
           <button
             onClick={() => router.back()}
             aria-label="Go back"
-            className="flex w-fit cursor-pointer items-center gap-1.5 text-sm font-medium text-[#087583] transition-colors hover:text-[#065E69]"
+            className="text-link-hover-text flex w-fit cursor-pointer items-center gap-1.5 text-sm font-medium transition-colors hover:text-[#065E69]"
           >
             <svg
               width="16"

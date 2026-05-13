@@ -124,7 +124,7 @@ export function Proof() {
                 {testimonial.text.split("\n\n").map((para, i) => (
                   <p
                     key={i}
-                    className={`text-[11px] leading-[1.5] font-normal text-[#454545] md:text-[15px] ${
+                    className={`text-label-text text-[11px] leading-[1.5] font-normal md:text-[15px] ${
                       i === 0 && testimonial.text.includes(" ") ? "mb-6" : ""
                     }`}
                   >

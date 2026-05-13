@@ -43,9 +43,9 @@ export default function ResetPasswordPage() {
 
   return (
     <AuthLayout>
-      <div className="text-center mb-2">
-        <h1 className="text-2xl font-bold text-primary">Reset Password</h1>
-        <p className="text-sm text-gray-500 mt-1">
+      <div className="mb-2 text-center">
+        <h1 className="text-primary text-2xl font-bold">Reset Password</h1>
+        <p className="mt-1 text-sm text-gray-500">
           Choose a new password for your account
         </p>
       </div>
@@ -61,7 +61,7 @@ export default function ResetPasswordPage() {
         />
 
         <div className="flex flex-col gap-1.5">
-          <label className="text-sm font-medium text-[#454545]">
+          <label className="text-label-text text-sm font-medium">
             Confirm Password
           </label>
           <Input
@@ -79,7 +79,7 @@ export default function ResetPasswordPage() {
                 confirm && password !== confirm ? "Passwords do not match" : ""
               )
             }
-            className={`h-11 bg-[#FAFAFA] border border-[#EDEDED] shadow-none placeholder:text-[#747474] ${confirmError ? "border-red-400" : ""}`}
+            className={`border-input-b placeholder:text-input-text h-11 border bg-[#FAFAFA] shadow-none ${confirmError ? "border-red-400" : ""}`}
           />
           {confirmError && (
             <p className="text-xs text-red-500">{confirmError}</p>
@@ -89,7 +89,7 @@ export default function ResetPasswordPage() {
         <Button
           type="submit"
           disabled={!isValid || pending}
-          className="w-full h-11 font-semibold rounded-lg shadow-none transition-opacity bg-brand hover:bg-[#065E69] text-white border-0 disabled:opacity-50"
+          className="bg-brand h-11 w-full rounded-lg border-0 font-semibold text-white shadow-none transition-opacity hover:bg-[#065E69] disabled:opacity-50"
         >
           {pending ? "Resetting…" : "Continue"}
         </Button>
