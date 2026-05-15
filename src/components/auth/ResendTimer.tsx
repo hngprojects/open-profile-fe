@@ -2,6 +2,7 @@
 import { resendOtp } from "@/app/actions/auth";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
+import { Button } from "../ui/button";
 
 type Props = {
   initialSeconds?: number;
@@ -43,13 +44,14 @@ export function ResendTimer({ initialSeconds = 98, email: _email }: Props) {
   return (
     <p className="text-center text-sm text-gray-500">
       Didn&apos;t get a code?{" "}
-      <button
+      <Button
+        variant="links"
         onClick={handleResend}
-        disabled={resending}
-        className="text-brand font-medium hover:underline cursor-pointer disabled:opacity-50"
+        disabled={resending || seconds > 0}
+        className="text-brand cursor-pointer font-medium hover:underline disabled:cursor-not-allowed disabled:opacity-50"
       >
         Resend Code
-      </button>
+      </Button>
       {seconds > 0 && (
         <>
           {" "}

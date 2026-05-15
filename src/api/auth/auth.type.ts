@@ -4,12 +4,15 @@ export type LoginRequest = {
 };
 
 export type LoginResponse = {
-  accessToken: string;
-  refreshToken: string;
-  data?: {
-    accessToken: string;
-    refreshToken: string;
+  status?: string;
+  user?: {
+    id?: string;
+    email?: string;
+    role?: string;
+    onboardingComplete?: boolean;
   };
+  accessToken?: string;
+  refreshToken?: string;
 };
 
 export type SignupRequest = {
@@ -26,4 +29,14 @@ export type User = {
   id: string;
   email: string;
   fullName?: string;
+  username: string | null;
+  bio: string | null;
+  photoUrl: string | null;
+  isPublished: boolean;
+  role: string | null;
+  authProvider: string;
+  isVerified: boolean;
+  onboardingComplete: boolean;
+  createdAt: string;
+  updatedAt: string;
 };

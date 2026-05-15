@@ -8,10 +8,10 @@ import React from "react";
 
 const PrivacyPolicy = () => {
   return (
-    <div className="min-h-screen bg-white font-sans selection:bg-[#065E69] selection:text-white overflow-hidden text-primary">
+    <div className="text-primary min-h-screen overflow-hidden bg-white font-sans selection:bg-[#065E69] selection:text-white">
       <Navbar />
       <PrivacyHero />
-      <div className="flex flex-col lg:flex-row lg:max-w-6xl mx-auto gap-10 py-16 px-4">
+      <div className="mx-auto flex flex-col gap-10 px-4 py-16 lg:max-w-6xl lg:flex-row">
         <div className="flex-1">
           <PrivacyTable />
         </div>

@@ -14,7 +14,7 @@ export default function VerifySuccessPage() {
             Email Verified Successfully
           </h1>
           <p className="mt-2 text-sm text-gray-500">
-            Your account has been successfully created, you can now sign in
+            Your email has been verified. You can now set up your profile.
           </p>
         </div>
 
@@ -22,7 +22,7 @@ export default function VerifySuccessPage() {
           asChild
           className="bg-brand-hover-bg h-11 w-full rounded-lg border-0 font-semibold text-white shadow-none hover:bg-[#065E69]"
         >
-          <Link href="/login">Continue</Link>
+          <Link href="/create-profile">Continue</Link>
         </Button>
       </div>
     </AuthLayout>

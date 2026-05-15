@@ -14,21 +14,21 @@ const faqData = [
     answer:
       "Yes! Creating your profile and getting verified is completely free. There are no hidden fees or credit card requirements.",
   },
-  {
-    question: "How does verification work ?",
-    answer:
-      "Verification is a seamless process. We verify your identity through your connected social accounts and professional credentials to ensure every profile on our platform is authentic and trusted.",
-  },
+  // {
+  //   question: "How does verification work ?",
+  //   answer:
+  //     "Verification is a seamless process. We verify your identity through your connected social accounts and professional credentials to ensure every profile on our platform is authentic and trusted.",
+  // },
   {
     question: "Can people find me if I don't share my profile link ?",
     answer:
       "By default, your profile is accessible via your unique link. However, you can choose to be discoverable in our global directory, allowing others to find you based on your skills and profession.",
   },
-  {
-    question: "What happens when someone invites me ?",
-    answer:
-      "When someone invites you, you'll receive an instant notification. This allows you to connect, collaborate, and explore new opportunities within the OpenProfile ecosystem.",
-  },
+  // {
+  //   question: "What happens when someone invites me ?",
+  //   answer:
+  //     "When someone invites you, you'll receive an instant notification. This allows you to connect, collaborate, and explore new opportunities within the OpenProfile ecosystem.",
+  // },
   {
     question: "Can I customize my profile",
     answer:

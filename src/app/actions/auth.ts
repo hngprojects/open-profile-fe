@@ -1,6 +1,6 @@
 "use server";
 import { redirect } from "next/navigation";
-import * as authService from "@/api/auth/auth.service";
+import * as authService from "@/api/auth/auth.server";
 import { isApiError } from "@/api/base";
 
 function extractError(err: unknown, fallback: string): string {
@@ -118,8 +118,11 @@ export async function logout() {
   try {
     await authService.logoutApi();
   } catch (_err) {
-    // Ignored
+    // ignored
   }
+  const { cookies } = await import("next/headers");
+  const store = await cookies();
+  store.delete("auth");
   redirect("/login");
 }
 

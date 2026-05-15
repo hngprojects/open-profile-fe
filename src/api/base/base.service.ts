@@ -4,8 +4,8 @@ import { env } from "@/env/client";
 import axios, { AxiosError, AxiosRequestConfig } from "axios";
 
 export const api = axios.create({
-  baseURL: `${env.NEXT_PUBLIC_API_URL}/api`,
-  timeout: 60 * 1000, // 1 minute
+  baseURL: `${env.NEXT_PUBLIC_API_URL}/api/v1`,
+  timeout: 60 * 1000,
   withCredentials: true,
 });
 
@@ -24,9 +24,6 @@ export async function callApi<TResData>({
   headers,
   signal,
 }: {
-  /**
-   * There is no need to prefix the url with the base url or with '/api', it is already prefixed.
-   */
   url: `/${string}`;
   method?: "GET" | "POST" | "PUT" | "DELETE" | "PATCH";
   data?: unknown;
@@ -48,12 +45,13 @@ export async function callApi<TResData>({
       signal,
     });
 
-    return response.data.data;
+    return (response.data.data ?? response.data) as TResData;
   } catch (e) {
     if (e instanceof AxiosError) {
       throw new ApiError(
         e.response ? getApiErrorMessage(e.response.data?.message) : e.message,
-        e.response?.data?.message
+        e.response?.data?.message,
+        e.response?.status
       );
     }
 

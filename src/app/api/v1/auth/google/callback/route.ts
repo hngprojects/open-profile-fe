@@ -18,7 +18,9 @@ export async function GET(request: NextRequest) {
     );
   }
 
-  const callbackUrl = new URL(`${env.API_BASE_URL}/api/auth/google/callback`);
+  const callbackUrl = new URL(
+    `${env.API_BASE_URL}/api/v1/auth/google/callback`
+  );
   callbackUrl.searchParams.set("code", code);
 
   const res = await fetch(callbackUrl, { redirect: "manual" });

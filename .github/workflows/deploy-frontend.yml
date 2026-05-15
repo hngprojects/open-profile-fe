@@ -54,7 +54,6 @@ jobs:
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/staging' && github.event_name == 'push'
     environment: staging
-    
 
     steps:
       - name: Checkout code

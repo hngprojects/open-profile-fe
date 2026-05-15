@@ -152,7 +152,7 @@ const PrivacyContent = () => {
     <div>
       {tableOfContent.map((item, index) => (
         <div className="mt-6 space-y-4" key={index}>
-          <h4 className="font-bold text-3xl">{item.heading}</h4>
+          <h4 className="text-3xl font-bold">{item.heading}</h4>
 
           {typeof item.content === "string" ? (
             <p>{item.content}</p>
@@ -161,7 +161,7 @@ const PrivacyContent = () => {
               {item.content.text && <p>{item.content.text}</p>}
 
               {item.content.list && (
-                <ul className="list-disc pl-5 space-y-2">
+                <ul className="list-disc space-y-2 pl-5">
                   {item.content.list.map((listItem, i) => (
                     <li key={i}>{listItem}</li>
                   ))}

@@ -18,7 +18,7 @@ const PrivacyTable = () => {
     <div>
       <div>
         <h4 className="text-2xl">Table of Content</h4>
-        <ul className=" space-y-4 mt-4">
+        <ul className="mt-4 space-y-4">
           {tabeOfContent.map((item, index) => (
             <li key={index}>{item}</li>
           ))}

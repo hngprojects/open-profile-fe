@@ -8,7 +8,7 @@ export default function WaitlistPage() {
     <main>
       <WaitlistHero />
       <section className="w-full bg-[#FAFAFA]">
-        <div className="max-w-7xl mx-auto px-4 md:px-8 py-16">
+        <div className="mx-auto max-w-7xl px-4 py-16 md:px-8">
           <Target />
         </div>
       </section>

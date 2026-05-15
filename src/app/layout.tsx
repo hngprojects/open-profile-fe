@@ -30,10 +30,10 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={cn("h-full antialiased font-afacad", afacad.variable)}
+      className={cn("font-afacad h-full antialiased", afacad.variable)}
     >
       <body
-        className={`min-h-full flex flex-col ${afacad.variable} ${dancing.variable}`}
+        className={`flex min-h-full flex-col ${afacad.variable} ${dancing.variable}`}
       >
         <Providers>
           {children}

@@ -5,7 +5,7 @@ export default function LoginPage() {
   return (
     <AuthForm
       mode="login"
-      googleAuthUrl={`${env.NEXT_PUBLIC_API_URL ?? ""}/api/auth/google`}
+      googleAuthUrl={`${env.NEXT_PUBLIC_API_URL ?? ""}/api/v1/auth/google`}
     />
   );
 }

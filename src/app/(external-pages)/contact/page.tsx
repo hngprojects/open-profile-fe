@@ -7,6 +7,7 @@ import { CTA } from "@/components/home/CTA";
 import Footer from "@/components/layout/Footer";
 import { Mail, Phone, MapPin, ChevronDown } from "lucide-react";
 import { contactAction } from "@/app/actions/contact";
+import { Button } from "@/components/ui/button";
 
 const XIcon = () => (
   <svg
@@ -223,12 +224,12 @@ export default function ContactPage() {
                     Thanks for reaching out. We&apos;ll get back to you as soon
                     as possible.
                   </p>
-                  <button
+                  <Button
                     onClick={() => setSuccess(false)}
-                    className="mt-2 text-[13px] font-medium text-[#065E69] hover:underline"
+                    className="mt-2 hover:underline"
                   >
                     Send another message
-                  </button>
+                  </Button>
                 </div>
               ) : (
                 <form onSubmit={handleSubmit} className="space-y-5">
@@ -276,7 +277,7 @@ export default function ContactPage() {
                       Industry
                     </label>
                     <div className="relative" ref={dropdownRef}>
-                      <button
+                      <Button
                         type="button"
                         onClick={() => setOpen((o) => !o)}
                         className="flex w-full items-center justify-between rounded-[8px] border border-[#E5E7EB] bg-white px-4 py-3 text-[13px] transition focus:ring-2 focus:ring-[#065E69] focus:outline-none"
@@ -292,7 +293,7 @@ export default function ContactPage() {
                           size={16}
                           className={`text-[#9CA3AF] transition-transform duration-200 ${open ? "rotate-180" : ""}`}
                         />
-                      </button>
+                      </Button>
 
                       <div
                         className={`absolute z-10 mt-1 w-full origin-top overflow-hidden rounded-[8px] border border-[#E5E7EB] bg-white shadow-lg transition-all duration-200 ${
@@ -302,8 +303,9 @@ export default function ContactPage() {
                         }`}
                       >
                         {industries.map((i) => (
-                          <button
+                          <Button
                             key={i}
+                            variant="dropdownItem"
                             type="button"
                             onClick={() => {
                               setIndustry(i);
@@ -316,7 +318,7 @@ export default function ContactPage() {
                             }`}
                           >
                             {i}
-                          </button>
+                          </Button>
                         ))}
                       </div>
                     </div>
@@ -340,13 +342,14 @@ export default function ContactPage() {
                     />
                   </div>
 
-                  <button
+                  <Button
                     type="submit"
+                    size="lg"
                     disabled={!isValid || pending}
                     className="w-full rounded-[8px] bg-[#065E69] py-3.5 text-[14px] font-medium text-white transition-all hover:enabled:bg-[#054f59] disabled:cursor-not-allowed disabled:opacity-40"
                   >
                     {pending ? "Sending…" : "Continue"}
-                  </button>
+                  </Button>
                 </form>
               )}
             </div>

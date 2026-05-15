@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import { Search } from "lucide-react";
+import { Button } from "../ui/button";
 
 const PrivacyHero = () => {
   const [query, setQuery] = useState<string>("");
@@ -24,12 +25,12 @@ const PrivacyHero = () => {
             />
           </span>
 
-          <button
-            className="bg-brand h-14 w-full rounded-[8px] px-4 text-[16px] leading-6 whitespace-nowrap text-white transition-colors hover:bg-[#065E69] sm:h-12.5 sm:w-auto"
+          <Button
+            className="h-14 w-full px-4 sm:h-12.5 sm:w-auto"
             style={{ fontFamily: "'Afacad', sans-serif" }}
           >
             Search
-          </button>
+          </Button>
         </div>
       </div>
     </div>

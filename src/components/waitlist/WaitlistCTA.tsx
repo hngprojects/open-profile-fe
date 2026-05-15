@@ -5,6 +5,7 @@ import Image from "next/image";
 import { motion } from "motion/react";
 import { toast } from "sonner";
 import { joinWaitlistAction } from "@/app/actions/waitlist";
+import { Button } from "../ui/button";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -74,7 +75,7 @@ export function WaitlistCTA() {
         />
       </div>
 
-      <div className="bg-selected-bg relative mx-auto flex max-w-[1280px] flex-col items-center overflow-hidden rounded-[24px] px-6 py-16 text-center md:px-12">
+      <div className="bg-inverse-bg relative mx-auto flex max-w-[1280px] flex-col items-center overflow-hidden rounded-[24px] px-6 py-16 text-center md:px-12">
         <div className="relative z-10 flex w-full max-w-[700px] flex-col items-center">
           <motion.h2
             {...fadeUp(0)}
@@ -96,7 +97,7 @@ export function WaitlistCTA() {
           <motion.form
             {...fadeUp(0.2)}
             onSubmit={handleSubmit}
-            className="mb-2 flex w-full max-w-[500px] flex-col gap-3 md:flex-row"
+            className="mb-2 flex w-full max-w-125 flex-col gap-3 md:flex-row"
           >
             <div className="flex-1">
               <input
@@ -109,7 +110,7 @@ export function WaitlistCTA() {
                 }}
                 onBlur={handleBlur}
                 disabled={isPending}
-                className={`h-[54px] w-full rounded-[10px] border bg-white px-5 text-[#050505] transition-colors outline-none placeholder:text-[#999] ${
+                className={`h-13.5 w-full rounded-[10px] border bg-white px-5 text-[#050505] transition-colors outline-none placeholder:text-[#999] ${
                   emailError
                     ? "border-red-400"
                     : "border-transparent focus:border-[#087583]"
@@ -117,14 +118,9 @@ export function WaitlistCTA() {
                 style={{ fontFamily: "'Afacad', sans-serif" }}
               />
             </div>
-            <button
-              type="submit"
-              disabled={isPending}
-              className="bg-brand-hover-bg h-[54px] rounded-[10px] px-8 font-medium whitespace-nowrap text-white transition-colors hover:bg-[#065E69] disabled:opacity-50"
-              style={{ fontFamily: "'Afacad', sans-serif" }}
-            >
+            <Button type="submit" disabled={isPending} className="h-13.5 px-8">
               {isPending ? "Joining..." : "Get Early Access"}
-            </button>
+            </Button>
           </motion.form>
 
           {/* Error message */}

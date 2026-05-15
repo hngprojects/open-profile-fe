@@ -5,6 +5,7 @@ import { motion } from "motion/react";
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
 import { joinWaitlistAction } from "@/app/actions/waitlist";
+import { Button } from "../ui/button";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -136,14 +137,14 @@ export function WaitlistHero() {
               style={{ fontFamily: "'Afacad', sans-serif" }}
             />
           </div>
-          <button
+          <Button
             type="submit"
+            variant="waitlist"
             disabled={isPending}
-            className="h-[50px] w-full rounded-[8px] bg-[#262626] px-8 font-medium whitespace-nowrap text-white transition-colors hover:bg-[#333] disabled:opacity-50 md:w-auto"
-            style={{ fontFamily: "'Afacad', sans-serif" }}
+            className="h-12.5 w-full px-8 md:w-auto"
           >
             {isPending ? "Joining..." : "Join the Waitlist"}
-          </button>
+          </Button>
         </motion.form>
 
         {/* Error message */}

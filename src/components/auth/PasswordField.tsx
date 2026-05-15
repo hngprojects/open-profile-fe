@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
+import { Button } from "../ui/button";
 
 const rules = [
   { label: "At least 8 characters", test: (p: string) => p.length >= 8 },
@@ -47,8 +48,9 @@ export function PasswordField({
           onBlur={() => setFocused(false)}
           className="border-input-b placeholder:text-input-text h-11 border bg-[#FAFAFA] pr-10 shadow-none transition-all duration-200 hover:border-[#ABABAB] hover:bg-white hover:shadow-sm"
         />
-        <button
+        <Button
           type="button"
+          variant="hamburger"
           onClick={() => setShow((v) => !v)}
           className="absolute top-1/2 right-3 -translate-y-1/2 cursor-pointer text-gray-400 hover:text-gray-600"
           aria-label={show ? "Hide password" : "Show password"}
@@ -84,7 +86,7 @@ export function PasswordField({
               <circle cx="12" cy="12" r="3" />
             </svg>
           )}
-        </button>
+        </Button>
       </div>
 
       {showRules &&
@@ -133,7 +135,7 @@ export function PasswordField({
                             >
                               <path
                                 d="M1.5 5l2.5 2.5 4.5-4.5"
-                                stroke="var(--selected-bg)"
+                                stroke="var(--inverse-bg)"
                                 strokeWidth="1.5"
                                 strokeLinecap="round"
                                 strokeLinejoin="round"

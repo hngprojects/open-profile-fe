@@ -7,15 +7,31 @@ const SECURITY_HEADERS: Record<string, string> = {
   "Permissions-Policy": "camera=(), microphone=(), geolocation=()",
 };
 
-export const proxy: NextProxy = (request) => {
-  const requestId = request.headers.get("x-request-id") ?? crypto.randomUUID();
+const PROTECTED = ["/dashboard", "/create-profile", "/onboarding"];
+const AUTH_ONLY = ["/login", "/signup", "/forgot-password", "/verify-email"];
 
+export const proxy: NextProxy = (request) => {
+  const { pathname } = request.nextUrl;
+  const isLoggedIn = request.cookies.has("auth");
+
+  if (!isLoggedIn && PROTECTED.some((p) => pathname.startsWith(p))) {
+    const url = request.nextUrl.clone();
+    url.pathname = "/login";
+    url.searchParams.set("returnTo", pathname);
+    return NextResponse.redirect(url);
+  }
+
+  if (isLoggedIn && AUTH_ONLY.some((p) => pathname.startsWith(p))) {
+    const url = request.nextUrl.clone();
+    url.pathname = "/dashboard";
+    return NextResponse.redirect(url);
+  }
+
+  const requestId = request.headers.get("x-request-id") ?? crypto.randomUUID();
   const requestHeaders = new Headers(request.headers);
   requestHeaders.set("x-request-id", requestId);
 
-  const response = NextResponse.next({
-    request: { headers: requestHeaders },
-  });
+  const response = NextResponse.next({ request: { headers: requestHeaders } });
 
   for (const [key, value] of Object.entries(SECURITY_HEADERS)) {
     response.headers.set(key, value);

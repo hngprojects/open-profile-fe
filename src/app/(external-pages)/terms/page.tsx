@@ -139,15 +139,15 @@ export default function PrivacyPolicy() {
     <>
       <Navbar />
 
-      <section className="max-w-360 mx-auto mt-20">
-        <div className="px-5 md:px-28 py-12 bg-[#DBEFF2]">
-          <div className="max-w-7xl mx-auto">
+      <section className="mx-auto mt-20 max-w-360">
+        <div className="bg-[#DBEFF2] px-5 py-12 md:px-28">
+          <div className="mx-auto max-w-7xl">
             <div className="max-w-2xl">
-              <h1 className="text-4xl sm:text-5xl font-bold text-slate-900 mb-4 tracking-tight">
+              <h1 className="mb-4 text-4xl font-bold tracking-tight text-slate-900 sm:text-5xl">
                 Terms of Service
               </h1>
 
-              <p className="text-slate-600 text-lg mb-3">
+              <p className="mb-3 text-lg text-slate-600">
                 Last updated on the 10th of May 2026
               </p>
 
@@ -163,10 +163,10 @@ export default function PrivacyPolicy() {
                   value={search}
                   placeholder="Search..."
                   onChange={(e) => setSearch(e.target.value)}
-                  className="py-3 px-12 w-full lg:w-1/2 bg-[#FAFAFA] border border-[#C9C9C9] rounded-[5.57px] text-[16px] leading-6 text-[#A3A3A3] placeholder:text-[#A3A3A3] outline-none focus:ring-2 focus:ring-brand/40 transition"
+                  className="focus:ring-brand/40 w-full rounded-[5.57px] border border-[#C9C9C9] bg-[#FAFAFA] px-12 py-3 text-[16px] leading-6 text-[#A3A3A3] transition outline-none placeholder:text-[#A3A3A3] focus:ring-2 lg:w-1/2"
                 />
 
-                <Button className="rounded-[5.57px] py-6 lg:ml-1 mt-2 lg:mt-0 w-full lg:w-auto">
+                <Button className="mt-2 w-full rounded-[5.57px] py-6 lg:mt-0 lg:ml-1 lg:w-auto">
                   Search
                 </Button>
               </form>
@@ -174,22 +174,23 @@ export default function PrivacyPolicy() {
           </div>
         </div>
 
-        <div className="mx-auto px-5 md:px-28 py-12 mt-17.5">
-          <div className="flex flex-col md:flex-row gap-12">
+        <div className="mx-auto mt-17.5 px-5 py-12 md:px-28">
+          <div className="flex flex-col gap-12 md:flex-row">
             <div className="flex-1">
-              <h2 className="font-semibold text-slate-900 mb-2 text-3xl tracking-wider">
+              <h2 className="mb-2 text-3xl font-semibold tracking-wider text-slate-900">
                 Table Of Contents
               </h2>
 
-              <div className="sticky top-24 rounded-xl flex-2">
+              <div className="sticky top-24 flex-2 rounded-xl">
                 <nav className="space-y-2">
                   {sections.map((section) => (
-                    <button
+                    <Button
+                      variant="dropdownItem"
                       key={section.id}
                       onClick={() => setActiveSection(section.id)}
-                      className={`w-full text-left lg:mt-3 rounded-lg transition-all duration-200 text-xl p-4 px-5 cursor-pointer ${
+                      className={`w-full cursor-pointer rounded-lg p-4 px-5 text-left text-xl transition-all duration-200 lg:mt-3 ${
                         activeSection === section.id
-                          ? "bg-teal-100 text-teal-900 font-medium"
+                          ? "bg-teal-100 font-medium text-teal-900"
                           : "text-slate-600 hover:bg-slate-100"
                       }`}
                     >
@@ -197,7 +198,7 @@ export default function PrivacyPolicy() {
                         <span>{section.id}</span>
                         <span>{section.title}</span>
                       </span>
-                    </button>
+                    </Button>
                   ))}
                 </nav>
               </div>
@@ -212,14 +213,14 @@ export default function PrivacyPolicy() {
                     id={`section-${section.id}`}
                   >
                     <div className="mb-6">
-                      <div className="flex items-start gap-3 mb-4">
+                      <div className="mb-4 flex items-start gap-3">
                         <span className="text-4xl">{section.icon}</span>
-                        <h2 className="text-3xl font-bold text-slate-900 mb-1">
+                        <h2 className="mb-1 text-3xl font-bold text-slate-900">
                           {section.id}. {sectionContent[section.id].title}
                         </h2>
                       </div>
 
-                      <p className="text-primary leading-relaxed mb-4">
+                      <p className="text-primary mb-4 leading-relaxed">
                         {sectionContent[section.id].content}
                       </p>
 
@@ -227,7 +228,7 @@ export default function PrivacyPolicy() {
                       Array.from(sectionContent[section.id].details).length >
                         1 ? (
                         <ul
-                          className={`space-y-2  ${section.id != "9" ? "list-disc" : "ml-4"}`}
+                          className={`space-y-2 ${section.id != "9" ? "list-disc" : "ml-4"}`}
                         >
                           {sectionContent[section.id].details.map(
                             (item, idx) => (
@@ -244,7 +245,7 @@ export default function PrivacyPolicy() {
                       )}
 
                       {sectionContent[section.id].extraDetails && (
-                        <p className="text-primary leading-relaxed mb-4 mt-3">
+                        <p className="text-primary mt-3 mb-4 leading-relaxed">
                           {sectionContent[section.id].extraDetails}
                         </p>
                       )}

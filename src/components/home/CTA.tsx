@@ -4,15 +4,15 @@ import Link from "next/link";
 
 export function CTA() {
   return (
-    <section className="bg-[#FAFAFA] py-24 md:py-26 px-4 md:px-8">
-      <div className="max-w-7xl mx-auto">
-        <div className="relative bg-brand rounded-[24px] md:rounded-[32px] overflow-hidden flex items-center w-full max-w-6xl mx-auto justify-between px-8 lg:px-16 py-9 lg:py-18">
+    <section className="bg-[#FAFAFA] px-4 py-24 md:px-8 md:py-26">
+      <div className="mx-auto max-w-7xl">
+        <div className="bg-brand relative mx-auto flex w-full max-w-6xl items-center justify-between overflow-hidden rounded-[24px] px-8 py-9 md:rounded-[32px] lg:px-16 lg:py-18">
           <div className="relative z-10 max-w-105 space-y-4">
-            <h2 className="text-[28px] md:text-[32px] font-semibold text-[#FEFEFE] leading-[1.2] tracking-tight md:whitespace-nowrap">
+            <h2 className="text-[28px] leading-[1.2] font-semibold tracking-tight text-[#FEFEFE] md:text-[32px] md:whitespace-nowrap">
               Be the profile people find first
             </h2>
 
-            <p className="text-[14px] md:text-[15px] text-[#FEFEFE] font-normal leading-relaxed">
+            <p className="text-[14px] leading-relaxed font-normal text-[#FEFEFE] md:text-[15px]">
               Create one searchable profile that shows who you are, what you do
               and why people should trust you
             </p>
@@ -28,7 +28,7 @@ export function CTA() {
             </div>
           </div>
 
-          <div className="hidden md:block absolute right-0 md:w-[320px] md:h-65 lg:w-100 lg:h-82.5">
+          <div className="absolute right-0 hidden md:block md:h-65 md:w-[320px] lg:h-82.5 lg:w-100">
             <Image src="/cta/cta.svg" className="object-cover" alt="" fill />
           </div>
         </div>

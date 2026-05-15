@@ -5,15 +5,24 @@ import { Slot } from "radix-ui";
 import { cn } from "@/lib/utils";
 
 const buttonVariants = cva(
-  "group/button inline-flex shrink-0 items-center justify-center rounded-4xl border border-transparent bg-clip-padding text-sm font-semibold whitespace-nowrap transition-all duration-300 outline-none select-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 active:not-aria-[haspopup]:translate-y-px disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 h-auto cursor-pointer",
+  "group/button inline-flex shrink-0 items-center justify-center rounded-md h-auto border border-transparent bg-clip-padding text-base font-medium whitespace-nowrap transition-all duration-300 outline-none select-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 active:not-aria-[haspopup]:translate-y-px disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 h-auto cursor-pointer font-afacad",
   {
     variants: {
       variant: {
-        primary: "bg-brand text-primary-foreground hover:bg-brand/80",
+        primary:
+          "bg-brand text-primary-foreground hover:bg-brand/80 disabled:bg-brand/80 aria-expanded:bg-brand/80 aria-expanded:text-primary-foreground ",
         secondary:
-          "bg-white text-brand hover:bg-white/95 aria-expanded:bg-brand aria-expanded:text-secondary-foreground",
+          "bg-button-bg text-brand hover:bg-white/95 aria-expanded:bg-brand aria-expanded:text-secondary-foreground",
         outline:
           "bg-white text-brand border-brand aria-expanded:bg-muted aria-expanded:text-foreground",
+        links:
+          "bg-transparent text-brand hover:bg-transparent aria-expanded:bg-transparent aria-expanded:text-brand",
+        waitlist:
+          "bg-button-bg-waitlist text-white hover:bg-positive-hover aria-expanded:bg-positive aria-expanded:text-white disabled:bg-positive/80 disabled:text-white/80",
+        hamburger:
+          "bg-transparent p-0 aria-expanded:bg-transparent aria-expanded:text-brand [&_svg]:text-brand aria-expanded:[&_svg]:text-brand hover:bg-transparent hover:text-brand aria-expanded:hover:bg-transparent aria-expanded:hover:text-brand disabled:bg-transparent disabled:text-brand/80 disabled:[&_svg]:text-brand/80",
+        dropdownItem:
+          "bg-white text-[#050505] flex justify-start  hover:bg-[#FAFAFA] aria-expanded:bg-[#FAFAFA] aria-expanded:text-[#050505] disabled:bg-white/80 disabled:text-[#050505]/80 ",
       },
       size: {
         default:
