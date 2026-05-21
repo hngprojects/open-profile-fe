@@ -19,6 +19,8 @@ type Props = {
   showRules?: boolean;
   required?: boolean;
   autoComplete?: string;
+  error?: string;
+  onBlur?: React.FocusEventHandler<HTMLInputElement>;
 };
 
 export function PasswordField({
@@ -27,6 +29,8 @@ export function PasswordField({
   showRules,
   required,
   autoComplete = "current-password",
+  error,
+  onBlur,
 }: Props) {
   const [show, setShow] = useState(false);
   const [focused, setFocused] = useState(false);
@@ -45,8 +49,11 @@ export function PasswordField({
             ? { value, onChange: (e) => onChange(e.target.value) }
             : {})}
           onFocus={() => setFocused(true)}
-          onBlur={() => setFocused(false)}
-          className="border-input-b placeholder:text-input-text h-11 border bg-[#FAFAFA] pr-10 shadow-none transition-all duration-200 hover:border-[#ABABAB] hover:bg-white hover:shadow-sm"
+          onBlur={(e) => {
+            setFocused(false);
+            onBlur?.(e);
+          }}
+          className={`border-input-b placeholder:text-input-text h-11 border bg-[#FAFAFA] pr-10 shadow-none transition-all duration-200 hover:border-[#ABABAB] hover:bg-white hover:shadow-sm ${error ? "border-red-400" : ""}`}
         />
         <Button
           type="button"
@@ -156,6 +163,7 @@ export function PasswordField({
             </div>
           );
         })()}
+      {error && <p className="text-xs text-red-500">{error}</p>}
     </div>
   );
 }

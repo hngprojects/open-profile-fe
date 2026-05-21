@@ -1,17 +1,18 @@
 "use client";
-import { resendOtp } from "@/app/actions/auth";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
+import { useMutation } from "@tanstack/react-query";
 import { Button } from "../ui/button";
+import { resendOtpOption } from "@/api/auth/auth.options";
+import { isApiError } from "@/api/base";
 
 type Props = {
   initialSeconds?: number;
   email?: string;
 };
 
-export function ResendTimer({ initialSeconds = 98, email: _email }: Props) {
+export function ResendTimer({ initialSeconds = 98, email = "" }: Props) {
   const [seconds, setSeconds] = useState(initialSeconds);
-  const [resending, setResending] = useState(false);
 
   useEffect(() => {
     if (seconds <= 0) return;
@@ -22,32 +23,25 @@ export function ResendTimer({ initialSeconds = 98, email: _email }: Props) {
   const mm = String(Math.floor(seconds / 60)).padStart(1, "0");
   const ss = String(seconds % 60).padStart(2, "0");
 
-  async function handleResend() {
-    if (resending) return;
-    setResending(true);
-    const formData = new FormData();
-    formData.append("email", _email ?? "");
-    // TODO: call resend API with email
-    try {
-      const res = await resendOtp(undefined, formData);
-      if (res?.success) {
-        toast.success("OTP resent successfully.");
-      }
-    } catch (error) {
-      console.error("Failed to resend OTP:", error);
-    }
-
-    setSeconds(initialSeconds);
-    setResending(false);
-  }
+  const resendMutation = useMutation({
+    ...resendOtpOption,
+    onSuccess: () => {
+      toast.success("OTP resent successfully.");
+      setSeconds(initialSeconds);
+    },
+    onError: (err) =>
+      toast.error(isApiError(err) ? err.message : "Failed to resend OTP."),
+  });
 
   return (
     <p className="text-center text-sm text-gray-500">
       Didn&apos;t get a code?{" "}
       <Button
         variant="links"
-        onClick={handleResend}
-        disabled={resending || seconds > 0}
+        onClick={() => {
+          if (email) resendMutation.mutate({ email });
+        }}
+        disabled={resendMutation.isPending || seconds > 0 || !email}
         className="text-brand cursor-pointer font-medium hover:underline disabled:cursor-not-allowed disabled:opacity-50"
       >
         Resend Code

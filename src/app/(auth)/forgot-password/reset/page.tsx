@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
+import { useMutation } from "@tanstack/react-query";
 import { AuthLayout } from "@/components/auth/AuthLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,36 +10,44 @@ import {
   PasswordField,
   allPasswordRulesMet,
 } from "@/components/auth/PasswordField";
-import { resetPassword } from "@/app/actions/auth";
+import { resetPasswordOption } from "@/api/auth/auth.options";
+import { isApiError } from "@/api/base";
 
 export default function ResetPasswordPage() {
   const router = useRouter();
-  const [pending, setPending] = useState(false);
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const [confirmError, setConfirmError] = useState("");
   const searchParams = useSearchParams();
-  const token = searchParams.get("token") ?? "";
 
   const isValid =
     allPasswordRulesMet(password) && confirm.length > 0 && password === confirm;
 
-  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    setPending(true);
+  const resetMutation = useMutation({
+    ...resetPasswordOption,
+    onSuccess: () => {
+      sessionStorage.removeItem("resetToken");
+      const email = searchParams.get("email") ?? "";
+      router.push(
+        `/forgot-password/success${email ? `?email=${encodeURIComponent(email)}` : ""}`
+      );
+    },
+    onError: (err) =>
+      toast.error(isApiError(err) ? err.message : "Password reset failed."),
+  });
 
-    const formData = new FormData();
-    formData.append("resetToken", token);
-    formData.append("newPassword", password);
-    try {
-      const result = await resetPassword(undefined, formData);
-      if (result?.redirectTo) router.push(result.redirectTo);
-      else if (result?.error) toast.error(result.error);
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Something went wrong.");
-    } finally {
-      setPending(false);
+  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const currentToken =
+      (typeof window !== "undefined"
+        ? sessionStorage.getItem("resetToken")
+        : null) || searchParams.get("token");
+
+    if (!currentToken) {
+      toast.error("Invalid or missing reset token. Please request a new link.");
+      return;
     }
+    resetMutation.mutate({ resetToken: currentToken, newPassword: password });
   }
 
   return (
@@ -51,8 +60,6 @@ export default function ResetPasswordPage() {
       </div>
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-        <input type="hidden" name="token" value={token} />
-
         <PasswordField
           value={password}
           onChange={setPassword}
@@ -88,10 +95,10 @@ export default function ResetPasswordPage() {
 
         <Button
           type="submit"
-          disabled={!isValid || pending}
+          disabled={!isValid || resetMutation.isPending}
           className="bg-brand h-11 w-full rounded-lg border-0 font-semibold text-white shadow-none transition-opacity hover:bg-[#065E69] disabled:opacity-50"
         >
-          {pending ? "Resetting…" : "Continue"}
+          {resetMutation.isPending ? "Resetting…" : "Continue"}
         </Button>
       </form>
     </AuthLayout>

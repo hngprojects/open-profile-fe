@@ -4,6 +4,12 @@ import {
   CreateProfileResponse,
   UsernameCheckResponse,
   ProfileResponse,
+  DashboardProfileResponse,
+  ProfileContentResponse,
+  UpsertDraftRequest,
+  UpsertDraftResponse,
+  DraftStateResponse,
+  PublishProfileResponse,
 } from "./profile.type";
 
 export function createProfile(data: CreateProfileRequest) {
@@ -11,6 +17,14 @@ export function createProfile(data: CreateProfileRequest) {
     url: "/profiles",
     method: "POST",
     data,
+  });
+}
+
+export function getDashboardProfile(signal?: AbortSignal) {
+  return callApi<DashboardProfileResponse>({
+    url: "/profiles/dashboard",
+    method: "GET",
+    signal,
   });
 }
 
@@ -44,5 +58,36 @@ export function searchProfiles(q: string, signal?: AbortSignal) {
     method: "GET",
     params: { q },
     signal,
+  });
+}
+
+export function getProfileContent(signal?: AbortSignal) {
+  return callApi<ProfileContentResponse>({
+    url: "/profiles/content",
+    method: "GET",
+    signal,
+  });
+}
+
+export function getDraftState(signal?: AbortSignal) {
+  return callApi<DraftStateResponse>({
+    url: "/profiles/content/state",
+    method: "GET",
+    signal,
+  });
+}
+
+export function upsertDraft(data: UpsertDraftRequest) {
+  return callApi<UpsertDraftResponse>({
+    url: "/profiles/content",
+    method: "PUT",
+    data,
+  });
+}
+
+export function publishProfile() {
+  return callApi<PublishProfileResponse>({
+    url: "/profiles/publish",
+    method: "POST",
   });
 }

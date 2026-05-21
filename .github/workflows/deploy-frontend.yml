@@ -1,19 +1,24 @@
-name: Frontend CI/CD
-
+name: DEPLOY FRONTEND Pipeline
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy to'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+          - staging
+          - production
+
   push:
     branches:
-      - feat/ci-cd
-      - dev
-      - staging
-      - production
-  pull_request:
-    branches:
-      - feat/ci-cd
-      - dev
-      - staging
-      - production
-
+       - feat/ci-cd-pipeline
+       - staging
+       - production
 jobs:
   ci:
     name: CI — Lint, Typecheck & Build
@@ -52,7 +57,7 @@ jobs:
     name: Deploy — Staging
     needs: ci
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/staging' && github.event_name == 'push'
+    if: (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'staging') || (github.event_name == 'push' && github.ref == 'refs/heads/staging')
     environment: staging
 
     steps:
@@ -85,8 +90,9 @@ jobs:
           script: |
             cd /var/www/openprofile-fe/staging
             rm -rf .next || true
-            pnpm install
-            pnpm install react-icons
+            pnpm install --config.ignore-scripts=true
+             # fallback frontend deps
+            pnpm add react-icons --no-save || true
             pnpm build
       - name: Start app with PM2
         uses: appleboy/ssh-action@v1.0.3
@@ -102,7 +108,7 @@ jobs:
     name: Deploy — production
     needs: ci
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/production' && github.event_name == 'push'
+    if: (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'production') || (github.event_name == 'push' && github.ref == 'refs/heads/production')
     environment: production
 
     steps:
@@ -135,7 +141,6 @@ jobs:
           script: |
             cd /var/www/openprofile-fe/production
             rm -rf .next || true
-            pnpm install
             pnpm install --config.ignore-scripts=true
             pnpm build
       - name: Start app with PM2

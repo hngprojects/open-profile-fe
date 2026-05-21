@@ -44,7 +44,10 @@ export function OtpInput({ length = 6, onChange }: Props) {
   }
 
   return (
-    <div className="flex gap-6" onPaste={handlePaste}>
+    <div
+      className="flex items-center justify-between gap-2"
+      onPaste={handlePaste}
+    >
       {code.map((val, i) => (
         <input
           key={i}
@@ -57,7 +60,7 @@ export function OtpInput({ length = 6, onChange }: Props) {
           value={val}
           onChange={(e) => handleChange(i, e.target.value)}
           onKeyDown={(e) => handleKeyDown(i, e)}
-          className="border-input-b h-10 w-full rounded-lg border bg-[#FAFAFA] text-center text-lg font-semibold transition-colors outline-none focus:border-[#087583]"
+          className="border-input-b h-12 w-full rounded-lg border bg-[#FAFAFA] text-center text-lg font-semibold transition-colors outline-none focus:border-[#087583] sm:h-12 sm:max-w-12"
         />
       ))}
     </div>

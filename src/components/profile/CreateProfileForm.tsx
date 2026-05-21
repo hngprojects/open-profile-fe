@@ -2,7 +2,7 @@
 
 import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { AuthLayout } from "@/components/auth/AuthLayout";
 import { useDebounce } from "@/hooks/useDebounce";
@@ -14,123 +14,149 @@ import {
   createProfileOption,
   checkUsernameOption,
 } from "@/api/profile/profile.options";
-import { isApiError } from "@/api/base";
+import { callApi, isApiError } from "@/api/base";
 
-type UsernameStatus = "available" | "taken" | "invalid" | "error" | "";
+type UsernameStatus = "available" | "taken" | "error" | "checking" | "";
 
 export default function CreateProfileForm() {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const [currentStep, setCurrentStep] = useState(1);
   const [username, setUsername] = useState("");
   const [bio, setBio] = useState("");
   const [fullName, setFullName] = useState("");
+  const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [photoUrl, setPhotoUrl] = useState("");
-  const debouncedUsername = useDebounce(username, 500);
+  const debouncedUsername = useDebounce(username, 300);
+  const isUsernameSynced = username === debouncedUsername;
 
   const usernameQuery = useQuery(checkUsernameOption(debouncedUsername));
 
-  const usernameStatus: UsernameStatus = usernameQuery.isLoading
+  const usernameStatus: UsernameStatus = !debouncedUsername
     ? ""
-    : usernameQuery.isError
-      ? isApiError(usernameQuery.error) && usernameQuery.error.status === 409
-        ? "taken"
-        : isApiError(usernameQuery.error) && usernameQuery.error.status === 400
-          ? "invalid"
-          : "error"
-      : usernameQuery.data?.available === true
-        ? "available"
-        : usernameQuery.data?.available === false
-          ? "taken"
-          : "";
+    : !isUsernameSynced || usernameQuery.isLoading || usernameQuery.isFetching
+      ? "checking"
+      : usernameQuery.isError
+        ? "error"
+        : usernameQuery.data?.available
+          ? "available"
+          : "taken";
 
   const availableLabel =
-    usernameQuery.isLoading && debouncedUsername
-      ? "Checking…"
+    usernameStatus === "checking"
+      ? "Checking..."
       : usernameStatus === "available"
-        ? "This username is available"
+        ? "Available"
         : usernameStatus === "taken"
-          ? "This username is taken"
-          : usernameStatus === "invalid"
-            ? "Invalid username format"
-            : usernameStatus === "error"
-              ? "Could not check availability"
-              : "";
+          ? "Username not available"
+          : usernameStatus === "error"
+            ? "Could not check availability"
+            : "";
 
   const createProfile = useMutation({
     ...createProfileOption,
-    onSuccess: () => setCurrentStep(3),
-    onError: (err) =>
-      toast.error(isApiError(err) ? err.message : "Failed to create profile."),
+    onSuccess: async () => {
+      if (photoFile) {
+        try {
+          const form = new FormData();
+          form.append("photo", photoFile);
+          await callApi({
+            url: `/profiles/${username}`,
+            method: "PATCH",
+            data: form,
+          });
+        } catch {
+          toast.error("Profile created but photo upload failed.");
+        }
+      }
+      queryClient.setQueryData<import("@/api/auth/auth.type").User>(
+        ["auth", "me"],
+        (prev) => (prev ? { ...prev, onboardingComplete: true } : prev)
+      );
+      setCurrentStep(3);
+    },
+    onError: (err) => {
+      if (isApiError(err) && err.status === 409) {
+        queryClient.setQueryData<import("@/api/auth/auth.type").User>(
+          ["auth", "me"],
+          (prev) => (prev ? { ...prev, onboardingComplete: true } : prev)
+        );
+        setCurrentStep(3);
+        return;
+      }
+      toast.error(isApiError(err) ? err.message : "Failed to create profile.");
+    },
   });
 
-  function handleSubmit(e: FormEvent<HTMLFormElement>) {
-    e.preventDefault();
+  function submitProfile() {
     if (currentStep !== 2) return;
+
     createProfile.mutate({
       username,
       fullName,
       bio,
-      // only pass photoUrl if it's a real URL (not a blob preview)
       ...(photoUrl && photoUrl.startsWith("http") ? { photoUrl } : {}),
     });
   }
 
+  function handleSubmit(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    submitProfile();
+  }
+
   return (
-    <>
-      <ProgressBar currentStep={currentStep} />
-      <div className="absolute top-4 right-4">
-        <button
-          type="button"
-          onClick={() => {
-            document.cookie = "auth=; path=/; max-age=0";
-            document.cookie = "access_token=; path=/; max-age=0";
-            router.replace("/login");
-          }}
-          className="text-sm text-gray-500 hover:underline"
-        >
-          Log out
-        </button>
-      </div>
-
-      <AuthLayout>
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-          {currentStep === 1 && (
-            <CreateProfileLink
-              username={username}
-              available={availableLabel}
-              isAvailable={usernameStatus === "available"}
-              onUpdateUsername={(e) => setUsername(e.target.value)}
-              onUpdateStep={() => setCurrentStep(2)}
-            />
-          )}
-
-          {currentStep === 2 && (
-            <CreateProfileInfo
-              bio={bio}
-              fullName={fullName}
-              onUpdateBio={(e) => setBio(e.target.value)}
-              onUpdateFullName={(e) => setFullName(e.target.value)}
-              onUpdateStep={() =>
-                handleSubmit({
-                  preventDefault: () => {},
-                } as FormEvent<HTMLFormElement>)
+    <AuthLayout>
+      <form
+        onSubmit={handleSubmit}
+        className="flex min-h-full w-full flex-1 flex-col gap-8"
+      >
+        <ProgressBar currentStep={currentStep} />
+        {currentStep === 1 && (
+          <CreateProfileLink
+            username={username}
+            available={availableLabel}
+            status={usernameStatus}
+            onUpdateUsername={(e) =>
+              setUsername(
+                e.target.value
+                  .toLowerCase()
+                  .replace(/\s+/g, "-")
+                  .replace(/[^a-z0-9-]/g, "")
+              )
+            }
+            onUpdateStep={() => {
+              if (isUsernameSynced && usernameStatus === "available") {
+                setCurrentStep(2);
               }
-              isPending={createProfile.isPending}
-              photoUrl={photoUrl}
-              onPhotoUrl={setPhotoUrl}
-            />
-          )}
+            }}
+          />
+        )}
 
-          {currentStep === 3 && (
-            <ProfileLinkSuccess
-              username={username}
-              bio={bio}
-              photoUrl={photoUrl || undefined}
-              onContinue={() => router.replace("/dashboard")}
-            />
-          )}
-        </form>
-      </AuthLayout>
-    </>
+        {currentStep === 2 && (
+          <CreateProfileInfo
+            bio={bio}
+            fullName={fullName}
+            onUpdateBio={(e) => setBio(e.target.value)}
+            onUpdateFullName={(e) => setFullName(e.target.value)}
+            onUpdateStep={submitProfile}
+            isPending={createProfile.isPending}
+            photoUrl={photoUrl}
+            onPhotoUrl={setPhotoUrl}
+            photoFile={photoFile}
+            onPhotoFile={setPhotoFile}
+          />
+        )}
+
+        {currentStep === 3 && (
+          <ProfileLinkSuccess
+            username={username}
+            fullName={fullName}
+            bio={bio}
+            photoUrl={photoUrl || undefined}
+            onContinue={() => router.replace("/dashboard")}
+          />
+        )}
+      </form>
+    </AuthLayout>
   );
 }

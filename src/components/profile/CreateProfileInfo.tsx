@@ -1,4 +1,4 @@
-import { ChangeEvent, useRef, useState } from "react";
+import { ChangeEvent, useEffect, useRef, useState } from "react";
 import { motion } from "motion/react";
 import { Camera } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -14,6 +14,8 @@ type CreateProfileInfoProps = {
   isPending?: boolean;
   photoUrl?: string;
   onPhotoUrl?: (url: string) => void;
+  photoFile?: File | null;
+  onPhotoFile?: (file: File | null) => void;
 };
 
 export default function CreateProfileInfo({
@@ -23,17 +25,38 @@ export default function CreateProfileInfo({
   onUpdateFullName,
   onUpdateStep,
   isPending,
+  photoUrl,
   onPhotoUrl,
+  onPhotoFile,
 }: CreateProfileInfoProps) {
   const inputRef = useRef<HTMLInputElement>(null);
+  const currentBlobRef = useRef<string | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (currentBlobRef.current) {
+        URL.revokeObjectURL(currentBlobRef.current);
+      }
+    };
+  }, []);
+
+  const displayPhoto = preview ?? photoUrl;
 
   function handleFile(e: ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
+
+    if (currentBlobRef.current) {
+      URL.revokeObjectURL(currentBlobRef.current);
+    }
+
     const objectUrl = URL.createObjectURL(file);
+    currentBlobRef.current = objectUrl;
+
     setPreview(objectUrl);
     onPhotoUrl?.(objectUrl);
+    onPhotoFile?.(file);
   }
 
   return (
@@ -58,9 +81,9 @@ export default function CreateProfileInfo({
             onClick={() => inputRef.current?.click()}
             className="border-brand mx-auto flex h-16 w-16 items-center justify-center overflow-hidden rounded-full border-3 border-dashed"
           >
-            {preview ? (
+            {displayPhoto ? (
               <Image
-                src={preview}
+                src={displayPhoto}
                 alt="Photo preview"
                 width={64}
                 height={64}
@@ -84,7 +107,7 @@ export default function CreateProfileInfo({
             onClick={() => inputRef.current?.click()}
             className="mx-auto mt-5 h-13 w-40 rounded-[10px] text-center text-lg font-normal shadow-none transition-colors"
           >
-            {preview ? "Change Photo" : "Upload a Photo"}
+            {displayPhoto ? "Change Photo" : "Upload a Photo"}
           </Button>
         </div>
 
@@ -100,6 +123,7 @@ export default function CreateProfileInfo({
               className="border-2 border-[#ededed] bg-white shadow-none"
             />
           </div>
+
           <div className="mt-4">
             <label className="mb-1 inline-block font-bold text-[#454545]">
               Bio

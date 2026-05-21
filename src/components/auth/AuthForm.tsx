@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import Link from "next/link";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { AuthLayout } from "@/components/auth/AuthLayout";
@@ -12,7 +12,11 @@ import {
   PasswordField,
   allPasswordRulesMet,
 } from "@/components/auth/PasswordField";
-import { loginOption, signupOption } from "@/api/auth/auth.options";
+import {
+  loginOption,
+  signupOption,
+  userQueryOptions,
+} from "@/api/auth/auth.options";
 import { isApiError } from "@/api/base";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -24,33 +28,39 @@ type Props = {
 
 export function AuthForm({ mode, googleAuthUrl }: Props) {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const searchParams = useSearchParams();
   const returnTo = searchParams.get("returnTo");
 
   const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState(searchParams.get("email") ?? "");
   const [password, setPassword] = useState("");
   const [nameError, setNameError] = useState("");
   const [emailError, setEmailError] = useState("");
+  const [passwordError, setPasswordError] = useState("");
 
   const isSignup = mode === "signup";
 
-  const isValid: boolean = isSignup
-    ? name.trim().split(/\s+/).length >= 2 &&
-      EMAIL_RE.test(email) &&
-      allPasswordRulesMet(password)
-    : EMAIL_RE.test(email) && password.length > 0;
-
   const loginMutation = useMutation({
     ...loginOption,
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
       document.cookie = "auth=1; path=/; SameSite=Lax";
+      await queryClient.resetQueries({ queryKey: userQueryOptions.queryKey });
       const onboardingComplete = data?.user?.onboardingComplete;
       const destination = onboardingComplete ? "/dashboard" : "/create-profile";
       router.replace(returnTo?.startsWith("/") ? returnTo : destination);
     },
-    onError: (err) =>
-      toast.error(isApiError(err) ? err.message : "Login failed."),
+    onError: (err) => {
+      const isNetworkError =
+        !navigator.onLine || (isApiError(err) && !err.status);
+      toast.error(
+        isNetworkError
+          ? "Something went wrong. Please try again."
+          : isApiError(err)
+            ? err.message
+            : "Login failed."
+      );
+    },
   });
 
   const signupMutation = useMutation({
@@ -58,14 +68,73 @@ export function AuthForm({ mode, googleAuthUrl }: Props) {
     onSuccess: () => {
       router.replace(`/verify-email?email=${encodeURIComponent(email)}`);
     },
-    onError: (err) =>
-      toast.error(isApiError(err) ? err.message : "Signup failed."),
+    onError: (err) => {
+      const isNetworkError =
+        !navigator.onLine || (isApiError(err) && !err.status);
+      toast.error(
+        isNetworkError
+          ? "Something went wrong. Please try again."
+          : isApiError(err)
+            ? err.message
+            : "Signup failed."
+      );
+    },
   });
 
   const pending = loginMutation.isPending || signupMutation.isPending;
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    if (!navigator.onLine) {
+      toast.error("Something went wrong. Please try again.");
+      return;
+    }
+
+    let hasError = false;
+
+    if (isSignup) {
+      if (!name) {
+        setNameError("Full name is required");
+        hasError = true;
+      } else if (name.trim().split(/\s+/).length < 2) {
+        setNameError("Enter first and last name");
+        hasError = true;
+      }
+
+      if (!email) {
+        setEmailError("Email is required");
+        hasError = true;
+      } else if (!EMAIL_RE.test(email)) {
+        setEmailError("Incorrect email");
+        hasError = true;
+      }
+
+      if (!password) {
+        setPasswordError("Password is required");
+        hasError = true;
+      } else if (!allPasswordRulesMet(password)) {
+        setPasswordError("Password does not meet all requirements");
+        hasError = true;
+      }
+    } else {
+      if (!email) {
+        setEmailError("Email is required");
+        hasError = true;
+      } else if (!EMAIL_RE.test(email)) {
+        setEmailError("Incorrect email");
+        hasError = true;
+      }
+
+      if (!password) {
+        setPasswordError("Password is required");
+        hasError = true;
+      }
+    }
+
+    if (hasError) {
+      return;
+    }
+
     if (isSignup) {
       signupMutation.mutate({ fullName: name, email, password });
     } else {
@@ -101,12 +170,17 @@ export function AuthForm({ mode, googleAuthUrl }: Props) {
               required
               autoComplete="name"
               value={name}
-              onChange={(e) => setName(e.target.value)}
+              onChange={(e) => {
+                setName(e.target.value);
+                if (nameError) setNameError("");
+              }}
               onBlur={() =>
                 setNameError(
-                  name.trim().split(/\s+/).length < 2
-                    ? "Enter first and last name"
-                    : ""
+                  !name
+                    ? "Full name is required"
+                    : name.trim().split(/\s+/).length < 2
+                      ? "Enter first and last name"
+                      : ""
                 )
               }
               className={`${inputClass} ${nameError ? "border-red-400" : ""}`}
@@ -125,10 +199,17 @@ export function AuthForm({ mode, googleAuthUrl }: Props) {
             placeholder="Enter your email address"
             autoComplete="email"
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            onChange={(e) => {
+              setEmail(e.target.value);
+              if (emailError) setEmailError("");
+            }}
             onBlur={() =>
               setEmailError(
-                email && !EMAIL_RE.test(email) ? "Incorrect email" : ""
+                !email
+                  ? "Email is required"
+                  : !EMAIL_RE.test(email)
+                    ? "Incorrect email"
+                    : ""
               )
             }
             className={`${inputClass} ${emailError ? "border-red-400" : ""}`}
@@ -138,10 +219,23 @@ export function AuthForm({ mode, googleAuthUrl }: Props) {
 
         <PasswordField
           value={password}
-          onChange={setPassword}
+          onChange={(v) => {
+            setPassword(v);
+            if (passwordError) setPasswordError("");
+          }}
           required
           showRules={isSignup}
           autoComplete={isSignup ? "new-password" : "current-password"}
+          error={passwordError}
+          onBlur={() =>
+            setPasswordError(
+              !password
+                ? "Password is required"
+                : isSignup && !allPasswordRulesMet(password)
+                  ? "Password does not meet all requirements"
+                  : ""
+            )
+          }
         />
 
         {!isSignup && (
@@ -157,11 +251,11 @@ export function AuthForm({ mode, googleAuthUrl }: Props) {
 
         <Button
           type="submit"
-          disabled={pending || (isSignup && !isValid)}
+          disabled={pending || !email || !password}
           className={`mt-1 h-[52px] w-full rounded-[10px] text-[16px] font-medium shadow-none transition-colors ${
-            isSignup && !isValid
+            pending || !email || !password
               ? "border-button-b text-label-text border bg-white"
-              : "bg-brand-hover-bg border-0 text-[#FEFEFE] hover:bg-[#065E69]"
+              : "bg-brand-hover-bg hover:bg-brand border-0 text-white"
           }`}
         >
           {pending ? "Please wait…" : "Continue"}

@@ -1,14 +1,16 @@
 "use client";
 import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { toast } from "sonner";
+import { useMutation } from "@tanstack/react-query";
 import { AuthLayout } from "@/components/auth/AuthLayout";
 import { AuthPageHeader } from "@/components/auth/AuthPageHeader";
 import { OtpInput } from "@/components/auth/OtpInput";
 import { ResendTimer } from "@/components/auth/ResendTimer";
 import { Button } from "@/components/ui/button";
 import { maskEmail } from "@/lib/utils";
-import { verifyResetOtp } from "@/app/actions/auth";
-import { toast } from "sonner";
+import { verifyResetOtpOption } from "@/api/auth/auth.options";
+import { isApiError } from "@/api/base";
 
 export default function ForgotPasswordVerifyPage() {
   const [code, setCode] = useState<string[]>([]);
@@ -17,21 +19,16 @@ export default function ForgotPasswordVerifyPage() {
   const email = searchParams.get("email") ?? "";
 
   const isComplete = code.length === 6 && code.every(Boolean);
-  const token = code.join("");
 
-  const handleVerify = async () => {
-    const formData = new FormData();
-    formData.append("email", email);
-    formData.append("otp", token);
-
-    try {
-      const res = await verifyResetOtp(undefined, formData);
-      if (res?.redirectTo) router.push(res.redirectTo);
-      else if (res?.error) toast.error(res.error);
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Something went wrong.");
-    }
-  };
+  const verifyMutation = useMutation({
+    ...verifyResetOtpOption,
+    onSuccess: (data) => {
+      sessionStorage.setItem("resetToken", data.resetToken);
+      router.push(`/forgot-password/reset?email=${encodeURIComponent(email)}`);
+    },
+    onError: (err) =>
+      toast.error(isApiError(err) ? err.message : "Verification failed."),
+  });
 
   return (
     <AuthLayout>
@@ -46,11 +43,11 @@ export default function ForgotPasswordVerifyPage() {
         </label>
         <OtpInput onChange={setCode} />
         <Button
-          onClick={handleVerify}
-          disabled={!isComplete}
+          onClick={() => verifyMutation.mutate({ email, otp: code.join("") })}
+          disabled={!isComplete || verifyMutation.isPending}
           className="bg-brand h-11 w-full rounded-lg border-0 font-semibold text-white shadow-none transition-opacity hover:bg-[#065E69] disabled:opacity-50"
         >
-          Continue
+          {verifyMutation.isPending ? "Verifying…" : "Continue"}
         </Button>
       </div>
 

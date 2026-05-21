@@ -3,7 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { type ProfileResponse } from "@/api/profile/profile.type";
-import { getProfileByUsername } from "@/api/profile/profile.service";
+import { env as serverEnv } from "@/env/server";
 
 type Props = {
   params: Promise<{ username: string }>;
@@ -12,12 +12,17 @@ type Props = {
 export default async function UserProfilePage({ params }: Props) {
   const { username } = await params;
 
-  let profile: ProfileResponse;
-  try {
-    profile = await getProfileByUsername(username);
-  } catch {
-    notFound();
-  }
+  const res = await fetch(
+    `${serverEnv.API_BASE_URL}/api/v1/profiles/${encodeURIComponent(username)}`,
+    {
+      cache: "no-store",
+    }
+  );
+
+  if (!res.ok) notFound();
+
+  const json = await res.json();
+  const profile: ProfileResponse = json.data ?? json;
 
   const name = profile.fullName ?? username;
   const initials = name
@@ -26,6 +31,12 @@ export default async function UserProfilePage({ params }: Props) {
     .join("")
     .slice(0, 2)
     .toUpperCase();
+
+  const photoSrc = profile.photoUrl
+    ? profile.photoUrl.startsWith("http")
+      ? profile.photoUrl
+      : new URL(profile.photoUrl, serverEnv.API_BASE_URL).toString()
+    : "";
 
   return (
     <div className="flex min-h-screen flex-col bg-[#FAFAFA]">
@@ -54,7 +65,7 @@ export default async function UserProfilePage({ params }: Props) {
 
         <div className="relative z-10 flex w-full max-w-lg flex-col items-center gap-4 text-center">
           <Avatar className="h-20 w-20">
-            <AvatarImage src={profile.photoUrl ?? ""} alt={name} />
+            <AvatarImage src={photoSrc} alt={name} />
             <AvatarFallback className="text-xl">{initials}</AvatarFallback>
           </Avatar>
           <div>

@@ -19,6 +19,7 @@ export function AuthLayout({ children }: { children: React.ReactNode }) {
             width={140}
             height={32}
             priority
+            className="mb-12"
           />
         </Link>
       </div>
@@ -46,7 +47,7 @@ export function AuthLayout({ children }: { children: React.ReactNode }) {
             variant="links"
             onClick={() => router.back()}
             aria-label="Go back"
-            className={`text-link-hover-text flex w-fit cursor-pointer items-center gap-1.5 text-sm font-medium transition-colors hover:text-[#065E69] ${pathname !== "/login" ? "hidden" : "block"}`}
+            className={`text-link-hover-text flex w-fit cursor-pointer items-center gap-1.5 text-sm font-medium transition-colors hover:text-[#065E69] ${pathname !== "/login" ? "hidden" : "flex"}`}
           >
             <svg
               width="16"

@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from "motion/react";
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import { CircleCheck } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 
@@ -43,6 +44,7 @@ const fadeUp = (delay = 0) => ({
 export function Hero() {
   const [query, setQuery] = useState("");
   const [current, setCurrent] = useState(0);
+  const router = useRouter();
 
   useEffect(() => {
     const id = setInterval(
@@ -54,6 +56,12 @@ export function Hero() {
 
   const getProfile = (offset: number) =>
     profiles[(current + offset) % profiles.length];
+
+  function handleSearch() {
+    const username = query.trim();
+    if (!username) return;
+    router.push(`/${encodeURIComponent(username)}`);
+  }
 
   return (
     <section className="w-full overflow-hidden bg-white">
@@ -96,15 +104,25 @@ export function Hero() {
             {...fadeUp(0.2)}
             className="flex w-full max-w-[512px] flex-col items-stretch gap-[6.73px] sm:flex-row"
           >
-            <input
-              type="text"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="open.profile/"
-              className="h-[50px] flex-1 rounded-[5.57px] border border-[#C9C9C9] bg-[#FAFAFA] px-[12px] py-4 text-[16px] leading-[24px] text-[#454545] transition outline-none placeholder:text-[#454545] focus:ring-2 focus:ring-[#087583]/40 sm:py-0"
-              style={{ fontFamily: "'Afacad', sans-serif" }}
-            />
+            <div className="flex h-[50px] flex-1 items-center rounded-[5.57px] border border-[#C9C9C9] bg-[#FAFAFA] px-[12px] focus-within:ring-2 focus-within:ring-[#087583]/40">
+              <span
+                className="shrink-0 text-[16px] leading-[24px] text-[#454545] select-none"
+                style={{ fontFamily: "'Afacad', sans-serif" }}
+              >
+                open.profile/
+              </span>
+              <input
+                type="text"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+                placeholder="username"
+                className="min-w-0 flex-1 bg-transparent text-[16px] leading-[24px] text-[#454545] outline-none placeholder:text-[#C9C9C9]"
+                style={{ fontFamily: "'Afacad', sans-serif" }}
+              />
+            </div>
             <Button
+              onClick={handleSearch}
               className="h-[56px] w-full rounded-[8px] bg-[#087583] px-[16px] text-[16px] leading-[24px] whitespace-nowrap text-white transition-colors hover:bg-[#065E69] sm:h-[50px] sm:w-auto"
               style={{ fontFamily: "'Afacad', sans-serif" }}
             >

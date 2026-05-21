@@ -25,14 +25,14 @@ export default function SearchPage() {
   );
 
   const results = data?.results ?? [];
-  const searched = submittedQuery.trim().length >= 3;
+  const searched = submittedQuery.trim().length >= 2;
 
   function runSearch(value: string) {
     const searchValue = value.trim();
 
-    if (searchValue.length < 3) {
+    if (searchValue.length < 2) {
       setSubmittedQuery("");
-      setValidationError("Please enter at least 3 characters to search");
+      setValidationError("Please enter at least 2 characters to search");
       return;
     }
 
@@ -132,20 +132,13 @@ export default function SearchPage() {
             <div className="grid gap-6 md:grid-cols-2">
               {results.map((user, index) => {
                 const name =
-                  user.name ||
-                  user.fullName ||
-                  user.username ||
-                  "Open Profile User";
-
+                  user.fullName || user.username || "Open Profile User";
                 const bio = user.bio || "Open Profile member";
-
                 const image =
                   user.avatar ||
                   user.profileImage ||
                   user.profilePicture ||
                   "/hero/avatar.png";
-
-                const slug = user.slug || user.username || user.id || "";
 
                 return (
                   <div
@@ -170,7 +163,7 @@ export default function SearchPage() {
                     </div>
 
                     <Link
-                      href={slug ? `/profile/${slug}` : "#"}
+                      href={user.username ? `/${user.username}` : "#"}
                       className="shrink-0 rounded-[6px] bg-[#087583] px-6 py-3 text-sm text-white"
                     >
                       View Profile
