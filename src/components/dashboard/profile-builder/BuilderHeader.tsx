@@ -3,8 +3,9 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Search } from "lucide-react";
+// import { Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { ROUTES } from "@/constants/routes";
 
 interface BuilderHeaderProps {
   onPublish: () => void;
@@ -18,9 +19,9 @@ export default function BuilderHeader({
   const pathname = usePathname();
 
   const navLinks = [
-    { label: "Home", href: "/dashboard" },
-    { label: "Profile Builder", href: "/dashboard/profile-builder" },
-    { label: "Settings", href: "/dashboard/settings" },
+    { label: "Home", href: ROUTES.dashboard.home },
+    { label: "Profile Builder", href: ROUTES.dashboard.profileBuilder },
+    // { label: "Settings", href: ROUTES.dashboard.settings.home },
   ];
 
   return (
@@ -28,15 +29,15 @@ export default function BuilderHeader({
       <div className="mx-auto flex items-center justify-between gap-6">
         <div className="flex items-center gap-3">
           <Link
-            href="/dashboard"
-            className="flex items-center transition-transform active:scale-95"
+            href={ROUTES.dashboard.home}
+            className="flex cursor-pointer items-center transition-transform active:scale-95"
           >
             <Image
               src="/logomark.svg"
               alt="Open Profile"
               width={40}
               height={40}
-              className="border-tertiary-b h-10 w-10 rounded-full border bg-white object-contain"
+              className="border-tertiary-b h-10 w-10 rounded-full border bg-background object-contain"
               priority
             />
           </Link>
@@ -46,8 +47,8 @@ export default function BuilderHeader({
           {navLinks.map((link) => {
             const isActive =
               pathname === link.href ||
-              (link.href === "/dashboard/profile-builder" &&
-                pathname === "/dashboard/canvas");
+              (link.href === ROUTES.dashboard.profileBuilder &&
+                pathname === ROUTES.dashboard.canvas);
 
             return (
               <Link
@@ -67,12 +68,12 @@ export default function BuilderHeader({
         </nav>
 
         <div className="flex items-center gap-4">
-          <button
+          {/* <button
             className="text-primary-text hover:bg-hover-bg flex h-10 w-10 items-center justify-center rounded-full transition-colors active:scale-95"
             aria-label="Search"
           >
             <Search size={20} />
-          </button>
+          </button> */}
 
           <Button
             type="button"

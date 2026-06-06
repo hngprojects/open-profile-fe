@@ -37,7 +37,7 @@ export function PasswordField({
 
   return (
     <div className="flex flex-col gap-1.5">
-      <label className="text-label-text text-sm font-medium">Password</label>
+      <label className="text-label-text font-medium">Password</label>
       <div className="relative">
         <Input
           name="password"

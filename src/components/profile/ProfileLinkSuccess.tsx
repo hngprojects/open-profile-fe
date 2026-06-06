@@ -7,13 +7,15 @@ import { toast } from "sonner";
 export default function ProfileLinkSuccess({
   username,
   bio,
-  fullName,
+  firstName,
+  lastName,
   photoUrl,
   onContinue,
 }: {
   username: string;
   bio: string;
-  fullName: string;
+  firstName: string;
+  lastName: string;
   photoUrl?: string;
   onContinue?: () => void;
 }) {
@@ -35,15 +37,10 @@ export default function ProfileLinkSuccess({
 
   const profileUrl = getProfileUrl();
 
-  const initials = fullName?.trim()
-    ? fullName
-        .trim()
-        .split(/\s+/)
-        .map((n) => n[0])
-        .join("")
-        .toUpperCase()
-        .slice(0, 2)
-    : (username || "").slice(0, 2).toUpperCase() || "?";
+  const initials =
+    `${firstName?.trim().slice(0, 1)}${lastName?.trim().slice(0, 1)}`.toUpperCase() ||
+    (username || "").slice(0, 2).toUpperCase() ||
+    "?";
 
   async function handleCopy(e: React.MouseEvent) {
     e.preventDefault();

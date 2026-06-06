@@ -6,16 +6,7 @@ import { ChevronDown, Pipette } from "lucide-react";
 import { useOutsideClick } from "@/hooks/useOutsideClick";
 import { isValidHex, hexToRgb, hexToHsl } from "@/utils/color";
 
-const RECOMMENDED_COLORS = [
-  "#D9D9D9",
-  "#050505",
-  "#335CFF",
-  "#FF3366",
-  "#00D084",
-  "#FF8A00",
-  "#9747FF",
-  "#00E0FF",
-];
+import { THEME_DEFAULTS, COLOR_PICKER_PRESETS } from "@/constants/theme";
 
 interface ColorPickerProps {
   color: string;
@@ -29,7 +20,7 @@ export function ColorPicker({ color, onChange, label }: ColorPickerProps) {
   const [popupStyle, setPopupStyle] = useState<React.CSSProperties>({});
   const triggerRef = useRef<HTMLButtonElement>(null);
   const ref = useOutsideClick(() => setOpen(false));
-  const safeColor = isValidHex(color) ? color : "#050505";
+  const safeColor = isValidHex(color) ? color : THEME_DEFAULTS.TEXT_COLOR;
 
   const rgb = hexToRgb(safeColor);
   const hsl = hexToHsl(safeColor);
@@ -80,15 +71,15 @@ export function ColorPicker({ color, onChange, label }: ColorPickerProps) {
 
       {open && (
         <div
-          className="animate-in fade-in zoom-in-95 overflow-hidden rounded-[16px] bg-white shadow-[0_8px_30px_rgb(0,0,0,0.18)] duration-200"
+          className="animate-in fade-in zoom-in-95 overflow-hidden rounded-[16px] bg-white shadow-lg duration-200"
           style={popupStyle}
         >
           <style>{`
             .kiro-picker .react-colorful { width: 100% !important; gap: 10px !important; }
             .kiro-picker .react-colorful__saturation { border-radius: 8px !important; height: 160px !important; }
             .kiro-picker .react-colorful__hue { height: 12px !important; border-radius: 6px !important; }
-            .kiro-picker .react-colorful__saturation-pointer { width: 20px !important; height: 20px !important; border: 3px solid white !important; box-shadow: 0 2px 6px rgba(0,0,0,0.25) !important; }
-            .kiro-picker .react-colorful__hue-pointer { width: 14px !important; height: 14px !important; border: 2px solid white !important; box-shadow: 0 1px 4px rgba(0,0,0,0.3) !important; }
+            .kiro-picker .react-colorful__saturation-pointer { width: 20px !important; height: 20px !important; border: 3px solid white !important; box-shadow: 0 2px 6px #00000040 !important; }
+            .kiro-picker .react-colorful__hue-pointer { width: 14px !important; height: 14px !important; border: 2px solid white !important; box-shadow: 0 1px 4px #0000004d !important; }
           `}</style>
           <div className="kiro-picker p-3 pb-0">
             <HexColorPicker
@@ -147,7 +138,7 @@ export function ColorPicker({ color, onChange, label }: ColorPickerProps) {
                 Recommended Colors
               </span>
               <div className="flex items-center gap-1.5">
-                {RECOMMENDED_COLORS.map((c) => (
+                {COLOR_PICKER_PRESETS.map((c) => (
                   <button
                     key={c}
                     type="button"

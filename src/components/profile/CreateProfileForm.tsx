@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
+import { ROUTES } from "@/constants/routes";
 import { useRouter } from "next/navigation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -14,7 +15,8 @@ import {
   createProfileOption,
   checkUsernameOption,
 } from "@/api/profile/profile.options";
-import { callApi, isApiError } from "@/api/base";
+import { isApiError } from "@/api/base";
+import { uploadImage } from "@/api/uploads/uploads.service";
 
 type UsernameStatus = "available" | "taken" | "error" | "checking" | "";
 
@@ -24,9 +26,11 @@ export default function CreateProfileForm() {
   const [currentStep, setCurrentStep] = useState(1);
   const [username, setUsername] = useState("");
   const [bio, setBio] = useState("");
-  const [fullName, setFullName] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [photoUrl, setPhotoUrl] = useState("");
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
   const debouncedUsername = useDebounce(username, 300);
   const isUsernameSynced = username === debouncedUsername;
 
@@ -55,23 +59,17 @@ export default function CreateProfileForm() {
 
   const createProfile = useMutation({
     ...createProfileOption,
-    onSuccess: async () => {
-      if (photoFile) {
-        try {
-          const form = new FormData();
-          form.append("photo", photoFile);
-          await callApi({
-            url: `/profiles/${username}`,
-            method: "PATCH",
-            data: form,
-          });
-        } catch {
-          toast.error("Profile created but photo upload failed.");
-        }
-      }
+    onSuccess: async (_, variables) => {
       queryClient.setQueryData<import("@/api/auth/auth.type").User>(
         ["auth", "me"],
-        (prev) => (prev ? { ...prev, onboardingComplete: true } : prev)
+        (prev) =>
+          prev
+            ? {
+                ...prev,
+                onboardingComplete: true,
+                photoUrl: variables.photoUrl || prev.photoUrl,
+              }
+            : prev
       );
       setCurrentStep(3);
     },
@@ -88,14 +86,38 @@ export default function CreateProfileForm() {
     },
   });
 
-  function submitProfile() {
-    if (currentStep !== 2) return;
+  async function submitProfile() {
+    if (
+      currentStep !== 2 ||
+      !firstName.trim() ||
+      !lastName.trim() ||
+      !bio.trim() ||
+      bio.length > 300
+    )
+      return;
+
+    let finalPhotoUrl = photoUrl;
+    if (photoFile && (!photoUrl || !photoUrl.startsWith("http"))) {
+      setIsUploadingImage(true);
+      try {
+        const { url } = await uploadImage(photoFile, "profiles");
+        finalPhotoUrl = url;
+        setPhotoUrl(url);
+      } catch {
+        toast.error("Failed to upload photo. You can try again later.");
+        setIsUploadingImage(false);
+        return; // Halt if upload fails to ensure we don't create profile without requested photo
+      }
+      setIsUploadingImage(false);
+    }
 
     createProfile.mutate({
       username,
-      fullName,
+      fullName: `${firstName.trim()} ${lastName.trim()}`,
       bio,
-      ...(photoUrl && photoUrl.startsWith("http") ? { photoUrl } : {}),
+      ...(finalPhotoUrl && finalPhotoUrl.startsWith("http")
+        ? { photoUrl: finalPhotoUrl }
+        : {}),
     });
   }
 
@@ -135,11 +157,13 @@ export default function CreateProfileForm() {
         {currentStep === 2 && (
           <CreateProfileInfo
             bio={bio}
-            fullName={fullName}
             onUpdateBio={(e) => setBio(e.target.value)}
-            onUpdateFullName={(e) => setFullName(e.target.value)}
+            firstName={firstName}
+            lastName={lastName}
+            onUpdateFirstName={(e) => setFirstName(e.target.value)}
+            onUpdateLastName={(e) => setLastName(e.target.value)}
             onUpdateStep={submitProfile}
-            isPending={createProfile.isPending}
+            isPending={createProfile.isPending || isUploadingImage}
             photoUrl={photoUrl}
             onPhotoUrl={setPhotoUrl}
             photoFile={photoFile}
@@ -150,10 +174,13 @@ export default function CreateProfileForm() {
         {currentStep === 3 && (
           <ProfileLinkSuccess
             username={username}
-            fullName={fullName}
+            firstName={firstName}
+            lastName={lastName}
             bio={bio}
             photoUrl={photoUrl || undefined}
-            onContinue={() => router.replace("/dashboard")}
+            onContinue={() =>
+              router.replace(`${ROUTES.dashboard.home}?new=true`)
+            }
           />
         )}
       </form>

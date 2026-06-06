@@ -1,8 +1,9 @@
 import { Button } from "@/components/ui/button";
-import { ChevronDown, Trash2, Upload } from "lucide-react";
+import { ChevronDown, Trash2 } from "lucide-react";
 import Image from "next/image";
-import { useRef, useState } from "react";
+import { useState } from "react";
 import type { SavedLink } from "./LinkSidebar";
+import { isValidUrl } from "./builder.utils";
 
 const presetIcons = [
   {
@@ -115,59 +116,82 @@ export default function SectionOption({
     editingLink?.iconId ?? null
   );
   const [isIconMenuOpen, setIsIconMenuOpen] = useState(false);
-  const [uploadedImage, setUploadedImage] = useState<string | null>(
-    editingLink?.imageSrc ?? null
-  );
-  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const [titleError, setTitleError] = useState("");
+  const [urlError, setUrlError] = useState("");
+  const [iconError, setIconError] = useState("");
+  const [_validatingUrl, setValidatingUrl] = useState(false);
 
   const selectedIcon =
     presetIcons.find((icon) => icon.id === selectedIconId) ?? null;
 
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
+  const handleSaveLink = async () => {
+    let hasError = false;
 
-    const reader = new FileReader();
-    reader.onload = () => {
-      const result = reader.result;
-      if (typeof result === "string") {
-        setUploadedImage(result);
+    if (!title.trim()) {
+      setTitleError("Title is required.");
+      hasError = true;
+    } else {
+      setTitleError("");
+    }
+
+    if (!url.trim()) {
+      setUrlError("URL is required.");
+      hasError = true;
+    } else {
+      setUrlError("");
+    }
+
+    if (!selectedIconId) {
+      setIconError("An icon is required.");
+      hasError = true;
+    } else {
+      setIconError("");
+    }
+
+    if (hasError) return;
+
+    const trimmedUrl = url.trim();
+
+    try {
+      setValidatingUrl(true);
+      if (!isValidUrl(trimmedUrl, selectedIconId)) {
+        setUrlError("Please enter a valid link for the selected icon.");
+        return;
       }
-    };
-    reader.readAsDataURL(file);
-    event.target.value = "";
-  };
 
-  const handleSaveLink = () => {
-    if (!title.trim() || !url.trim()) return;
+      onSaveLink(
+        {
+          title: title.trim(),
+          url: trimmedUrl,
+          iconId: selectedIcon?.id ?? null,
+          iconLabel: selectedIcon?.label ?? null,
+          iconSrc: selectedIcon?.icon ?? null,
+          imageSrc: null,
+        },
+        editingLink?.id ?? null
+      );
 
-    onSaveLink(
-      {
-        title: title.trim(),
-        url: url.trim(),
-        iconId: selectedIcon?.id ?? null,
-        iconLabel: selectedIcon?.label ?? null,
-        iconSrc: selectedIcon?.icon ?? null,
-        imageSrc: uploadedImage,
-      },
-      editingLink?.id ?? null
-    );
-
-    setTitle("");
-    setUrl("");
-    setSelectedIconId(null);
-    setIsIconMenuOpen(false);
-    setUploadedImage(null);
-    returnTab();
+      setTitleError("");
+      setUrl("");
+      setUrlError("");
+      setSelectedIconId(null);
+      setIsIconMenuOpen(false);
+      setIconError("");
+      returnTab();
+    } catch {
+      setUrlError("Please enter a valid link for the selected icon.");
+    } finally {
+      setValidatingUrl(false);
+    }
   };
 
   return (
-    <div className="p-3">
+    <div>
       <form
         className="flex flex-col gap-4"
         onSubmit={(event) => {
           event.preventDefault();
-          handleSaveLink();
+          void handleSaveLink();
         }}
       >
         <span className="flex w-full flex-col gap-2">
@@ -179,10 +203,18 @@ export default function SectionOption({
             id="title"
             name="title"
             value={title}
-            onChange={(event) => setTitle(event.target.value)}
+            onChange={(event) => {
+              setTitle(event.target.value);
+              if (event.target.value.trim()) setTitleError("");
+            }}
             placeholder="Add title"
-            className="border-accent-foreground/30 focus:ring-accent rounded-md border p-2 focus:ring-2 focus:ring-offset-1 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+            className={`w-full rounded-[10px] border px-4 py-3 text-sm font-semibold text-[#050505] transition-colors outline-none ${
+              titleError
+                ? "border-red-500 focus:border-red-500"
+                : "border-border focus:border-brand-b"
+            }`}
           />
+          {titleError && <p className="text-xs text-red-500">{titleError}</p>}
         </span>
 
         <span className="flex w-full flex-col gap-2">
@@ -190,11 +222,15 @@ export default function SectionOption({
             Icon
           </label>
           <div className="relative">
-            <div className="border-tertiary-b flex overflow-hidden rounded-md border bg-white">
+            <div
+              className={`border-tertiary-b bg-background flex overflow-hidden rounded-md border ${
+                iconError && !selectedIconId ? "border-red-500" : ""
+              }`}
+            >
               <button
                 type="button"
                 onClick={() => setIsIconMenuOpen((current) => !current)}
-                className="flex min-w-0 flex-1 items-center gap-3 p-3 text-left transition-colors hover:bg-[#F8FAFC]"
+                className="hover:bg-secondary-bg flex min-w-0 flex-1 items-center gap-3 p-3 text-left transition-colors"
                 aria-haspopup="listbox"
                 aria-expanded={isIconMenuOpen}
               >
@@ -231,7 +267,7 @@ export default function SectionOption({
 
                   setIsIconMenuOpen((current) => !current);
                 }}
-                className="text-muted-foreground border-tertiary-b flex w-14 shrink-0 items-center justify-center border-l transition-colors hover:bg-[#F8FAFC]"
+                className="text-muted-foreground border-tertiary-b hover:bg-secondary-bg flex w-14 shrink-0 items-center justify-center border-l transition-colors"
                 aria-label={
                   selectedIcon ? "Remove selected icon" : "Open icon list"
                 }
@@ -246,8 +282,8 @@ export default function SectionOption({
             </div>
 
             {isIconMenuOpen && (
-              <div className="border-tertiary-b absolute z-20 mt-2 max-h-72 w-full overflow-auto rounded-xl border bg-white p-2 shadow-lg">
-                <div className="mb-2 px-2 text-xs font-semibold tracking-wide text-gray-500 uppercase">
+              <div className="border-tertiary-b bg-background absolute z-20 mt-2 max-h-72 w-full overflow-auto rounded-xl border p-2 shadow-lg">
+                <div className="text-secondary-text mb-2 px-2 text-xs font-semibold tracking-wide uppercase">
                   Preset icons
                 </div>
                 <div className="grid grid-cols-4 gap-2">
@@ -262,7 +298,7 @@ export default function SectionOption({
                           setSelectedIconId(icon.id);
                           setIsIconMenuOpen(false);
                         }}
-                        className={`flex flex-col items-center gap-2 rounded-md border p-2 transition-all ${isActive ? "border-brand-b bg-brand-light-subtle-bg" : "hover:border-tertiary-b border-transparent hover:bg-[#F8FAFC]"}`}
+                        className={`flex flex-col items-center gap-2 rounded-md border p-2 transition-all ${isActive ? "border-brand-b bg-brand-light-subtle-bg" : "hover:border-tertiary-b hover:bg-secondary-bg border-transparent"}`}
                         aria-label={icon.label}
                       >
                         <Image
@@ -292,69 +328,9 @@ export default function SectionOption({
               </div>
             )}
           </div>
-        </span>
-
-        <span className="flex w-full flex-col gap-2">
-          <label className="text-sm font-semibold">Image</label>
-          <div className="relative">
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/*"
-              onChange={handleFileChange}
-              className="hidden"
-              aria-hidden
-            />
-
-            <div className="border-tertiary-b flex overflow-hidden rounded-md border bg-white">
-              <button
-                type="button"
-                onClick={() => fileInputRef.current?.click()}
-                className="flex min-w-0 flex-1 items-center gap-3 p-3 text-left transition-colors hover:bg-[#F8FAFC]"
-              >
-                {uploadedImage ? (
-                  <Image
-                    src={uploadedImage}
-                    alt="Uploaded"
-                    width={40}
-                    height={40}
-                    unoptimized
-                    className="h-10 w-10 shrink-0 rounded-md object-cover"
-                  />
-                ) : (
-                  <Image
-                    src="/profilebuilder_home/icons/placeholder.svg"
-                    alt="placeholder"
-                    width={24}
-                    height={24}
-                    className="shrink-0"
-                  />
-                )}
-              </button>
-
-              <button
-                type="button"
-                onClick={() => {
-                  if (uploadedImage) {
-                    setUploadedImage(null);
-                    if (fileInputRef.current) {
-                      fileInputRef.current.value = "";
-                    }
-                    return;
-                  }
-
-                  fileInputRef.current?.click();
-                }}
-                className="text-muted-foreground border-tertiary-b flex w-14 shrink-0 items-center justify-center border-l transition-colors hover:bg-[#F8FAFC]"
-                aria-label={
-                  uploadedImage ? "Remove uploaded image" : "Upload image"
-                }
-                title={uploadedImage ? "Remove image" : "Upload image"}
-              >
-                {uploadedImage ? <Trash2 size={16} /> : <Upload size={16} />}
-              </button>
-            </div>
-          </div>
+          {iconError && (
+            <p className="mt-1 text-xs text-red-500">{iconError}</p>
+          )}
         </span>
 
         <span className="flex w-full flex-col gap-2">
@@ -366,10 +342,31 @@ export default function SectionOption({
             id="url"
             name="url"
             value={url}
-            onChange={(event) => setUrl(event.target.value)}
-            placeholder="Search site or paste link ...."
-            className="border-accent-foreground/30 focus:ring-accent rounded-md border p-2 focus:ring-2 focus:ring-offset-1 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+            onChange={(event) => {
+              const val = event.target.value;
+              setUrl(val);
+              if (urlError) {
+                if (!val.trim() || isValidUrl(val.trim(), selectedIconId)) {
+                  setUrlError("");
+                }
+              }
+            }}
+            onBlur={(event) => {
+              const val = event.target.value;
+              if (val.trim() && !isValidUrl(val.trim(), selectedIconId)) {
+                setUrlError("Please enter a valid link (e.g. yoursite.com)");
+              } else {
+                setUrlError("");
+              }
+            }}
+            placeholder="Paste link (e.g. yoursite.com)..."
+            className={`w-full rounded-[10px] border px-4 py-3 text-sm font-semibold text-[#050505] transition-colors outline-none disabled:cursor-not-allowed disabled:opacity-50 ${
+              urlError
+                ? "border-red-500 focus:border-red-500"
+                : "border-border focus:border-brand-b"
+            }`}
           />
+          {urlError && <p className="text-xs text-red-500">{urlError}</p>}
         </span>
 
         <p className="text-muted-foreground text-xs font-medium">

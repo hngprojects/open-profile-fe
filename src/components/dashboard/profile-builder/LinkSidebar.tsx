@@ -52,11 +52,8 @@ const LinkSidebar = ({
   const handleLinksChange = (
     updateFn: (currentLinks: SavedLink[]) => SavedLink[]
   ) => {
-    let nextLinks;
-    setLinks((currentLinks) => {
-      nextLinks = updateFn(currentLinks);
-      return nextLinks;
-    });
+    const nextLinks = updateFn(links);
+    setLinks(nextLinks);
     syncSection({ links: nextLinks });
   };
 
@@ -106,48 +103,32 @@ const LinkSidebar = ({
   };
 
   return (
-    <aside className="border-tertiary-b animate-in fade-in flex h-full w-72.5 shrink-0 flex-col border bg-white shadow-sm duration-200 select-none">
+    <aside className="border-tertiary-b animate-in fade-in bg-background flex h-full w-72.5 shrink-0 flex-col rounded-2xl border p-6 shadow-sm duration-200 select-none">
       {/* Back Button */}
-      <div className="p-6 pb-4">
-        <button
-          onClick={returnTab}
-          className="text-primary-text hover:text-link-hover-text inline-flex items-center gap-2 text-base font-semibold transition-all"
-        >
-          <ChevronLeft size={20} />
-          <span>Links</span>
-        </button>
-      </div>
-      {/* tabs */}
-
-      <div className="border-tertiary-b flex border-b">
-        <button
-          onClick={() => setSelectedTab("content")}
-          className={`relative flex-1 py-4 text-center text-sm font-bold transition-all ${
-            selectedTab === "content"
-              ? "text-primary-text"
-              : "text-tertiary-text hover:text-primary-text"
-          }`}
-        >
-          Content
-          {selectedTab === "content" && (
-            <span className="bg-primary-text absolute bottom-0 left-0 h-[2.5px] w-full transition-all" />
-          )}
-        </button>
-        <button
-          className={`relative flex-1 py-4 text-center text-sm font-bold transition-all ${
-            selectedTab === "section"
-              ? "text-primary-text"
-              : "text-tertiary-text hover:text-primary-text"
-          }`}
-        >
-          Section
-          {selectedTab === "section" && (
-            <span className="bg-primary-text absolute bottom-0 left-0 h-[2.5px] w-full transition-all" />
-          )}
-        </button>
+      <div className="border-tertiary-b border-b pb-4">
+        {selectedTab === "content" ? (
+          <button
+            onClick={returnTab}
+            className="text-primary-text hover:text-link-hover-text inline-flex items-center gap-2 text-base font-semibold transition-all"
+          >
+            <ChevronLeft size={20} />
+            <span>Links</span>
+          </button>
+        ) : (
+          <button
+            onClick={() => {
+              setEditingLink(null);
+              setSelectedTab("content");
+            }}
+            className="text-primary-text hover:text-link-hover-text inline-flex items-center gap-2 text-base font-semibold transition-all"
+          >
+            <ChevronLeft size={20} />
+            <span>Back to Links</span>
+          </button>
+        )}
       </div>
 
-      <div>
+      <div className="flex-1 overflow-y-auto py-6 pr-1">
         {selectedTab === "content" ? (
           <ContentOption
             title={sectionTitle}

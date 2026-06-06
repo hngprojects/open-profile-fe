@@ -1,0 +1,60 @@
+
+> nextjs-starter@0.1.0 build
+> next build
+
+▲ Next.js 16.2.6 (Turbopack)
+- Environments: .env.local
+- Experiments (use with caution):
+  ✓ authInterrupts
+
+  Creating an optimized production build ...
+✓ Compiled successfully in 23.7s
+  Running TypeScript ...
+  Finished TypeScript in 16.6s ...
+  Collecting page data using 3 workers ...
+  Generating static pages using 3 workers (0/31) ...
+  Generating static pages using 3 workers (7/31) 
+  Generating static pages using 3 workers (15/31) 
+  Generating static pages using 3 workers (23/31) 
+✓ Generating static pages using 3 workers (31/31) in 2.2s
+  Finalizing page optimization ...
+
+Route (app)
+┌ ○ /
+├ ○ /_not-found
+├ ƒ /[username]
+├ ƒ /api/health
+├ ƒ /api/search
+├ ƒ /api/v1/auth/google
+├ ƒ /api/v1/auth/google/callback
+├ ƒ /auth/callback
+├ ○ /contact
+├ ○ /create-profile
+├ ○ /dashboard
+├ ○ /dashboard/canvas
+├ ○ /dashboard/help
+├ ○ /dashboard/profile-builder
+├ ○ /dashboard/settings
+├ ○ /faq
+├ ○ /forgot-password
+├ ○ /forgot-password/reset
+├ ○ /forgot-password/success
+├ ○ /forgot-password/verify
+├ ○ /login
+├ ○ /onboarding
+├ ○ /privacy-policy
+├ ○ /robots.txt
+├ ○ /search
+├ ○ /signup
+├ ○ /sitemap.xml
+├ ○ /terms
+├ ○ /verify-email
+├ ○ /verify-email/success
+└ ○ /waitlist
+
+
+ƒ Proxy (Middleware)
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+

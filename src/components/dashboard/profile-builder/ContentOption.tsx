@@ -24,7 +24,7 @@ export default function ContentOption({
   canAddLink: boolean;
 }) {
   return (
-    <div className="p-3">
+    <div>
       <div className="flex flex-col gap-4">
         <span className="flex w-full flex-col gap-2">
           <label className="text-sm font-semibold" htmlFor="title">
@@ -62,7 +62,7 @@ export default function ContentOption({
           </span>
           <div className="flex flex-col gap-3">
             {links.length === 0 ? (
-              <div className="border-tertiary-b bg-primary-bg rounded-xl border p-4 text-sm text-gray-500">
+              <div className="border-tertiary-b bg-primary-bg rounded-xl border p-4 text-sm text-secondary-text">
                 No links saved yet. Create one in the Section tab.
               </div>
             ) : (
@@ -89,7 +89,7 @@ export default function ContentOption({
                         e.stopPropagation();
                         onDeleteLink(link.id);
                       }}
-                      className="hover:text-negative-text mr-10 flex shrink-0 justify-end p-1.5 text-gray-400 opacity-0 transition-all group-hover:opacity-100"
+                      className="hover:text-negative-text mr-10 flex shrink-0 justify-end p-1.5 text-secondary-text opacity-0 transition-all group-hover:opacity-100"
                       title="Delete link"
                       aria-label={`Delete link ${link.title}`}
                     >

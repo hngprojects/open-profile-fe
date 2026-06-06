@@ -11,7 +11,7 @@ const audiences = [
     checkIcon: "/target_assets/icon-check.svg",
     title: "Freelancers",
     description:
-      "Designers, developers, writers — win client trust faster with a verified profile that shows everything.",
+      "Designers, developers, writers win client trust faster with a verified profile that shows everything.",
     items: [
       "Showcase portfolio & credentials",
       "Get verified for credibility",
@@ -25,7 +25,7 @@ const audiences = [
     checkIcon: "/target_assets/icon-orange-check.svg",
     title: "Creators",
     description:
-      "Newsletter writers, podcasters, content makers — build a verified home base for your audience.",
+      "Newsletter writers, podcasters, content makers build a verified home base for your audience.",
     items: [
       "Unify your scattered presence",
       "Attract brand partnerships",
@@ -39,7 +39,7 @@ const audiences = [
     checkIcon: "/target_assets/icon-green-check.svg",
     title: "Indie Builders",
     description:
-      "Solo founders, makers, hackers — create a persistent identity that shows all your projects.",
+      "Solo founders, makers, hackers create a persistent identity that shows all your projects.",
     items: [
       "Showcase your full body of work",
       "Attract collaborators & investors",
@@ -93,7 +93,7 @@ export default function Target() {
               whileInView="show"
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: i * 0.15 }}
-              className="relative mx-auto flex h-full w-full max-w-[450px] flex-col space-y-4 overflow-hidden rounded-[16px] px-6 pt-20 pb-6"
+              className="relative mx-auto flex h-full w-full max-w-112.5 flex-col space-y-4 overflow-hidden rounded-[16px] px-6 pt-20 pb-6 transition-all duration-200 hover:shadow-lg"
             >
               {/* top icon */}
               <div className={`absolute top-0 ${right}`}>

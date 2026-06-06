@@ -1,6 +1,6 @@
 import React from "react";
 
-interface TableOfContentItem {
+export interface TableOfContentItem {
   heading: string;
   content:
     | string
@@ -10,12 +10,18 @@ interface TableOfContentItem {
         footer?: string;
       };
 }
+export const getTableOfContentId = (heading: string) => {
+  return heading
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "");
+};
 
-const tableOfContent: TableOfContentItem[] = [
+export const tableOfContent: TableOfContentItem[] = [
   {
     heading: "1. Introduction",
     content:
-      " At Open Profile, we value your privacy and are committed to protecting your personal information. This Privacy Policy explains how we collect, use, store, and protect information when you use our platform, website, and related services (“Open Profile” or the “Services”).Open Profile is designed to help freelancers, creators, and indie builders create a structured, searchable, and shareable public identity online. By using our Services, you agree to the collection and use of information in accordance with this Privacy Policy.",
+      "At Open Profile, we value your privacy and are committed to protecting your personal information. This Privacy Policy explains how we collect, use, store, and protect information when you use our platform, website, and related services (“Open Profile” or the “Services”). Open Profile is designed to help freelancers, creators, and indie builders create a structured, searchable, and shareable public identity online. By using our Services, you agree to the collection and use of information in accordance with this Privacy Policy.",
   },
   {
     heading: "2. About Open Profile",
@@ -43,16 +49,16 @@ const tableOfContent: TableOfContentItem[] = [
         "Profile photo",
         "Biography and public profile details",
         "Social media links",
-        "Messages or support requests ",
-        "Automatically Collected Information ",
-        "IP address ",
-        "Device and browser information ",
-        "Usage activity ",
-        "Cookies and analytics data ",
-        "Approximate location information ",
+        "Messages or support requests",
+        "Automatically Collected Information",
+        "IP address",
+        "Device and browser information",
+        "Usage activity",
+        "Cookies and analytics data",
+        "Approximate location information",
       ],
       footer:
-        " Public Profile Information Information you publish on your profile may be publicly visible and searchable.",
+        "Public Profile Information: Information you publish on your profile may be publicly visible and searchable.",
     },
   },
   {
@@ -64,20 +70,18 @@ const tableOfContent: TableOfContentItem[] = [
         "Display public profiles",
         "Improve platform performance",
         "Personalize user experience",
-        "To prevent fraud and ensure security",
+        "Prevent fraud and ensure security",
         "Communicate updates and support messages",
-        "Prevent fraud, abuse, and unauthorized access",
         "Comply with legal obligations",
-        "",
       ],
       footer:
-        "We process personal information in accordance with applicable privacy and data protection laws",
+        "We process personal information in accordance with applicable privacy and data protection laws.",
     },
   },
   {
     heading: "5. Public Profiles And Search Visibility",
     content: {
-      text: "Open Profile is designed as a public-facing platform By creating a public profile, you understand that:",
+      text: "Open Profile is designed as a public-facing platform. By creating a public profile, you understand that:",
       list: [
         "Your profile may appear in search results",
         "Search engines may index your content",
@@ -133,46 +137,62 @@ const tableOfContent: TableOfContentItem[] = [
       ],
     },
   },
-
   {
     heading: "9. Children’s Privacy",
-    content: {
-      text: "Open Profile is not intended for children under the age required by applicable law.We do not knowingly collect personal information from children without proper authorization or consent where required. If we discover that a child has provided personal data unlawfully, we may remove such information.",
-    },
+    content:
+      "Open Profile is not intended for children under the age required by applicable law. We do not knowingly collect personal information from children without proper authorization or consent where required. If we discover that a child has provided personal data unlawfully, we may remove such information.",
   },
   {
     heading: "10. Changes To This Privacy Policy And Contact Information",
-    content: {
-      text: "We may update this Privacy Policy periodically to reflect changes in our practices, technologies, or legal obligations.Continued use of the Service after updates constitutes acceptance of the revised Privacy Policy.For questions, requests, or privacy-related concerns, contact:Open Profile Privacy Team  Email: privacy@openprofile.com  Support: support@openprofile.com",
-    },
+    content:
+      "We may update this Privacy Policy periodically to reflect changes in our practices, technologies, or legal obligations. Continued use of the Service after updates constitutes acceptance of the revised Privacy Policy. For questions, requests, or privacy-related concerns, contact: Open Profile Privacy Team. Email: privacy@openprofile.com. Support: support@openprofile.com",
   },
 ];
+
 const PrivacyContent = () => {
   return (
     <div>
-      {tableOfContent.map((item, index) => (
-        <div className="mt-6 space-y-4" key={index}>
-          <h4 className="text-3xl font-bold">{item.heading}</h4>
+      {tableOfContent.map((item, index) => {
+        const id = getTableOfContentId(item.heading);
 
-          {typeof item.content === "string" ? (
-            <p>{item.content}</p>
-          ) : (
-            <>
-              {item.content.text && <p>{item.content.text}</p>}
+        return (
+          <div className="mt-6 scroll-mt-32 space-y-4" key={index} id={id}>
+            <h4 className="text-primary-text text-3xl font-bold">
+              {item.heading}
+            </h4>
 
-              {item.content.list && (
-                <ul className="list-disc space-y-2 pl-5">
-                  {item.content.list.map((listItem, i) => (
-                    <li key={i}>{listItem}</li>
-                  ))}
-                </ul>
-              )}
+            {typeof item.content === "string" ? (
+              <p className="text-secondary-text leading-relaxed">
+                {item.content}
+              </p>
+            ) : (
+              <>
+                {item.content.text && (
+                  <p className="text-secondary-text leading-relaxed">
+                    {item.content.text}
+                  </p>
+                )}
 
-              {item.content.footer && <p>{item.content.footer}</p>}
-            </>
-          )}
-        </div>
-      ))}
+                {item.content.list && (
+                  <ul className="text-secondary-text list-disc space-y-2 pl-5">
+                    {item.content.list.map((listItem, i) => (
+                      <li key={i} className="leading-relaxed">
+                        {listItem}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+
+                {item.content.footer && (
+                  <p className="text-secondary-text leading-relaxed">
+                    {item.content.footer}
+                  </p>
+                )}
+              </>
+            )}
+          </div>
+        );
+      })}
     </div>
   );
 };

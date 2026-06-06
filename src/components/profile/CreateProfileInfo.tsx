@@ -7,9 +7,11 @@ import Image from "next/image";
 
 type CreateProfileInfoProps = {
   bio: string;
-  fullName: string;
   onUpdateBio: (e: ChangeEvent<HTMLTextAreaElement>) => void;
-  onUpdateFullName: (e: ChangeEvent<HTMLInputElement>) => void;
+  firstName: string;
+  lastName: string;
+  onUpdateFirstName: (e: ChangeEvent<HTMLInputElement>) => void;
+  onUpdateLastName: (e: ChangeEvent<HTMLInputElement>) => void;
   onUpdateStep: () => void;
   isPending?: boolean;
   photoUrl?: string;
@@ -20,14 +22,16 @@ type CreateProfileInfoProps = {
 
 export default function CreateProfileInfo({
   bio,
-  fullName,
   onUpdateBio,
-  onUpdateFullName,
   onUpdateStep,
   isPending,
   photoUrl,
   onPhotoUrl,
   onPhotoFile,
+  firstName,
+  lastName,
+  onUpdateFirstName,
+  onUpdateLastName,
 }: CreateProfileInfoProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const currentBlobRef = useRef<string | null>(null);
@@ -42,6 +46,37 @@ export default function CreateProfileInfo({
   }, []);
 
   const displayPhoto = preview ?? photoUrl;
+
+  const [errors, setErrors] = useState<{
+    firstName?: string;
+    lastName?: string;
+    bio?: string;
+  }>({});
+
+  const characterCount = bio?.length || 0;
+
+  function handleContinue() {
+    const newErrors: { firstName?: string; lastName?: string; bio?: string } =
+      {};
+    if (!firstName.trim()) {
+      newErrors.firstName = "First name is required.";
+    }
+    if (!lastName.trim()) {
+      newErrors.lastName = "Last name is required.";
+    }
+    if (!bio.trim()) {
+      newErrors.bio = "Bio is required.";
+    } else if (characterCount > 300) {
+      newErrors.bio = "Maximum 300 characters allowed.";
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
+    setErrors({});
+    onUpdateStep();
+  }
 
   function handleFile(e: ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -70,7 +105,7 @@ export default function CreateProfileInfo({
           <h1 className="text-primary text-3xl font-bold">
             Tell us about yourself
           </h1>
-          <p className="my-2 text-[#454545]">
+          <p className="text-secondary-text my-2">
             This is what people will see when they search you
           </p>
         </div>
@@ -112,36 +147,88 @@ export default function CreateProfileInfo({
         </div>
 
         <div className="mt-16 flex flex-col gap-1.5">
-          <div className="mt-4">
-            <label className="mb-1 inline-block font-bold text-[#454545]">
-              Full Name
-            </label>
-            <Input
-              value={fullName}
-              onChange={onUpdateFullName}
-              placeholder="John Doe"
-              className="border-2 border-[#ededed] bg-white shadow-none"
-            />
+          <div className="flex w-full flex-col items-center gap-4 md:flex-row">
+            <span className="flex-1">
+              <label className="text-secondary-text mb-1 inline-block font-bold">
+                <span className="text-danger-text">*</span> First Name
+              </label>
+              <Input
+                value={firstName}
+                onChange={(e) => {
+                  onUpdateFirstName(e);
+                  if (errors.firstName)
+                    setErrors({ ...errors, firstName: undefined });
+                }}
+                placeholder="Enter your first name"
+                className={`border-2 bg-white shadow-none ${errors.firstName ? "border-danger-text focus-visible:ring-danger-text" : "border-active-bg"}`}
+              />
+              {errors.firstName && (
+                <p className="text-danger-text mt-1 text-sm">
+                  {errors.firstName}
+                </p>
+              )}
+            </span>
+            <span className="flex-1">
+              <label className="text-secondary-text mb-1 inline-block font-bold">
+                <span className="text-danger-text">*</span> Last Name
+              </label>
+              <Input
+                value={lastName}
+                onChange={(e) => {
+                  onUpdateLastName(e);
+                  if (errors.lastName)
+                    setErrors({ ...errors, lastName: undefined });
+                }}
+                placeholder="Enter your last name"
+                className={`border-2 bg-white shadow-none ${errors.lastName ? "border-danger-text focus-visible:ring-danger-text" : "border-active-bg"}`}
+              />
+              {errors.lastName && (
+                <p className="text-danger-text mt-1 text-sm">
+                  {errors.lastName}
+                </p>
+              )}
+            </span>
           </div>
 
           <div className="mt-4">
-            <label className="mb-1 inline-block font-bold text-[#454545]">
-              Bio
+            <label className="text-secondary-text mb-1 inline-block font-bold">
+              <span className="text-danger-text">*</span> Bio
             </label>
             <textarea
-              className="w-full resize-none rounded-lg border-2 border-[#ededed] bg-white p-3"
+              className={`w-full resize-none rounded-lg border-2 bg-white p-3 focus:outline-none ${errors.bio ? "focus:ring-danger-text border-danger-text focus:ring-1" : "border-active-bg"}`}
               value={bio}
-              onChange={onUpdateBio}
+              onChange={(e) => {
+                onUpdateBio(e);
+                if (errors.bio) setErrors({ ...errors, bio: undefined });
+              }}
               rows={5}
               placeholder="Product designer & side project builder based in lagos"
             />
+            <div className="mt-1 flex items-center justify-between">
+              <span
+                className={`text-xs ${characterCount > 300 ? "text-danger-text font-medium" : "text-tertiary-text"}`}
+              >
+                {characterCount <= 300
+                  ? `${characterCount} / 300 characters`
+                  : `-${characterCount - 300} characters`}
+              </span>
+              {errors.bio && (
+                <span className="text-danger-text text-sm">{errors.bio}</span>
+              )}
+            </div>
           </div>
 
           <Button
             type="button"
-            disabled={isPending || !fullName.trim()}
-            className="mt-4 h-13 w-full rounded-[10px] bg-[#087583] text-[16px] font-medium shadow-none transition-colors"
-            onClick={onUpdateStep}
+            disabled={
+              isPending ||
+              !firstName.trim() ||
+              !lastName.trim() ||
+              !bio.trim() ||
+              characterCount > 300
+            }
+            className="bg-brand mt-4 h-13 w-full rounded-[10px] text-base shadow-none transition-colors"
+            onClick={handleContinue}
           >
             {isPending ? "Please wait…" : "Continue"}
           </Button>

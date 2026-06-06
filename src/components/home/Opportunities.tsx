@@ -76,7 +76,7 @@ export function Opportunities() {
               fill
               className="object-cover transition-transform duration-700 group-hover:scale-105"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+            <div className="absolute inset-0 bg-linear-to-t from-black/70 via-black/20 to-transparent" />
 
             <h3 className="absolute bottom-8 left-8 text-[24px] font-bold tracking-tight text-white">
               -Monitor your audience
@@ -95,7 +95,7 @@ export function Opportunities() {
             Make your profile searchable so people can find you when it matters.
           </p>
         </div>
-        <Button className="h-12 rounded-[12px] bg-[#8850EE] px-10 text-[15px] font-bold text-white shadow-sm hover:bg-[#8850EE]">
+        <Button className="bg-purple-brand hover:bg-purple-brand-hover h-12 rounded-[12px] px-10 text-[15px] font-bold text-white shadow-sm">
           Get started
         </Button>
       </div>

@@ -4,8 +4,8 @@ const STEP_CLASSES =
 export default function ProgressBar({ currentStep }: { currentStep: number }) {
   function findActiveTab(step: number) {
     return currentStep === step
-      ? "h-16 w-16 border-[#C3E2E5] bg-[#DBEFF2] text-link-hover-text text-[28px]"
-      : "h-10 w-10 border-[#A2A2A2] bg-[#fefefe] text-[#A2A2A2] text-[24px]";
+      ? "h-16 w-16 border-brand-subtle-b bg-brand-progress-bg text-link-hover-text text-[28px]"
+      : "h-10 w-10 border-disabled-text bg-span-text text-disabled-text text-[24px]";
   }
 
   if (currentStep === 3) return null;

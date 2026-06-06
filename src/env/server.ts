@@ -7,6 +7,7 @@ export const env = createEnv({
       .enum(["development", "test", "production"])
       .default("development"),
     API_BASE_URL: z.url().default("https://api.staging.open-profile.hng14.com"),
+    COOKIE_DOMAIN: z.string().optional(),
   },
   experimental__runtimeEnv: {},
   skipValidation: !!process.env.SKIP_ENV_VALIDATION,

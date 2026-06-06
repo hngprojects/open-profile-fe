@@ -11,6 +11,7 @@ export type SearchResult = {
   avatar?: string;
   profileImage?: string;
   profilePicture?: string;
+  photoUrl?: string;
   slug?: string;
 };
 
@@ -21,15 +22,19 @@ export type SearchResponse = {
 
 export function searchProfiles({
   q,
+  page = 1,
+  limit = 10,
   signal,
 }: {
   q: string;
+  page?: number;
+  limit?: number;
   signal?: AbortSignal;
 }) {
   return callApi<SearchResponse>({
     url: "/search",
     method: "GET",
-    params: { q },
+    params: { q, page, limit },
     signal,
   });
 }

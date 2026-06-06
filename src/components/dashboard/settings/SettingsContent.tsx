@@ -7,6 +7,7 @@ import { LogOut } from "lucide-react";
 import { logout } from "@/app/actions/auth";
 import { useQuery } from "@tanstack/react-query";
 import { dashboardProfileOption } from "@/api/profile/profile.options";
+import { ROUTES } from "@/constants/routes";
 
 const accountSettings = [
   {
@@ -14,19 +15,19 @@ const accountSettings = [
     description:
       "Edit your photo, name, username, bio, and contact information.",
     action: "Edit profile",
-    href: "/dashboard/profile-builder",
+    href: ROUTES.comingSoon,
   },
   {
     title: "Email Address",
     description: "Manage the email connected to your account.",
     action: "Update email",
-    href: "/dashboard/settings/email",
+    href: ROUTES.comingSoon,
   },
   {
     title: "Password & Security",
     description: "Change your password and keep your account secure.",
     action: "Update password",
-    href: "/dashboard/settings/security",
+    href: ROUTES.comingSoon,
   },
 ];
 
@@ -35,13 +36,13 @@ const profilePreferences = [
     title: "Profile Preview Settings",
     description: "Adjust how your profile appears before publishing.",
     action: "Preview profile",
-    href: "/dashboard/profile-builder",
+    href: ROUTES.comingSoon,
   },
   {
     title: "Personal Customization",
     description: "Customize your profile appearance, theme, and layout.",
     action: "Customize profile",
-    href: "/dashboard/profile-builder",
+    href: ROUTES.comingSoon,
   },
 ];
 
@@ -228,7 +229,7 @@ export default function SettingsContent() {
             </div>
 
             <Link
-              href="/dashboard/settings/billing"
+              href={ROUTES.comingSoon}
               className="mx-auto mt-3 flex h-11 w-full items-center justify-center rounded-[8px] bg-[#087583] font-semibold text-white md:max-w-[260px]"
             >
               Manage billing

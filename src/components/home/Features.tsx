@@ -4,11 +4,14 @@ import React from "react";
 import { motion } from "motion/react";
 import Image from "next/image";
 import Link from "next/link";
+import { useQuery } from "@tanstack/react-query";
+import { getCurrentUserOption } from "@/api/auth/auth.options";
+import { ROUTES } from "@/constants/routes";
+import { useAuthCookie } from "@/hooks/useAuthCookie";
 
 const features = [
   {
     id: 1,
-    iconBg: "bg-green-100",
     icon: "/features/User.svg",
     title: "Be found by your name",
     description:
@@ -16,7 +19,6 @@ const features = [
   },
   {
     id: 2,
-    iconBg: "bg-pink-100",
     icon: "/features/Badge.svg",
     title: "Build trust faster",
     description:
@@ -24,7 +26,6 @@ const features = [
   },
   {
     id: 3,
-    iconBg: "bg-yellow-100",
     icon: "/features/Share.svg",
     title: "Make every share count",
     description:
@@ -32,7 +33,6 @@ const features = [
   },
   {
     id: 4,
-    iconBg: "bg-purple-100",
     icon: "/features/Message.svg",
     title: "Dedicated support",
     description:
@@ -75,7 +75,7 @@ function FeatureCard({
         {feature.title}
       </h3>
 
-      <p className="text-sm leading-7 text-teal-100/70">
+      <p className="text-brand-subtle-text text-sm leading-7 opacity-80">
         {feature.description}
       </p>
     </motion.div>
@@ -83,10 +83,16 @@ function FeatureCard({
 }
 
 export function Features() {
+  const hasAuthCookie = useAuthCookie();
+  const { data: user } = useQuery({
+    ...getCurrentUserOption(),
+    enabled: hasAuthCookie,
+    throwOnError: false,
+  });
+
   return (
     <section
-      className="relative w-full overflow-hidden py-16 md:py-24"
-      style={{ backgroundColor: "#0d3d3a" }}
+      className="bg-brand-dark-bg relative w-full overflow-hidden py-16 md:py-24"
       aria-labelledby="features-heading"
     >
       <motion.div
@@ -94,9 +100,9 @@ export function Features() {
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, amount: 0.2 }}
         transition={{ duration: 0.6 }}
-        className="mx-auto mb-16 flex max-w-7xl flex-col items-center gap-4 px-4 text-center md:px-8"
+        className="mx-auto mb-10 flex max-w-7xl flex-col items-center gap-4 px-4 text-center md:px-8"
       >
-        <span className="mx-auto flex h-7.5 w-fit items-center gap-1 rounded-[24px] bg-[#F2FDFE] pr-5.5 pl-3.5">
+        <span className="bg-brand-light-subtle-bg mx-auto flex h-7.5 w-fit items-center gap-1 rounded-[24px] pr-5.5 pl-3.5">
           <Image
             src="/target_assets/icon-flash.svg"
             alt=""
@@ -110,7 +116,7 @@ export function Features() {
 
         <h2
           id="features-heading"
-          className="text-3xl leading-tight font-extrabold tracking-tight text-white sm:text-4xl md:text-5xl"
+          className="text-[32px] leading-tight font-semibold tracking-tight text-white md:text-[40px]"
         >
           One link, clear Proof, faster opportunities
         </h2>
@@ -136,11 +142,11 @@ export function Features() {
         className="mx-auto mt-12 flex max-w-7xl justify-center px-4 md:mt-20 md:px-8"
       >
         <Link
-          href="/signup"
-          className="w-full cursor-pointer rounded-lg bg-white px-6 py-3.5 text-sm font-semibold text-teal-700 transition-all duration-200 hover:scale-105 hover:bg-teal-50 active:scale-95 sm:w-auto sm:px-8"
+          href={user ? ROUTES.dashboard.home : "/signup"}
+          className="text-brand hover:bg-brand-light-subtle-bg mx-auto inline-flex w-fit cursor-pointer items-center justify-center rounded-lg bg-white px-6 py-3.5 text-center text-sm font-semibold whitespace-nowrap transition-all duration-200 hover:scale-105 active:scale-95 sm:px-8"
           style={{ fontFamily: "'Inter', sans-serif" }}
         >
-          Create Your Profile Now
+          {user ? "Go to Dashboard" : "Create Your Profile Now"}
         </Link>
       </motion.div>
     </section>

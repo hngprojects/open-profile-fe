@@ -1,7 +1,4 @@
-"use client";
-
-import { ReactNode, useState } from "react";
-import DashboardSidebar from "./DashboardSidebar";
+import { ReactNode } from "react";
 import DashboardTopbar from "./DashboardTopbar";
 
 type DashboardLayoutProps = {
@@ -9,21 +6,12 @@ type DashboardLayoutProps = {
 };
 
 export default function DashboardLayout({ children }: DashboardLayoutProps) {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-
   return (
     <div className="min-h-screen bg-[#FAFAFA]">
-      <DashboardTopbar onOpenSidebar={() => setSidebarOpen(true)} />
-
-      <div className="flex">
-        <DashboardSidebar
-          isOpen={sidebarOpen}
-          onClose={() => setSidebarOpen(false)}
-        />
-        <main className="min-w-0 flex-1 overflow-x-hidden p-6 md:px-8 md:py-10 lg:pr-10 lg:pl-10">
-          {children}
-        </main>
-      </div>
+      <DashboardTopbar />
+      <main className="min-w-0 flex-1 overflow-x-hidden px-4 py-5 sm:px-5 md:px-6 md:py-8 lg:px-8">
+        {children}
+      </main>
     </div>
   );
 }

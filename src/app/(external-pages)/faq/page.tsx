@@ -1,6 +1,5 @@
 "use client";
 
-import { Navbar } from "@/components/layout/Navbar";
 import {
   Accordion,
   AccordionContent,
@@ -11,7 +10,6 @@ import { motion, Variants } from "motion/react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import Footer from "@/components/layout/Footer";
 
 export default function FaqPage() {
   const faqData = [
@@ -20,21 +18,21 @@ export default function FaqPage() {
       answer:
         "Yes! Creating your profile and getting verified is completely free. There are no hidden fees or credit card requirements.",
     },
-    {
-      question: "How does verification work ?",
-      answer:
-        "Yes! Creating your profile and getting verified is completely free. There are no hidden fees or credit card requirements.",
-    },
+    // {
+    //   question: "How does verification work ?",
+    //   answer:
+    //     "Yes! Creating your profile and getting verified is completely free. There are no hidden fees or credit card requirements.",
+    // },
     {
       question: "Can people find me if I don't share my profile link ?",
       answer:
         "Yes! Creating your profile and getting verified is completely free. There are no hidden fees or credit card requirements.",
     },
-    {
-      question: "What happens when someone invites me ?",
-      answer:
-        "Yes! Creating your profile and getting verified is completely free. There are no hidden fees or credit card requirements.",
-    },
+    // {
+    //   question: "What happens when someone invites me ?",
+    //   answer:
+    //     "Yes! Creating your profile and getting verified is completely free. There are no hidden fees or credit card requirements.",
+    // },
     {
       question: "How do I share my profile",
       answer:
@@ -106,8 +104,6 @@ export default function FaqPage() {
 
   return (
     <div>
-      <Navbar />
-
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -151,7 +147,7 @@ export default function FaqPage() {
         </Accordion>
       </motion.div>
 
-      <section className="mt-[153px] px-4 lg:mt-0 lg:border-t lg:border-b-[#FEFEFE] lg:pt-12.75">
+      <section className="mt-[153px] px-4 pb-10 lg:mt-0 lg:border-t lg:border-b lg:pt-12.75">
         <div className="mx-auto max-w-7xl">
           <div className="bg-brand relative mx-auto flex w-full max-w-6xl items-center justify-between overflow-hidden rounded-[8px] px-4 py-10 md:rounded-[32px] lg:px-16 lg:py-18">
             <div className="relative z-10 max-w-105 space-y-6">
@@ -179,10 +175,6 @@ export default function FaqPage() {
             </div>
           </div>
         </div>
-      </section>
-
-      <section className="mt-[111px]">
-        <Footer />
       </section>
     </div>
   );

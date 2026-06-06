@@ -18,7 +18,6 @@ export type LoginResponse = {
 export type SignupRequest = {
   email: string;
   password: string;
-  fullName: string;
 };
 
 export type SignupResponse = {

@@ -5,6 +5,10 @@ import Image from "next/image";
 import Link from "next/link";
 import { UserIcon } from "../icons/UserIcon";
 import { QuestionIcon } from "../icons/QuestionIcon";
+import { useQuery } from "@tanstack/react-query";
+import { getCurrentUserOption } from "@/api/auth/auth.options";
+import { ROUTES } from "@/constants/routes";
+import { useAuthCookie } from "@/hooks/useAuthCookie";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 24 },
@@ -91,6 +95,13 @@ const lines = [
 ];
 
 export default function Impression() {
+  const hasAuthCookie = useAuthCookie();
+  const { data: user } = useQuery({
+    ...getCurrentUserOption(),
+    enabled: hasAuthCookie,
+    throwOnError: false,
+  });
+
   return (
     <div className="font-afacad text-primary grid w-full grid-cols-1 items-center gap-10 lg:grid-cols-2 xl:gap-20">
       {/* left visual */}
@@ -274,10 +285,10 @@ export default function Impression() {
           whileTap={{ scale: 0.97 }}
         >
           <Link
-            href="/signup"
+            href={user ? ROUTES.dashboard.home : "/signup"}
             className="bg-brand flex h-12 cursor-pointer items-center justify-center rounded-[8px] px-4 font-medium text-[#FEFEFE]"
           >
-            Create Your Profile Now
+            {user ? "Go to Dashboard" : "Create Your Profile Now"}
           </Link>
         </motion.div>
       </motion.div>

@@ -4,7 +4,7 @@ import { cookies } from "next/headers";
 
 export const getCurrentSession = cache(async () => {
   const store = await cookies();
-  return store.get("_at");
+  return store.get("accessToken") || store.get("_at");
 });
 
 export const verifySession = cache(async () => {

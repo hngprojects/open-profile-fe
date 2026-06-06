@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import Image from "next/image";
 import { ChevronLeft, Trash2, Smile } from "lucide-react";
 import type { Section } from "./types";
+import { isValidUrl } from "./builder.utils";
 
 interface CtaSidebarProps {
   returnTab: () => void;
@@ -73,6 +74,10 @@ export default function CtaSidebar({
     section?.buttonText || "Start a Conversation"
   );
   const [buttonUrl, setButtonUrl] = useState(section?.url || "");
+  const [urlError, setUrlError] = useState("");
+  const [titleError, setTitleError] = useState("");
+  const [subtitleError, setSubtitleError] = useState("");
+  const [btnTextError, setBtnTextError] = useState("");
   const [selectedIconId, setSelectedIconId] = useState<string | null>(
     section?.iconId || "chat"
   );
@@ -100,12 +105,22 @@ export default function CtaSidebar({
 
   const handleTitleChange = (val: string) => {
     setSectionTitle(val);
-    syncSection({ title: val });
+    if (!val.trim()) {
+      setTitleError("Title is required.");
+    } else {
+      setTitleError("");
+      syncSection({ title: val });
+    }
   };
 
   const handleSubtitleChange = (val: string) => {
     setSectionSubtitle(val);
-    syncSection({ subtitle: val });
+    if (!val.trim()) {
+      setSubtitleError("Subtitle is required.");
+    } else {
+      setSubtitleError("");
+      syncSection({ subtitle: val });
+    }
   };
 
   const handleLayoutChange = (lay: string) => {
@@ -115,12 +130,26 @@ export default function CtaSidebar({
 
   const handleButtonTextChange = (val: string) => {
     setButtonText(val);
-    syncSection({ buttonText: val });
+    if (!val.trim()) {
+      setBtnTextError("Button text is required.");
+    } else {
+      setBtnTextError("");
+      syncSection({ buttonText: val });
+    }
   };
 
   const handleButtonUrlChange = (val: string) => {
     setButtonUrl(val);
-    syncSection({ url: val });
+    if (!val.trim()) {
+      setUrlError("URL is required.");
+    } else if (isValidUrl(val.trim(), selectedIconId)) {
+      setUrlError("");
+      syncSection({ url: val });
+    } else {
+      setUrlError(
+        "Please enter a valid link, email, or phone number (e.g., +1234567890)"
+      );
+    }
   };
 
   const handleSelectIcon = (iconId: string, iconSrc: string, label: string) => {
@@ -138,9 +167,9 @@ export default function CtaSidebar({
   const currentIcon = PRESET_ICONS.find((i) => i.id === selectedIconId);
 
   return (
-    <aside className="border-tertiary-b animate-in fade-in flex h-full w-72.5 shrink-0 flex-col border bg-white shadow-sm duration-200 select-none">
+    <aside className="border-tertiary-b animate-in fade-in bg-background flex h-full w-72.5 shrink-0 flex-col rounded-2xl border p-6 shadow-sm duration-200 select-none">
       {/* Back Button */}
-      <div className="p-6 pb-4">
+      <div className="border-tertiary-b border-b pb-4">
         <button
           onClick={returnTab}
           className="text-primary-text hover:text-link-hover-text inline-flex items-center gap-2 text-base font-semibold transition-all"
@@ -150,78 +179,101 @@ export default function CtaSidebar({
         </button>
       </div>
 
-      {/* Tabs Layout */}
-      <div className="border-tertiary-b flex border-b">
-        <button
-          type="button"
-          className="text-primary-text relative flex-1 py-4 text-center text-sm font-bold"
-        >
-          Content
-          <span className="bg-primary-text absolute bottom-0 left-0 h-[2.5px] w-full" />
-        </button>
-      </div>
-
       {/* Sidebar Content */}
-      <div className="flex-1 overflow-y-auto p-4 pr-3.5">
+      <div className="flex-1 overflow-y-auto py-6 pr-1">
         <div className="flex flex-col gap-6">
-          {/* Layout Section */}
-          <div className="flex flex-col gap-2">
-            <label className="text-xs font-bold text-[#050505]">Layout</label>
-            <div className="grid grid-cols-3 gap-2">
-              {["1", "2", "3"].map((lay) => (
-                <button
-                  key={lay}
-                  type="button"
-                  onClick={() => handleLayoutChange(lay)}
-                  className={`group relative aspect-square overflow-hidden rounded-xl border transition-all duration-200 outline-none focus:outline-none ${
-                    layout === lay
-                      ? "border-[#E4E4E7] bg-[#F4F4F5]"
-                      : "border-[#EDEDED] bg-white hover:border-gray-300"
-                  }`}
-                >
-                  <Image
-                    src={`/profilebuilder_cta/${lay}.svg`}
-                    alt={`Layout ${lay}`}
-                    fill
-                    className="object-contain p-2"
-                  />
-                </button>
-              ))}
-            </div>
-          </div>
-
           {/* Title Section */}
           <div className="flex flex-col gap-2">
-            <label className="text-xs font-bold text-[#050505]">Title</label>
+            <label className="text-primary-text text-xs font-bold">
+              Title<span className="ml-1 text-red-500">*</span>
+            </label>
             <input
               type="text"
               value={sectionTitle}
               onChange={(e) => handleTitleChange(e.target.value)}
               placeholder="Let's build something"
-              className="focus:border-brand-b focus:ring-brand-b w-full rounded-[10px] border border-[#EDEDED] px-4 py-3 text-sm font-semibold text-[#050505] outline-none focus:ring-1"
+              className={`text-primary-text w-full rounded-[10px] border px-4 py-3 text-sm font-semibold transition-colors outline-none ${
+                titleError
+                  ? "border-red-500 focus:border-red-500"
+                  : "border-border focus:border-brand-b"
+              }`}
             />
+            {titleError && <p className="text-xs text-red-500">{titleError}</p>}
           </div>
 
           {/* Subtitle Section */}
           <div className="flex flex-col gap-2">
-            <label className="text-xs font-bold text-[#050505]">Subtitle</label>
+            <label className="text-primary-text text-xs font-bold">
+              Subtitle<span className="ml-1 text-red-500">*</span>
+            </label>
             <textarea
               value={sectionSubtitle}
               onChange={(e) => handleSubtitleChange(e.target.value)}
               maxLength={200}
               placeholder="I'm currently accepting new projects and consulting opportunities..."
               rows={4}
-              className="focus:border-brand-b focus:ring-brand-b w-full resize-none rounded-[10px] border border-[#EDEDED] px-4 py-3 text-sm text-[#050505] outline-none focus:ring-1"
+              className={`text-primary-text w-full resize-none rounded-[10px] border px-4 py-3 text-sm transition-colors outline-none ${
+                subtitleError
+                  ? "border-red-500 focus:border-red-500"
+                  : "border-border focus:border-brand-b"
+              }`}
             />
-            <p className="text-right text-[11px] text-[#A2A2A2]">
-              {sectionSubtitle.length}/200
-            </p>
+            <div className="flex items-center justify-between">
+              {subtitleError ? (
+                <p className="text-xs text-red-500">{subtitleError}</p>
+              ) : (
+                <span />
+              )}
+              <p className="text-tertiary-text text-right text-[11px]">
+                {sectionSubtitle.length}/200
+              </p>
+            </div>
+          </div>
+
+          {/* Button Section */}
+          <div className="flex flex-col gap-2">
+            <label className="text-primary-text text-xs font-bold">
+              Button<span className="ml-1 text-red-500">*</span>
+            </label>
+            <div
+              className={`flex flex-col overflow-hidden rounded-[10px] border ${
+                btnTextError || urlError
+                  ? "border-red-500"
+                  : "border-border bg-background"
+              }`}
+            >
+              <input
+                type="text"
+                value={buttonText}
+                onChange={(e) => handleButtonTextChange(e.target.value)}
+                placeholder="Start a Conversation"
+                className="border-border text-primary-text w-full border-b px-4 py-3 text-sm font-semibold outline-none focus:bg-gray-50/30"
+              />
+              <div className="bg-background relative flex items-center">
+                <input
+                  type="text"
+                  value={buttonUrl}
+                  onChange={(e) => handleButtonUrlChange(e.target.value)}
+                  placeholder="Paste link, email, or phone (e.g., +1234567890)..."
+                  className={`bg-background w-full px-4 py-3 pr-10 text-sm outline-none focus:bg-gray-50/30 ${
+                    urlError ? "text-red-500" : "text-secondary-text"
+                  }`}
+                />
+                <span className="text-tertiary-text absolute right-4 text-xs font-bold select-none">
+                  ...
+                </span>
+              </div>
+            </div>
+            {btnTextError && (
+              <p className="text-xs text-red-500">{btnTextError}</p>
+            )}
+            {urlError && <p className="text-xs text-red-500">{urlError}</p>}
           </div>
 
           {/* Icon Selector Section */}
           <div className="relative flex flex-col gap-2" ref={iconSelectorRef}>
-            <label className="text-xs font-bold text-[#050505]">Icon</label>
-            <div className="flex h-[50px] overflow-hidden rounded-[8px] border border-[#EDEDED] bg-white">
+            <label className="text-primary-text text-xs font-bold">Icon</label>
+            <div className="border-border bg-background flex h-[50px] overflow-hidden rounded-[8px] border">
               <button
                 type="button"
                 onClick={() => setIsIconSelectorOpen(!isIconSelectorOpen)}
@@ -237,11 +289,11 @@ export default function CtaSidebar({
                     />
                   </div>
                 ) : (
-                  <div className="flex h-6 w-6 items-center justify-center rounded-full bg-[#F4F4F5] text-gray-400">
+                  <div className="text-tertiary-text flex h-6 w-6 items-center justify-center rounded-full bg-[#F4F4F5]">
                     <Smile size={14} />
                   </div>
                 )}
-                <span className="truncate text-xs font-semibold text-gray-500">
+                <span className="text-secondary-text truncate text-xs font-semibold">
                   {currentIcon ? currentIcon.label : "Select Icon"}
                 </span>
               </button>
@@ -249,7 +301,7 @@ export default function CtaSidebar({
               <button
                 type="button"
                 onClick={handleClearIcon}
-                className="flex w-[50px] shrink-0 items-center justify-center border-l border-[#EDEDED] text-gray-400 transition-colors hover:bg-gray-50 hover:text-red-600"
+                className="border-border text-tertiary-text flex w-[50px] shrink-0 items-center justify-center border-l transition-colors hover:bg-gray-50 hover:text-red-600"
                 title="Remove Icon"
               >
                 <Trash2 size={16} />
@@ -258,8 +310,8 @@ export default function CtaSidebar({
 
             {/* Presets Grid Dropdown */}
             {isIconSelectorOpen && (
-              <div className="border-tertiary-b animate-in fade-in slide-in-from-bottom-2 absolute bottom-[55px] left-0 z-30 max-h-56 w-full overflow-y-auto rounded-xl border bg-white p-3.5 shadow-lg duration-150">
-                <p className="mb-2.5 text-left text-xs font-bold tracking-wider text-[#747474] uppercase">
+              <div className="border-tertiary-b animate-in fade-in slide-in-from-bottom-2 bg-background absolute bottom-[55px] left-0 z-30 max-h-56 w-full overflow-y-auto rounded-xl border p-3.5 shadow-lg duration-150">
+                <p className="text-secondary-text mb-2.5 text-left text-xs font-bold tracking-wider uppercase">
                   Select Presets
                 </p>
                 <div className="grid grid-cols-4 gap-2">
@@ -291,29 +343,31 @@ export default function CtaSidebar({
             )}
           </div>
 
-          {/* Button Section */}
+          {/* Layout Section */}
           <div className="flex flex-col gap-2">
-            <label className="text-xs font-bold text-[#050505]">Button</label>
-            <div className="flex flex-col overflow-hidden rounded-[10px] border border-[#EDEDED] bg-white">
-              <input
-                type="text"
-                value={buttonText}
-                onChange={(e) => handleButtonTextChange(e.target.value)}
-                placeholder="Start a Conversation"
-                className="w-full border-b border-[#EDEDED] px-4 py-3 text-sm font-semibold text-[#050505] outline-none focus:bg-gray-50/30"
-              />
-              <div className="relative flex items-center">
-                <input
-                  type="text"
-                  value={buttonUrl}
-                  onChange={(e) => handleButtonUrlChange(e.target.value)}
-                  placeholder="Search site or paste link"
-                  className="w-full px-4 py-3 pr-10 text-sm text-gray-600 outline-none focus:bg-gray-50/30"
-                />
-                <span className="absolute right-4 text-xs font-bold text-gray-400 select-none">
-                  ...
-                </span>
-              </div>
+            <label className="text-primary-text text-xs font-bold">
+              Layout
+            </label>
+            <div className="grid grid-cols-3 gap-2">
+              {["1", "2", "3"].map((lay) => (
+                <button
+                  key={lay}
+                  type="button"
+                  onClick={() => handleLayoutChange(lay)}
+                  className={`group relative aspect-square overflow-hidden rounded-xl border transition-all duration-200 outline-none focus:outline-none ${
+                    layout === lay
+                      ? "border-[#E4E4E7] bg-[#F4F4F5]"
+                      : "border-border bg-background hover:border-gray-300"
+                  }`}
+                >
+                  <Image
+                    src={`/profilebuilder_cta/${lay}.svg`}
+                    alt={`Layout ${lay}`}
+                    fill
+                    className="object-contain p-2"
+                  />
+                </button>
+              ))}
             </div>
           </div>
         </div>

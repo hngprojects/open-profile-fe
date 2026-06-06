@@ -3,6 +3,7 @@ export type SectionType = "bio" | "links" | "projects" | "experience";
 export interface SavedLink {
   id: string;
   title: string;
+  label?: string;
   url: string;
   iconId: string | null;
   iconLabel: string | null;
@@ -53,6 +54,7 @@ export interface Section {
   iconSrc?: string | null;
   buttonText?: string;
   url?: string;
+  ctaType?: "link" | "email" | "phone" | "whatsapp";
 }
 
 export interface ProfilePreview {

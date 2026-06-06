@@ -122,6 +122,10 @@ export async function logout() {
   }
   const { cookies } = await import("next/headers");
   const store = await cookies();
+  store.delete("accessToken");
+  store.delete("refreshToken");
+  store.delete("_at");
+  store.delete("_rt");
   store.delete("auth");
   redirect("/login");
 }

@@ -1,8 +1,21 @@
+"use client";
+
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { useQuery } from "@tanstack/react-query";
+import { getCurrentUserOption } from "@/api/auth/auth.options";
+import { ROUTES } from "@/constants/routes";
+import { useAuthCookie } from "@/hooks/useAuthCookie";
 
 export function CTA() {
+  const hasAuthCookie = useAuthCookie();
+  const { data: user } = useQuery({
+    ...getCurrentUserOption(),
+    enabled: hasAuthCookie,
+    throwOnError: false,
+  });
+
   return (
     <section className="bg-[#FAFAFA] px-4 py-24 md:px-8 md:py-26">
       <div className="mx-auto max-w-7xl">
@@ -22,8 +35,11 @@ export function CTA() {
                 variant="secondary"
                 size="lg"
                 className="rounded-[12px] p-6"
+                asChild
               >
-                <Link href="/signup"> Create Your Profile Now</Link>
+                <Link href={user ? ROUTES.dashboard.home : "/signup"}>
+                  {user ? "Go to Dashboard" : "Get started for free"}
+                </Link>
               </Button>
             </div>
           </div>

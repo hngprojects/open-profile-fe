@@ -24,6 +24,7 @@ export function getCurrentUser({ signal, token }: ApiOptions) {
     url: "/auth/me",
     method: "GET",
     signal,
+    silent: true,
     ...(token ? { headers: { Authorization: `Bearer ${token}` } } : {}),
   });
 }

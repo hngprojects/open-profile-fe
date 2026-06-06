@@ -3,10 +3,19 @@
 import { motion, AnimatePresence } from "motion/react";
 import { useState, useEffect } from "react";
 import Image from "next/image";
-import { CircleCheck } from "lucide-react";
+import Link from "next/link";
+import { CircleCheck, Loader2, AlertCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useQuery } from "@tanstack/react-query";
+import { toast } from "sonner";
+import { AxiosError } from "axios";
 
 import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { getBaseDisplayUrl } from "@/utils/profile";
+import { useDebounce } from "@/hooks/useDebounce";
+import { useOutsideClick } from "@/hooks/useOutsideClick";
+import { searchProfilesOption } from "@/api/search/search.options";
 
 const profiles = [
   {
@@ -43,8 +52,24 @@ const fadeUp = (delay = 0) => ({
 
 export function Hero() {
   const [query, setQuery] = useState("");
+  const debouncedQuery = useDebounce(query, 400);
+  const [inputFocused, setInputFocused] = useState(false);
   const [current, setCurrent] = useState(0);
   const router = useRouter();
+
+  const searchContainerRef = useOutsideClick(() => setInputFocused(false));
+
+  const {
+    data: searchData,
+    isFetching,
+    isError,
+    error,
+  } = useQuery({
+    ...searchProfilesOption(debouncedQuery, 1, 2),
+    enabled: debouncedQuery.trim().length >= 3,
+  });
+
+  const displayUrl = getBaseDisplayUrl();
 
   useEffect(() => {
     const id = setInterval(
@@ -54,33 +79,52 @@ export function Hero() {
     return () => clearInterval(id);
   }, []);
 
+  useEffect(() => {
+    if (isError && error) {
+      const axiosError = error as unknown as AxiosError;
+      const status = axiosError.response?.status;
+      if (status === 429) {
+        toast.error("Too many searches. Please slow down.");
+      } else if (status !== 400) {
+        toast.error("Search failed. Please check your connection.");
+      }
+    }
+  }, [isError, error]);
+
   const getProfile = (offset: number) =>
     profiles[(current + offset) % profiles.length];
 
   function handleSearch() {
     const username = query.trim();
-    if (!username) return;
-    router.push(`/${encodeURIComponent(username)}`);
+    if (username.length < 3) return;
+    router.push(`/search?q=${encodeURIComponent(username)}`);
   }
+
+  const showDropdown = inputFocused && debouncedQuery.trim().length >= 3;
+  const searchResults = isError ? [] : searchData?.results || [];
+  const isSearchPending = isFetching || query !== debouncedQuery;
+  const previewResults = searchResults.slice(0, 2);
+  const totalResults = searchData?.total || 0;
+  const remainingCount = Math.max(0, totalResults - 2);
 
   return (
     <section className="w-full overflow-hidden bg-white">
-      <div className="relative mx-auto flex max-w-[1440px] flex-col items-start gap-8 px-6 pt-[60px] pb-[40px] md:px-[125px] md:pt-[80px] lg:flex-row lg:items-center lg:gap-4">
+      <div className="max-w-9xl relative mx-auto flex flex-col items-start gap-8 px-6 pt-[60px] pb-[40px] md:px-12 md:pt-[80px] lg:flex-row lg:items-center lg:gap-4 lg:px-16 xl:px-[125px]">
         {/* ───────────────── LEFT COLUMN ───────────────── */}
-        <div className="z-10 flex w-full shrink-0 flex-col gap-4 lg:max-w-[500px]">
+        <div className="z-10 flex w-full shrink-0 flex-col gap-4 lg:max-w-[450px] xl:max-w-[500px]">
           {/* Heading */}
           <motion.h1
             {...fadeUp(0.05)}
-            className="text-[38px] leading-[1.12] font-semibold tracking-[-1px] text-[#050505] sm:text-[46px] md:text-[56px]"
+            className="text-primary-text text-[38px] leading-[1.12] font-semibold tracking-[-1px] sm:text-[46px] md:text-[56px]"
             style={{ fontFamily: "'Afacad', sans-serif" }}
           >
             Create{" "}
             <span className="relative mx-2 inline-block">
-              <span className="absolute -top-5 left-1/2 -translate-x-1/2 text-xl leading-none tracking-wider whitespace-nowrap text-[#087583]">
+              <span className="text-link-hover-text absolute -top-5 left-1/2 -translate-x-1/2 text-xl leading-none tracking-wider whitespace-nowrap">
                 \ | /
               </span>
               <span
-                className="text-[#087583] italic"
+                className="text-link-hover-text italic"
                 style={{ fontFamily: "'Dancing Script', cursive" }}
               >
                 One
@@ -92,7 +136,7 @@ export function Hero() {
           {/* Subtext */}
           <motion.p
             {...fadeUp(0.12)}
-            className="max-w-[538px] text-[16px] leading-[26px] font-normal text-[#050505] md:text-[18px]"
+            className="text-primary-text max-w-[538px] text-[16px] leading-[26px] font-normal md:text-[18px]"
             style={{ fontFamily: "'Afacad', sans-serif" }}
           >
             Turn your scattered online presence into one searchable profile that
@@ -102,38 +146,148 @@ export function Hero() {
           {/* Search */}
           <motion.div
             {...fadeUp(0.2)}
-            className="flex w-full max-w-[512px] flex-col items-stretch gap-[6.73px] sm:flex-row"
+            className="relative flex w-full max-w-[512px] flex-col items-stretch gap-1.75 sm:flex-row"
+            ref={searchContainerRef}
           >
-            <div className="flex h-[50px] flex-1 items-center rounded-[5.57px] border border-[#C9C9C9] bg-[#FAFAFA] px-[12px] focus-within:ring-2 focus-within:ring-[#087583]/40">
+            <div className="border-secondary-b bg-primary-bg focus-within:ring-brand-hover-bg/40 relative flex h-12 min-h-12 flex-1 items-center rounded-[5.57px] border px-3.5 focus-within:ring-2 lg:h-12.5 lg:min-h-12.5">
               <span
-                className="shrink-0 text-[16px] leading-[24px] text-[#454545] select-none"
+                className="text-label-text shrink-0 text-[16px] leading-6 select-none"
                 style={{ fontFamily: "'Afacad', sans-serif" }}
               >
-                open.profile/
+                {displayUrl}/
               </span>
               <input
                 type="text"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
+                onFocus={() => setInputFocused(true)}
                 onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-                placeholder="username"
-                className="min-w-0 flex-1 bg-transparent text-[16px] leading-[24px] text-[#454545] outline-none placeholder:text-[#C9C9C9]"
+                placeholder="Search by name or username..."
+                className="text-label-text placeholder:text-secondary-b h-full min-w-0 flex-1 bg-transparent pl-1 text-[16px] leading-6 outline-none disabled:opacity-50"
                 style={{ fontFamily: "'Afacad', sans-serif" }}
               />
+              {isFetching && debouncedQuery.trim().length >= 3 && (
+                <Loader2 className="ml-2 h-4 w-4 shrink-0 animate-spin text-[#666]" />
+              )}
             </div>
             <Button
               onClick={handleSearch}
-              className="h-[56px] w-full rounded-[8px] bg-[#087583] px-[16px] text-[16px] leading-[24px] whitespace-nowrap text-white transition-colors hover:bg-[#065E69] sm:h-[50px] sm:w-auto"
+              disabled={query.trim().length < 3}
+              className="bg-link-hover-text hover:bg-button-brand-bg h-12 w-full rounded-[8px] px-4 text-[16px] leading-6 whitespace-nowrap text-white transition-colors disabled:cursor-not-allowed disabled:bg-[#E5E5E5] disabled:text-[#A3A3A3] sm:w-auto lg:h-12.5"
               style={{ fontFamily: "'Afacad', sans-serif" }}
             >
               Search a Profile
             </Button>
+
+            {/* Dropdown */}
+            <AnimatePresence>
+              {showDropdown && (
+                <motion.div
+                  initial={{ opacity: 0, y: 4 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 4 }}
+                  transition={{ duration: 0.15 }}
+                  className="border-border absolute top-full left-0 z-50 mt-2 w-full overflow-hidden rounded-lg border bg-white shadow-lg"
+                >
+                  {isSearchPending && searchResults.length === 0 ? (
+                    <div
+                      className="text-secondary-text p-4 text-center text-sm"
+                      style={{ fontFamily: "'Afacad', sans-serif" }}
+                    >
+                      Searching...
+                    </div>
+                  ) : searchResults.length === 0 ? (
+                    <div
+                      className="text-secondary-text p-4 text-center text-sm"
+                      style={{ fontFamily: "'Afacad', sans-serif" }}
+                    >
+                      No profiles found for &quot;{debouncedQuery}&quot;.
+                    </div>
+                  ) : (
+                    <div className="flex flex-col">
+                      {previewResults.map((result) => (
+                        <Link
+                          key={result.id || result.username}
+                          href={`/${result.username}`}
+                          onClick={() => setInputFocused(false)}
+                          className="border-border/50 flex items-center gap-3 border-b p-3 transition-colors last:border-0 hover:bg-[#FAFAFA]"
+                        >
+                          <Avatar className="border-border h-10 w-10 border">
+                            <AvatarImage
+                              src={
+                                result.photoUrl ||
+                                result.profilePicture ||
+                                result.profileImage ||
+                                result.avatar ||
+                                ""
+                              }
+                            />
+                            <AvatarFallback className="bg-brand text-xs text-white">
+                              {(
+                                result.fullName ||
+                                result.name ||
+                                result.username ||
+                                "?"
+                              )
+                                .charAt(0)
+                                .toUpperCase()}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div className="flex flex-col overflow-hidden">
+                            <span
+                              className="text-primary-text truncate text-[15px] font-semibold"
+                              style={{ fontFamily: "'Afacad', sans-serif" }}
+                            >
+                              {result.fullName ||
+                                result.name ||
+                                result.username}
+                            </span>
+                            <span
+                              className="text-secondary-text truncate text-[13px]"
+                              style={{ fontFamily: "'Afacad', sans-serif" }}
+                            >
+                              @{result.username}
+                            </span>
+                          </div>
+                        </Link>
+                      ))}
+                      <Link
+                        href={`/search?q=${encodeURIComponent(debouncedQuery)}`}
+                        onClick={() => setInputFocused(false)}
+                        className="border-border border-t bg-[#FEFEFE] p-3 text-center text-[14px] font-medium text-[#087583] transition-colors hover:bg-[#FAFAFA]"
+                        style={{ fontFamily: "'Afacad', sans-serif" }}
+                      >
+                        {remainingCount > 0
+                          ? `${remainingCount} more results, see more...`
+                          : "See all results"}
+                      </Link>
+                    </div>
+                  )}
+                </motion.div>
+              )}
+            </AnimatePresence>
           </motion.div>
+
+          {/* Character Hint */}
+          <AnimatePresence>
+            {query.trim().length > 0 && query.trim().length < 3 && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                exit={{ opacity: 0, height: 0 }}
+                className="mt-1 ml-1 flex items-center gap-1.5 overflow-hidden text-[13px] text-[#FF3158]"
+                style={{ fontFamily: "'Afacad', sans-serif" }}
+              >
+                <AlertCircle size={14} />
+                <span>Please enter at least 3 characters to search</span>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           {/* Social proof */}
           <motion.div
             {...fadeUp(0.28)}
-            className="flex flex-row items-center gap-3"
+            className="mt-4 flex flex-row items-center gap-3"
           >
             <div
               className="relative shrink-0"
@@ -161,7 +315,7 @@ export function Hero() {
               ))}
             </div>
             <p
-              className="text-[14px] leading-[24px] font-normal text-[#454545] md:text-[16px]"
+              className="text-secondary-text text-[14px] leading-[24px] font-normal md:text-[16px]"
               style={{ fontFamily: "'Afacad', sans-serif" }}
             >
               Join over Creators and freelancers that trusts us all over the
@@ -171,7 +325,7 @@ export function Hero() {
         </div>
 
         {/* ───────────────── RIGHT COLUMN — desktop only ───────────────── */}
-        <div className="relative -ml-[10px] hidden w-full flex-1 overflow-visible lg:block">
+        <div className="relative hidden w-full flex-1 overflow-visible lg:block">
           {/* LEFT fade */}
           <div
             style={{
@@ -239,7 +393,7 @@ export function Hero() {
                       <div className="absolute bottom-0 left-0 z-10 flex flex-col gap-1 p-[15px_18px]">
                         <div className="flex items-center gap-1">
                           <span
-                            className="text-[20px] leading-[26px] font-bold text-[#FEFEFE]"
+                            className="text-span-text text-[20px] leading-[26px] font-bold"
                             style={{ fontFamily: "'Afacad', sans-serif" }}
                           >
                             {p.name}
@@ -250,7 +404,7 @@ export function Hero() {
                           />
                         </div>
                         <span
-                          className="text-[14px] leading-[24px] font-medium text-[#E6E6E6]"
+                          className="text-span-text-100 text-[14px] leading-[24px] font-medium"
                           style={{ fontFamily: "'Afacad', sans-serif" }}
                         >
                           {p.role}
@@ -336,7 +490,7 @@ export function Hero() {
                   <div className="absolute bottom-0 left-0 z-10 flex flex-col gap-0.5 p-[10px_12px]">
                     <div className="flex items-center gap-1">
                       <span
-                        className="text-[13px] leading-[18px] font-bold whitespace-nowrap text-[#FEFEFE]"
+                        className="text-span-text text-[13px] leading-[18px] font-bold whitespace-nowrap"
                         style={{ fontFamily: "'Afacad', sans-serif" }}
                       >
                         {p.name}
@@ -347,7 +501,7 @@ export function Hero() {
                       />
                     </div>
                     <span
-                      className="text-[11px] leading-[16px] font-medium whitespace-nowrap text-[#E6E6E6]"
+                      className="text-span-text-100 text-[11px] leading-[16px] font-medium whitespace-nowrap"
                       style={{ fontFamily: "'Afacad', sans-serif" }}
                     >
                       {p.role}
@@ -361,7 +515,7 @@ export function Hero() {
       </div>
 
       <div className="hidden px-[125px] pt-[40px] pb-[80px] lg:block">
-        <div className="border-t border-[#C9C9C9]" />
+        <div className="border-secondary-b border-t" />
       </div>
     </section>
   );

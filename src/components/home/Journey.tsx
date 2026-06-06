@@ -11,9 +11,11 @@ interface Step {
   description: string;
   icon: string;
   ghostIcon: string;
+  mobileGhostClassName: string;
+  mobileIconBoxSize: number;
+  mobileIconImageSize: number;
 }
-
-const steps: Step[] = [
+export const steps: Step[] = [
   {
     id: "create-profile",
     ghostIcon: "/journey/step01.svg",
@@ -22,6 +24,9 @@ const steps: Step[] = [
     description:
       "Sign up in seconds with email, Google, or LinkedIn. Craft your bio, and link your work.",
     icon: "/journey/User.svg",
+    mobileGhostClassName: "top-[-12px] right-[24px]",
+    mobileIconBoxSize: 45,
+    mobileIconImageSize: 45,
   },
   {
     id: "verify-identity",
@@ -31,6 +36,9 @@ const steps: Step[] = [
     description:
       "Verify your email and connect social accounts. Build credibility with verification badges.",
     icon: "/journey/check.svg",
+    mobileGhostClassName: "top-[-18px] right-[4px]",
+    mobileIconBoxSize: 75,
+    mobileIconImageSize: 75,
   },
   {
     id: "share-link",
@@ -40,6 +48,9 @@ const steps: Step[] = [
     description:
       "Share your link, appear in searches, and grow your network. Not found? Invite them to join.",
     icon: "/journey/cross.svg",
+    mobileGhostClassName: "top-[-18px] right-[24px]",
+    mobileIconBoxSize: 75,
+    mobileIconImageSize: 75,
   },
 ];
 
@@ -50,26 +61,38 @@ function MobileStepCard({ step }: { step: Step }) {
       <Image
         src={step.ghostIcon}
         alt="step number"
-        width={140}
-        height={140}
-        className="absolute top-[-30px] right-0 opacity-100"
+        width={96}
+        height={96}
+        className={`absolute opacity-100 ${step.mobileGhostClassName}`}
       />
 
       {/* Icon */}
-      <div className="relative z-20 mb-8">
+      <div
+        className="relative z-20 mb-4 flex items-center justify-center"
+        style={{
+          width: `${step.mobileIconBoxSize}px`,
+          height: `${step.mobileIconBoxSize}px`,
+        }}
+      >
         <Image
+          key={step.id}
           src={step.icon}
           alt="step icon"
-          width={78}
-          height={78}
-          className="object-contain"
+          width={step.mobileIconImageSize}
+          height={step.mobileIconImageSize}
+          unoptimized
+          style={{
+            maxWidth: "none",
+          }}
+          className="shrink-0 object-contain"
         />
       </div>
-
       {/* Content */}
       <div className="relative z-10">
         <h3
-          className={`font-semisemibold pb-4 text-[32px] leading-[1.1] tracking-[-0.03em] ${step.titleColor === "teal" ? "text-[#00798C]" : "text-[#202020]"} `}
+          className={`pb-4 text-[32px] leading-[1.1] font-semibold tracking-[-0.03em] ${
+            step.titleColor === "teal" ? "text-brand-text" : "text-primary-text"
+          }`}
         >
           {step.title}
         </h3>
@@ -84,7 +107,7 @@ function MobileStepCard({ step }: { step: Step }) {
 
 export function Journey() {
   return (
-    <section className="relative w-full overflow-hidden bg-[#FBFBFB] py-20">
+    <section className="relative w-full overflow-hidden bg-[#FBFBFB] py-28">
       <div className="mx-auto max-w-7xl px-4 md:px-8">
         {/* HEADER */}
         <motion.div
@@ -114,14 +137,14 @@ export function Journey() {
         </motion.div>
 
         {/* DESKTOP */}
-        <div className="relative hidden lg:block lg:h-[480px] xl:h-[560px]">
+        <div className="relative mx-auto hidden h-[580px] w-full max-w-[1180px] lg:block">
           {/* Wave */}
-          <div className="absolute left-1/2 w-[85%] max-w-[1150px] min-w-[900px] -translate-x-1/2 lg:top-[160px] xl:top-[180px] xl:w-[75%]">
+          <div className="absolute top-[220px] left-1/2 z-0 w-[820px] -translate-x-1/2">
             <Image
               src="/journey/Wave.svg"
               alt="wave"
-              width={1150}
-              height={280}
+              width={820}
+              height={260}
               className="h-auto w-full"
               priority
             />
@@ -133,19 +156,17 @@ export function Journey() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5 }}
-            className="absolute lg:top-[150px] lg:left-[2%] lg:w-[260px] xl:top-[170px] xl:left-[4%] xl:w-[320px]"
+            className="absolute top-[190px] left-[80px] w-[300px]"
           >
-            {/* Ghost */}
             <Image
               src={steps[0].ghostIcon}
               alt="step number"
-              width={180}
-              height={180}
-              className="absolute opacity-100 lg:-top-[80px] lg:left-[-10px] xl:-top-[95px] xl:left-[0px]"
+              width={160}
+              height={160}
+              className="absolute top-[-105px] left-[130px] z-0 opacity-100"
             />
 
-            {/* Icon */}
-            <div className="absolute z-20 lg:top-[125px] lg:-left-[20px] xl:top-[130px] xl:left-[95px]">
+            <div className="absolute top-[150px] left-[100px] z-20 -translate-x-1/2 -translate-y-1/2">
               <Image
                 src={steps[0].icon}
                 alt="step icon"
@@ -154,13 +175,12 @@ export function Journey() {
               />
             </div>
 
-            {/* Content */}
-            <div className="relative z-10">
-              <h3 className="leading-[1.05] font-semibold tracking-[-0.04em] text-[#00798C] lg:text-[28px] xl:text-[32px]">
+            <div className="relative z-10 -translate-x-12">
+              <h3 className="text-[28px] leading-[1.05] font-semibold tracking-[-0.04em] text-[#00798C]">
                 {steps[0].title}
               </h3>
 
-              <p className="mt-5 leading-[1.8] text-[#6B7280] lg:text-[15px] xl:text-[18px] xl:leading-[2]">
+              <p className="mt-4 max-w-[275px] text-[16px] leading-[1.75] text-[#6B7280]">
                 {steps[0].description}
               </p>
             </div>
@@ -172,34 +192,31 @@ export function Journey() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
-            className="absolute left-1/2 -translate-x-1/2 lg:top-[340px] lg:w-[300px] xl:top-[380px] xl:w-[360px]"
+            className="absolute top-[325px] left-[500px] w-[310px]"
           >
-            {/* Ghost */}
             <Image
               src={steps[1].ghostIcon}
               alt="step number"
-              width={180}
-              height={180}
-              className="absolute lg:-top-[90px] lg:left-[220px] xl:-top-[100px] xl:left-[250px]"
+              width={160}
+              height={160}
+              className="absolute top-[-40px] left-[130px] z-0 opacity-100"
             />
 
-            {/* Icon */}
-            <div className="absolute z-20 lg:-top-[210px] lg:left-[220px] xl:-top-[230px] xl:left-[250px]">
+            <div className="absolute top-[-130px] left-[145px] z-20">
               <Image
                 src={steps[1].icon}
                 alt="step icon"
-                width={78}
-                height={78}
+                width={64}
+                height={64}
               />
             </div>
 
-            {/* Content */}
-            <div className="relative z-10 pt-[10px] lg:pl-[20px] xl:pl-[40px]">
-              <h3 className="text-label-text leading-[1.05] font-semibold tracking-[-0.04em] lg:text-[28px] xl:text-[32px]">
+            <div className="relative z-10 -translate-x-8 pt-15">
+              <h3 className="text-label-text text-[28px] leading-[1.05] font-semibold tracking-[-0.04em]">
                 {steps[1].title}
               </h3>
 
-              <p className="mt-5 leading-[1.8] text-[#6B7280] lg:text-[15px] xl:text-[18px] xl:leading-[2]">
+              <p className="mt-4 max-w-[285px] text-[16px] leading-[1.75] text-[#6B7280]">
                 {steps[1].description}
               </p>
             </div>
@@ -211,34 +228,31 @@ export function Journey() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.7 }}
-            className="absolute lg:top-[310px] lg:right-[1%] lg:w-[280px] xl:top-[350px] xl:right-[3%] xl:w-[360px]"
+            className="absolute top-[315px] left-[815px] w-[340px]"
           >
-            {/* Ghost */}
             <Image
               src={steps[2].ghostIcon}
               alt="step number"
-              width={180}
-              height={180}
-              className="absolute lg:-top-[40px] lg:-right-[30px] xl:-top-[50px] xl:-right-[40px]"
+              width={160}
+              height={160}
+              className="absolute top-[-35px] left-[250px] z-0 opacity-100"
             />
 
-            {/* Icon */}
-            <div className="absolute z-20 lg:-top-[110px] lg:-right-[20px] xl:-top-[105px] xl:right-[90px]">
+            <div className="absolute top-[-60px] left-[165px] z-20">
               <Image
                 src={steps[2].icon}
                 alt="step icon"
-                width={78}
-                height={78}
+                width={64}
+                height={64}
               />
             </div>
 
-            {/* Content */}
-            <div className="relative z-10 lg:pt-[30px] xl:pt-[40px]">
-              <h3 className="leading-[1.05] font-semibold tracking-[-0.04em] text-[#202020] lg:text-[28px] xl:text-[32px]">
+            <div className="relative z-10 pt-18">
+              <h3 className="max-w-[335px] text-[28px] leading-[1.12] font-semibold tracking-[-0.04em] text-[#202020]">
                 {steps[2].title}
               </h3>
 
-              <p className="mt-5 leading-[1.8] text-[#6B7280] lg:text-[15px] xl:text-[18px] xl:leading-[2]">
+              <p className="mt-4 max-w-[320px] text-[16px] leading-[1.75] text-[#6B7280]">
                 {steps[2].description}
               </p>
             </div>

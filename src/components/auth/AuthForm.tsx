@@ -18,6 +18,8 @@ import {
   userQueryOptions,
 } from "@/api/auth/auth.options";
 import { isApiError } from "@/api/base";
+import { Checkbox } from "../ui/checkbox";
+import { ROUTES } from "@/constants/routes";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -31,11 +33,9 @@ export function AuthForm({ mode, googleAuthUrl }: Props) {
   const queryClient = useQueryClient();
   const searchParams = useSearchParams();
   const returnTo = searchParams.get("returnTo");
-
-  const [name, setName] = useState("");
+  const [agreed, setAgreed] = useState(false);
   const [email, setEmail] = useState(searchParams.get("email") ?? "");
   const [password, setPassword] = useState("");
-  const [nameError, setNameError] = useState("");
   const [emailError, setEmailError] = useState("");
   const [passwordError, setPasswordError] = useState("");
 
@@ -44,7 +44,6 @@ export function AuthForm({ mode, googleAuthUrl }: Props) {
   const loginMutation = useMutation({
     ...loginOption,
     onSuccess: async (data) => {
-      document.cookie = "auth=1; path=/; SameSite=Lax";
       await queryClient.resetQueries({ queryKey: userQueryOptions.queryKey });
       const onboardingComplete = data?.user?.onboardingComplete;
       const destination = onboardingComplete ? "/dashboard" : "/create-profile";
@@ -93,14 +92,6 @@ export function AuthForm({ mode, googleAuthUrl }: Props) {
     let hasError = false;
 
     if (isSignup) {
-      if (!name) {
-        setNameError("Full name is required");
-        hasError = true;
-      } else if (name.trim().split(/\s+/).length < 2) {
-        setNameError("Enter first and last name");
-        hasError = true;
-      }
-
       if (!email) {
         setEmailError("Email is required");
         hasError = true;
@@ -136,7 +127,10 @@ export function AuthForm({ mode, googleAuthUrl }: Props) {
     }
 
     if (isSignup) {
-      signupMutation.mutate({ fullName: name, email, password });
+      signupMutation.mutate({
+        email,
+        password,
+      });
     } else {
       loginMutation.mutate({ email, password });
     }
@@ -148,10 +142,10 @@ export function AuthForm({ mode, googleAuthUrl }: Props) {
   return (
     <AuthLayout>
       <div className="mb-1 text-center">
-        <h1 className="text-2xl font-bold text-[#050505]">
+        <h1 className="text-primary-text text-3xl font-bold">
           {isSignup ? "Join Openprofile" : "Welcome back"}
         </h1>
-        <p className="mt-1 text-sm text-gray-500">
+        <p className="mt-1 text-lg text-gray-500">
           {isSignup
             ? "Create a verified profile that tells the world exactly who you are"
             : "Sign in to your Openprofile account"}
@@ -159,40 +153,8 @@ export function AuthForm({ mode, googleAuthUrl }: Props) {
       </div>
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-        {isSignup && (
-          <div className="flex flex-col gap-1.5">
-            <label className="text-label-text text-sm font-medium">
-              Full Name
-            </label>
-            <Input
-              name="name"
-              placeholder="Enter your name"
-              required
-              autoComplete="name"
-              value={name}
-              onChange={(e) => {
-                setName(e.target.value);
-                if (nameError) setNameError("");
-              }}
-              onBlur={() =>
-                setNameError(
-                  !name
-                    ? "Full name is required"
-                    : name.trim().split(/\s+/).length < 2
-                      ? "Enter first and last name"
-                      : ""
-                )
-              }
-              className={`${inputClass} ${nameError ? "border-red-400" : ""}`}
-            />
-            {nameError && <p className="text-xs text-red-500">{nameError}</p>}
-          </div>
-        )}
-
         <div className="flex flex-col gap-1.5">
-          <label className="text-label-text text-sm font-medium">
-            Email Address
-          </label>
+          <label className="text-label-text font-medium">Email Address</label>
           <Input
             name="email"
             type="email"
@@ -242,17 +204,45 @@ export function AuthForm({ mode, googleAuthUrl }: Props) {
           <div className="-mt-2 flex justify-end">
             <Link
               href="/forgot-password"
-              className="text-link-hover-text text-sm font-medium hover:underline"
+              className="text-link-hover-text font-medium hover:underline"
             >
               Forgot password?
             </Link>
           </div>
         )}
-
+        {isSignup && (
+          <div className="flex items-start justify-center gap-3">
+            <Checkbox
+              id="toggle-checkbox"
+              checked={agreed}
+              onCheckedChange={(checked) => setAgreed(!!checked)}
+              className="h-5 w-5 cursor-pointer border-gray-500"
+            />
+            <label
+              htmlFor="toggle-checkbox"
+              className="text-label-text cursor-pointer text-left text-sm leading-tight"
+            >
+              By continuing, you agree to Openprofile&apos;s{" "}
+              <Link
+                href={ROUTES.public.privacy}
+                className="text-link-hover-text font-semibold hover:underline"
+              >
+                privacy policy
+              </Link>
+              , and{" "}
+              <Link
+                href={ROUTES.public.terms}
+                className="text-link-hover-text font-semibold hover:underline"
+              >
+                Terms and Conditions
+              </Link>
+            </label>
+          </div>
+        )}
         <Button
           type="submit"
-          disabled={pending || !email || !password}
-          className={`mt-1 h-[52px] w-full rounded-[10px] text-[16px] font-medium shadow-none transition-colors ${
+          disabled={pending || !email || !password || (isSignup && !agreed)}
+          className={`mt-1 h-13 w-full rounded-[10px] text-base font-medium shadow-none transition-colors ${
             pending || !email || !password
               ? "border-button-b text-label-text border bg-white"
               : "bg-brand-hover-bg hover:bg-brand border-0 text-white"
@@ -262,30 +252,11 @@ export function AuthForm({ mode, googleAuthUrl }: Props) {
         </Button>
       </form>
 
-      {isSignup && (
-        <p className="text-label-text text-center text-xs">
-          By Continuing, you agree to Openprofile&apos;s{" "}
-          <Link
-            href="/privacy"
-            className="text-link-hover-text font-semibold hover:underline"
-          >
-            privacy policy
-          </Link>
-          , and{" "}
-          <Link
-            href="/terms"
-            className="text-link-hover-text font-semibold hover:underline"
-          >
-            Terms and Conditions
-          </Link>
-        </p>
-      )}
-
       <div className="text-label-text text-center text-xs">OR</div>
 
       <a
         href={googleAuthUrl}
-        className="border-input-b flex h-11 w-full items-center justify-center gap-3 rounded-lg border bg-[#FAFAFA] text-sm font-medium transition-colors hover:bg-[#f0f0f0]"
+        className="border-input-b hover:bg-hover-bg bg-primary-bg flex h-11 w-full items-center justify-center gap-3 rounded-lg border font-medium transition-colors"
       >
         <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true">
           <path
@@ -308,7 +279,7 @@ export function AuthForm({ mode, googleAuthUrl }: Props) {
         {isSignup ? "Sign up with Google" : "Continue with Google"}
       </a>
 
-      <p className="text-center text-sm text-gray-500">
+      <p className="text-center text-gray-500">
         {isSignup ? (
           <>
             Already have an account?{" "}

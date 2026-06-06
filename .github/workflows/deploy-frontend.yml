@@ -64,6 +64,15 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Clean stale source files on server
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          password: ${{ secrets.EC2_PASSWORD }}
+          script: |
+            rm -rf /var/www/openprofile-fe/staging/src
+
       - name: Copy files to server
         uses: appleboy/scp-action@v0.1.7
         with:
@@ -114,6 +123,15 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: Clean stale source files on server
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          password: ${{ secrets.EC2_PASSWORD }}
+          script: |
+            rm -rf /var/www/openprofile-fe/production/src
 
       - name: Copy files to server
         uses: appleboy/scp-action@v0.1.7
