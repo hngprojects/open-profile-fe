@@ -119,7 +119,7 @@ export default function DashboardHome() {
     }
   }, [profile]);
 
-  const hasTemplate = !!(profile?.templateType || appearance?.template);
+  const hasTemplate = !!profile?.templateType;
   const isFirstTimeUser = !!(profile && !hasTemplate && !hasSeenModal);
   const initialModalTemplate = (
     activeTemplate === "default"

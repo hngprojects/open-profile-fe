@@ -166,7 +166,7 @@ export default function CreatorDashboardView({
       {/* CREATOR HEADER (Bio Section) */}
       {(!bioSection || bioSection.visible !== false) && (
         <div
-          className={`relative mt-6 flex w-full flex-col items-center gap-4 rounded-2xl p-6 text-center ${bioSection?.font ? getFontClass(bioSection.font) : ""}`}
+          className={`relative mx-auto mt-6 flex w-full max-w-4xl flex-col items-center gap-4 rounded-2xl p-6 text-center ${bioSection?.font ? getFontClass(bioSection.font) : ""}`}
           style={getSectionStyle(bioSection)}
         >
           <div className="border-border bg-secondary-bg relative h-24 w-24 shrink-0 overflow-hidden rounded-full border">
@@ -278,7 +278,7 @@ export default function CreatorDashboardView({
       )}
 
       <div
-        className="mt-12 w-full"
+        className="mt-6 w-full"
         style={{ paddingBottom: "var(--op-spacing, 4rem)" }}
       >
         {visibleSections.map((section) => {
@@ -300,7 +300,7 @@ export default function CreatorDashboardView({
             return (
               <div
                 key={section.id}
-                className={`relative flex w-full flex-col gap-6 ${section.font ? getFontClass(section.font) : ""}`}
+                className={`relative mx-auto flex w-full max-w-4xl flex-col gap-6 rounded-3xl ${section.font ? getFontClass(section.font) : ""}`}
                 style={(() => {
                   const { gap: _gap, ...rest } = getSectionStyle(section);
                   return rest;
@@ -338,7 +338,7 @@ export default function CreatorDashboardView({
 
                         const card = (
                           <div
-                            className={`group border-border bg-background hover:border-brand-hover-bg/30 flex rounded-[12px] border p-4 shadow-sm transition-shadow hover:shadow-md ${
+                            className={`group border-border bg-background hover:border-brand-hover-bg/30 flex h-full rounded-3xl border p-4 shadow-sm transition-shadow hover:shadow-md ${
                               layoutType === "1"
                                 ? "flex-col justify-between sm:flex-row sm:items-center"
                                 : layoutType === "3"
@@ -436,7 +436,7 @@ export default function CreatorDashboardView({
             return (
               <div
                 key={section.id}
-                className={`relative mx-auto flex w-full flex-col gap-4 ${section.font ? getFontClass(section.font) : ""}`}
+                className={`relative mx-auto flex w-full max-w-4xl flex-col gap-4 rounded-3xl ${section.font ? getFontClass(section.font) : ""}`}
                 style={(() => {
                   const { gap: _gap, ...rest } = getSectionStyle(section);
                   return rest;
@@ -476,7 +476,7 @@ export default function CreatorDashboardView({
             return (
               <div
                 key={section.id}
-                className={`border-border mx-auto max-w-2xl rounded-3xl border p-8 sm:p-10 ${section.font ? getFontClass(section.font) : ""}`}
+                className={`border-border mx-auto max-w-4xl rounded-3xl border p-8 sm:p-10 ${section.font ? getFontClass(section.font) : ""}`}
                 style={getSectionStyle(section)}
               >
                 <p className="text-secondary-text text-center text-[15px] leading-relaxed break-all whitespace-pre-wrap">
