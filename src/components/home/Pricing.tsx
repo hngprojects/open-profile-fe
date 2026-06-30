@@ -94,7 +94,7 @@ export function Pricing() {
         whileInView="visible"
         viewport={{ once: true, margin: "-100px" }}
         variants={containerVariants}
-        className="mx-auto flex max-w-7xl flex-col items-center px-4 md:px-8"
+        className="mx-auto flex w-full max-w-[1100px] flex-col items-center px-4 sm:px-6 lg:px-0"
       >
         <motion.h2
           variants={itemVariants}
@@ -102,6 +102,7 @@ export function Pricing() {
         >
           Choose the plan that fits your needs.
         </motion.h2>
+
         <motion.div
           variants={itemVariants}
           className="border-primary-foreground-b mb-10 inline-flex items-center rounded-2xl border bg-white text-center transition-all duration-300"
@@ -130,7 +131,7 @@ export function Pricing() {
 
         <motion.div
           variants={containerVariants}
-          className="grid w-full max-w-6xl grid-cols-1 gap-6 md:grid-cols-3"
+          className="grid w-full grid-cols-1 gap-6 md:grid-cols-3"
         >
           {plans.map((plan, index) => (
             <motion.div

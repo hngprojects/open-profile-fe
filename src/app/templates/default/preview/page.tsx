@@ -26,7 +26,7 @@ export default function DefaultTemplatePreviewPage() {
     source: "draft" as const,
     updatedAt: new Date().toISOString(),
     content: {
-      sectionOrder: ["bio", "links", "projects", "experience"],
+      sectionOrder: ["bio", "links", "projects", "cta"],
       bio: {
         visible: true,
         content: "I'm a designer and developer. I build things for the web.",
@@ -36,8 +36,16 @@ export default function DefaultTemplatePreviewPage() {
         sectionTitle: "Featured Links",
         items: [
           { id: "link-1", title: "Portfolio", url: "https://john.studio" },
-          { id: "link-2", title: "Twitter", url: "https://twitter.com/johnsmith" },
-          { id: "link-3", title: "GitHub", url: "https://github.com/johnsmith" },
+          {
+            id: "link-2",
+            title: "Twitter",
+            url: "https://twitter.com/johnsmith",
+          },
+          {
+            id: "link-3",
+            title: "GitHub",
+            url: "https://github.com/johnsmith",
+          },
         ],
       },
       projects: {
@@ -55,7 +63,8 @@ export default function DefaultTemplatePreviewPage() {
           {
             id: "proj-2",
             title: "Field - Mobile Journaling app",
-            description: "A calm journaling experience with a custom typography stack.",
+            description:
+              "A calm journaling experience with a custom typography stack.",
             buttonText: "View Project",
             url: "#",
             imageSrc: "/profile-preview/feature2.jpg",
@@ -67,7 +76,8 @@ export default function DefaultTemplatePreviewPage() {
         label: "Work with me",
         url: "mailto:hello@example.com",
         title: "Open to new projects.",
-        subtitle: "Have an idea or product you're building? I can help you design it the right way.",
+        subtitle:
+          "Have an idea or product you're building? I can help you design it the right way.",
       },
     },
   };

@@ -239,29 +239,16 @@ export function getSectionStyle(
   if (section.bgColor) {
     style.backgroundColor = section.bgColor;
     // Override Tailwind CSS variables for children
-    (style as any)["--op-bg-color"] = section.bgColor;
-    (style as any)["--primary-bg"] = section.bgColor;
-    (style as any)["--background"] = section.bgColor;
-  }
-
-  if ((section as any).iconColor) {
-    const iconColor = (section as any).iconColor;
-    (style as any)["--brand"] = iconColor;
-    (style as any)["--brand-text"] = iconColor;
-    (style as any)["--brand-bg"] = iconColor;
-    (style as any)["--brand-hover-bg"] = iconColor;
-    (style as any)["--button-brand-bg"] = iconColor;
-    (style as any)["--brand-b"] = iconColor;
-    (style as any)["--link-text"] = iconColor;
-    (style as any)["--link-hover-text"] = iconColor;
-    (style as any)["--op-accent-color"] = iconColor;
+    (style as Record<string, unknown>)["--op-bg-color"] = section.bgColor;
+    (style as Record<string, unknown>)["--primary-bg"] = section.bgColor;
+    (style as Record<string, unknown>)["--background"] = section.bgColor;
   }
 
   if (section.textColor) {
     style.color = section.textColor;
     // Override Tailwind CSS variables for children
-    (style as any)["--op-text-color"] = section.textColor;
-    (style as any)["--primary-text"] = section.textColor;
+    (style as Record<string, unknown>)["--op-text-color"] = section.textColor;
+    (style as Record<string, unknown>)["--primary-text"] = section.textColor;
   }
 
   return style;

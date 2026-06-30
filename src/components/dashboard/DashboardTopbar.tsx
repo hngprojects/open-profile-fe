@@ -18,6 +18,7 @@ import { dashboardProfileOption } from "@/api/profile/profile.options";
 import { getInitials } from "@/utils/avatar";
 import { getImageUrl } from "@/utils/profile";
 import type { PublishProfileResponse } from "@/api/profile/profile.type";
+import { useProfileBuilderPublishState } from "./profile-builder/profile-builder-publish-state";
 
 const navLinks = [
   { label: "Home", href: ROUTES.dashboard.home },
@@ -30,6 +31,13 @@ export default function DashboardTopbar() {
   const { data: user } = useQuery(userQueryOptions);
   const { data: profile } = useQuery(dashboardProfileOption());
   const queryClient = useQueryClient();
+  const {
+    hasUnpublishedChanges,
+    publishStatus,
+    setPublishStatus,
+    markProfilePublished,
+    runBeforePublish,
+  } = useProfileBuilderPublishState();
 
   const draftUpdatedAtRef = useRef<string | null>(null);
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -54,16 +62,24 @@ export default function DashboardTopbar() {
     void
   >({
     mutationKey: ["profile", "publish"],
-    mutationFn: publishProfile,
+    mutationFn: async () => {
+      await runBeforePublish();
+      return publishProfile();
+    },
+    onMutate() {
+      setPublishStatus("publishing");
+    },
     onSuccess() {
       draftUpdatedAtRef.current = null;
       queryClient.invalidateQueries({ queryKey: ["profile", "content"] });
       queryClient.invalidateQueries({ queryKey: ["profile", "draft-state"] });
       queryClient.invalidateQueries({ queryKey: ["profile", "dashboard"] });
       queryClient.invalidateQueries({ queryKey: ["profile", "appearance"] });
+      markProfilePublished();
       toast.success("Profile published successfully.");
     },
     onError(error: unknown) {
+      setPublishStatus("idle");
       toast.error(
         isApiError(error)
           ? error.message
@@ -87,6 +103,14 @@ export default function DashboardTopbar() {
   });
 
   const isLogoutPending = logoutMutation.isPending;
+  const publishButtonLabel =
+    isPublishing || publishStatus === "publishing"
+      ? "Publishing…"
+      : publishStatus === "published"
+        ? "Published"
+        : hasUnpublishedChanges
+          ? "Unpublished changes • Publish"
+          : "Publish";
 
   const handleCloseModal = () => {
     if (!isLogoutPending) setModalOpen(false);
@@ -156,7 +180,7 @@ export default function DashboardTopbar() {
                 disabled={isPublishing}
                 className="bg-brand-hover-bg hover:bg-brand-active-bg h-10 rounded-[10px] px-6 text-sm font-semibold text-white transition-all active:scale-95 disabled:opacity-60"
               >
-                {isPublishing ? "Publishing…" : "Publish"}
+                {publishButtonLabel}
               </Button>
             )}
 

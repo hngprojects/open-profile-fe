@@ -18,65 +18,36 @@ export default function FaqPage() {
       answer:
         "Yes! Creating your profile and getting verified is completely free. There are no hidden fees or credit card requirements.",
     },
-    // {
-    //   question: "How does verification work ?",
-    //   answer:
-    //     "Yes! Creating your profile and getting verified is completely free. There are no hidden fees or credit card requirements.",
-    // },
-    {
-      question: "Can people find me if I don't share my profile link ?",
-      answer:
-        "Yes! Creating your profile and getting verified is completely free. There are no hidden fees or credit card requirements.",
-    },
-    // {
-    //   question: "What happens when someone invites me ?",
-    //   answer:
-    //     "Yes! Creating your profile and getting verified is completely free. There are no hidden fees or credit card requirements.",
-    // },
+
     {
       question: "How do I share my profile",
       answer:
-        "Yes! Creating your profile and getting verified is completely free. There are no hidden fees or credit card requirements.",
+        "You can share your profile by copying your unique username link (e.g., openprofile.com/username) and adding it to your social media bios, email signature, resume, or portfolio.",
     },
     {
       question: "What types of information can I add to my profile?",
       answer:
-        "Yes! Creating your profile and getting verified is completely free. There are no hidden fees or credit card requirements.",
+        "You can customize your profile by adding your bio, professional title, location, profile picture, social media links (LinkedIn, GitHub, X, etc.), custom links to portfolios, projects, work history, and skills.",
     },
     {
       question: "How many links can I add?",
       answer:
-        "Yes! Creating your profile and getting verified is completely free. There are no hidden fees or credit card requirements.",
+        "There is no limit! You can add as many links and projects as you want to showcase your complete professional presence in one place.",
     },
     {
       question: "Can I change my profile picture anytime?",
       answer:
-        "Yes! Creating your profile and getting verified is completely free. There are no hidden fees or credit card requirements.",
+        "Yes, you can update your profile picture, bio, and other information at any time from your account settings or profile builder dashboard.",
     },
     {
       question: "Will my profile changes be visible instantly?",
       answer:
-        "Yes! Creating your profile and getting verified is completely free. There are no hidden fees or credit card requirements.",
+        "Yes, any updates or changes you make on your profile builder are saved and reflected on your public profile instantly after publishing.",
     },
     {
       question: "What should I do if I forget my password?",
       answer:
-        "Yes! Creating your profile and getting verified is completely free. There are no hidden fees or credit card requirements.",
-    },
-    {
-      question: "How do I delete my profile if I no longer need it?",
-      answer:
-        "Yes! Creating your profile and getting verified is completely free. There are no hidden fees or credit card requirements.",
-    },
-    {
-      question: "Is it possible to recover a deleted profile?",
-      answer:
-        "Yes! Creating your profile and getting verified is completely free. There are no hidden fees or credit card requirements.",
-    },
-    {
-      question: "How can I update my email address on my account?",
-      answer:
-        "Yes! Creating your profile and getting verified is completely free. There are no hidden fees or credit card requirements.",
+        "If you forget your password, simply click the 'Forgot Password' link on the login page. We will send you an email with instructions and a link to securely reset it.",
     },
   ];
 

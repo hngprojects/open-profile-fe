@@ -16,7 +16,6 @@ export default function ExternalPagesLayout({
     "/faq",
     "/privacy-policy",
     "/terms",
-    "/waitlist",
     "/how-it-works",
   ];
 

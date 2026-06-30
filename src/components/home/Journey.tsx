@@ -15,6 +15,7 @@ interface Step {
   mobileIconBoxSize: number;
   mobileIconImageSize: number;
 }
+
 export const steps: Step[] = [
   {
     id: "create-profile",
@@ -57,7 +58,6 @@ export const steps: Step[] = [
 function MobileStepCard({ step }: { step: Step }) {
   return (
     <div className="relative mx-auto w-full max-w-[340px]">
-      {/* Ghost Number */}
       <Image
         src={step.ghostIcon}
         alt="step number"
@@ -66,7 +66,6 @@ function MobileStepCard({ step }: { step: Step }) {
         className={`absolute opacity-100 ${step.mobileGhostClassName}`}
       />
 
-      {/* Icon */}
       <div
         className="relative z-20 mb-4 flex items-center justify-center"
         style={{
@@ -87,7 +86,7 @@ function MobileStepCard({ step }: { step: Step }) {
           className="shrink-0 object-contain"
         />
       </div>
-      {/* Content */}
+
       <div className="relative z-10">
         <h3
           className={`pb-4 text-[32px] leading-[1.1] font-semibold tracking-[-0.03em] ${
@@ -108,8 +107,7 @@ function MobileStepCard({ step }: { step: Step }) {
 export function Journey() {
   return (
     <section className="relative w-full overflow-hidden bg-[#FBFBFB] py-28">
-      <div className="mx-auto max-w-7xl px-4 md:px-8">
-        {/* HEADER */}
+      <div className="mx-auto w-full max-w-[1100px] px-4 sm:px-6 lg:px-0">
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -117,7 +115,6 @@ export function Journey() {
           transition={{ duration: 0.6 }}
           className="flex flex-col items-center text-center"
         >
-          {/* Badge */}
           <div className="mx-auto flex h-7.5 w-fit items-center gap-1 rounded-[24px] bg-[#F2FDFE] pr-5.5 pl-3.5">
             <Image
               src="/target_assets/icon-flash.svg"
@@ -125,20 +122,17 @@ export function Journey() {
               width={16}
               height={16}
             />
-            <p className="text-brand font-sfpror text-[12px] leading-4 font-medium">
+            <p className="text-brand text-[12px] leading-4 font-medium">
               Your Journey Starts Here
             </p>
           </div>
 
-          {/* Heading */}
           <h2 className="mt-6 max-w-[900px] text-[34px] leading-[1.05] font-semibold tracking-[-0.04em] text-[#111111] md:text-[40px]">
             Create the profile people should find first
           </h2>
         </motion.div>
 
-        {/* DESKTOP */}
-        <div className="relative mx-auto hidden h-[580px] w-full max-w-[1180px] lg:block">
-          {/* Wave */}
+        <div className="relative mx-auto hidden h-[580px] w-full max-w-[1100px] lg:block">
           <div className="absolute top-[220px] left-1/2 z-0 w-[820px] -translate-x-1/2">
             <Image
               src="/journey/Wave.svg"
@@ -150,13 +144,12 @@ export function Journey() {
             />
           </div>
 
-          {/* STEP 1 */}
           <motion.div
             initial={{ opacity: 0, y: 40 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5 }}
-            className="absolute top-[190px] left-[80px] w-[300px]"
+            className="absolute top-[190px] left-[40px] w-[300px]"
           >
             <Image
               src={steps[0].ghostIcon}
@@ -186,13 +179,12 @@ export function Journey() {
             </div>
           </motion.div>
 
-          {/* STEP 2 */}
           <motion.div
             initial={{ opacity: 0, y: 40 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
-            className="absolute top-[325px] left-[500px] w-[310px]"
+            className="absolute top-[325px] left-[455px] w-[310px]"
           >
             <Image
               src={steps[1].ghostIcon}
@@ -222,20 +214,19 @@ export function Journey() {
             </div>
           </motion.div>
 
-          {/* STEP 3 */}
           <motion.div
             initial={{ opacity: 0, y: 40 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.7 }}
-            className="absolute top-[315px] left-[815px] w-[340px]"
+            className="absolute top-[315px] left-[760px] w-[340px]"
           >
             <Image
               src={steps[2].ghostIcon}
               alt="step number"
               width={160}
               height={160}
-              className="absolute top-[-35px] left-[250px] z-0 opacity-100"
+              className="absolute top-[-35px] left-[200px] z-0 opacity-100"
             />
 
             <div className="absolute top-[-60px] left-[165px] z-20">
@@ -259,7 +250,6 @@ export function Journey() {
           </motion.div>
         </div>
 
-        {/* MOBILE */}
         <div className="mt-20 flex flex-col gap-24 lg:hidden">
           {steps.map((step, index) => (
             <motion.div

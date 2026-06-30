@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -8,11 +8,10 @@ import {
   dashboardProfileOption,
   profileContentOption,
   draftStateOption,
-  upsertDraftOption,
   updateProfileAppearanceOption,
   profileAppearanceOption,
 } from "@/api/profile/profile.options";
-import { upsertDraft } from "@/api/profile/profile.service";
+import { updateProfile, upsertDraft } from "@/api/profile/profile.service";
 import LeftSidebar from "./LeftSidebar";
 import PreviewCanvas from "./PreviewCanvas";
 import RightPanel from "./RightPanel";
@@ -22,12 +21,14 @@ import { THEME_DEFAULTS } from "@/constants/theme";
 import type {
   ProfileAppearanceCornerStyle,
   ProfileAppearanceFont,
-  UpsertDraftResponse,
+  UpsertDraftRequest,
 } from "@/api/profile/profile.type";
 import { contentToSections, sectionsToContent } from "./builder.utils";
 import { isApiError } from "@/api/base";
+import { normalizeFullName, validateFullName } from "@/utils/nameValidation";
 import { ROUTES } from "@/constants/routes";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useProfileBuilderPublishState } from "./profile-builder-publish-state";
 import {
   Dialog,
   DialogContent,
@@ -41,8 +42,7 @@ const createSection = (type: string, customTitle?: string): Section | null => {
     bio: "bio",
     links: "links",
     projects: "projects",
-    experience: "experience",
-    cta: "experience",
+    cta: "cta",
   };
 
   const resolvedType = allowedTypes[type];
@@ -52,7 +52,6 @@ const createSection = (type: string, customTitle?: string): Section | null => {
     bio: "bio",
     links: "links",
     projects: "projects",
-    experience: "cta",
     cta: "cta",
   };
 
@@ -72,32 +71,28 @@ const createSection = (type: string, customTitle?: string): Section | null => {
     type: resolvedType,
     visible: true,
     subtitle:
-      resolvedType === "links"
-        ? ""
-        : resolvedType === "experience"
-          ? ""
-          : undefined,
+      resolvedType === "links" ? "" : resolvedType === "cta" ? "" : undefined,
     links: resolvedType === "links" ? [] : undefined,
     projects: resolvedType === "projects" ? [] : undefined,
-    layout: resolvedType === "experience" ? "1" : undefined,
-    buttonText:
-      resolvedType === "experience" ? "Start a Conversation" : undefined,
-    url: resolvedType === "experience" ? "" : undefined,
-    iconId: resolvedType === "experience" ? "chat" : undefined,
+    layout: resolvedType === "cta" ? "1" : undefined,
+    buttonText: resolvedType === "cta" ? "Start a Conversation" : undefined,
+    url: resolvedType === "cta" ? "" : undefined,
+    iconId: resolvedType === "cta" ? "chat" : undefined,
     iconSrc:
-      resolvedType === "experience"
+      resolvedType === "cta"
         ? "/profilebuilder_home/icons/chat.svg"
         : undefined,
-    iconLabel: resolvedType === "experience" ? "Chat" : undefined,
+    iconLabel: resolvedType === "cta" ? "Chat" : undefined,
   };
 };
 
 const normalizeColorForApi = (color: string) => {
   if (!color) return "#087583";
 
-  if (color.startsWith("#")) return color;
+  const normalized = color.trim();
+  const hex = normalized.split("__")[0].split("_")[0];
 
-  const hex = color.split("_")[0];
+  if (hex.startsWith("#")) return hex;
 
   return `#${hex}`;
 };
@@ -153,8 +148,120 @@ const mapCornerStyleFromApi = (cornerStyle: string) => {
   return cornerStyleMap[cornerStyle] ?? "rounded";
 };
 
+type ProfileMetaSnapshot = {
+  fullName: string;
+  bio: string | null;
+  photoUrl: string | null;
+};
+
+type PublishSnapshotSection = {
+  id: string;
+  title: string;
+  type: Section["type"];
+  visible: boolean;
+  subtitle?: string;
+  bio?: string;
+  fullName?: string;
+  photoUrl?: string | null;
+  links?: Section["links"];
+  projects?: Section["projects"];
+  layout?: Section["layout"];
+  buttonText?: string;
+  url?: string;
+  iconId?: string;
+  iconSrc?: string;
+  iconLabel?: string;
+  bgColor?: string;
+  textColor?: string;
+  iconColor?: string;
+  font?: string;
+};
+
+function isDraftConflictError(error: unknown) {
+  const errObj = error as Record<string, unknown>;
+
+  return (
+    errObj?.status === 409 ||
+    errObj?.statusCode === 409 ||
+    (error instanceof Error && error.message?.includes("409"))
+  );
+}
+
+function getBioValueForProfileMeta(
+  bioSection: Section | undefined,
+  currentProfile: { bio?: string | null } | null | undefined
+) {
+  return bioSection?.bio !== undefined
+    ? bioSection.bio
+    : (currentProfile?.bio ?? null);
+}
+
+function createPublishSnapshot({
+  sections,
+  template,
+  font,
+  textColor,
+  bgColor,
+  iconColor,
+  spacing,
+  borderRadius,
+  appearanceTheme,
+}: {
+  sections: Section[];
+  template: string;
+  font: string;
+  textColor: string;
+  bgColor: string;
+  iconColor: string;
+  spacing: number;
+  borderRadius: "sharp" | "rounded" | "pill";
+  appearanceTheme: "light" | "dark";
+}) {
+  const snapshotSections: PublishSnapshotSection[] = sections.map(
+    (section) => ({
+      id: section.id,
+      title: section.title,
+      type: section.type,
+      visible: section.visible,
+      subtitle: section.subtitle ?? undefined,
+      bio: section.bio ?? undefined,
+      fullName: section.fullName ?? undefined,
+      photoUrl: section.photoUrl ?? undefined,
+      links: section.links,
+      projects: section.projects,
+      layout: section.layout ?? undefined,
+      buttonText: section.buttonText ?? undefined,
+      url: section.url ?? undefined,
+      iconId: section.iconId ?? undefined,
+      iconSrc: section.iconSrc ?? undefined,
+      iconLabel: section.iconLabel ?? undefined,
+      bgColor: section.bgColor ?? undefined,
+      textColor: section.textColor ?? undefined,
+      iconColor: section.iconColor ?? undefined,
+      font: section.font ?? undefined,
+    })
+  );
+
+  return JSON.stringify({
+    sections: snapshotSections,
+    template: template.toLowerCase(),
+    font,
+    textColor,
+    bgColor,
+    iconColor,
+    spacing,
+    borderRadius,
+    appearanceTheme,
+  });
+}
+
 export default function ProfileBuilderContent() {
   const queryClient = useQueryClient();
+  const {
+    publishedVersion,
+    setHasUnpublishedChanges,
+    setBeforePublishHandler,
+  } = useProfileBuilderPublishState();
 
   const searchParams = useSearchParams();
   const sectionParam = searchParams.get("section");
@@ -166,7 +273,6 @@ export default function ProfileBuilderContent() {
   const dashboardProfile = useQuery(dashboardProfileOption());
   const profileContent = useQuery(profileContentOption());
   const draftState = useQuery(draftStateOption());
-
   const profileAppearance = useQuery(profileAppearanceOption());
 
   const profile = dashboardProfile.data;
@@ -187,11 +293,9 @@ export default function ProfileBuilderContent() {
   const [borderRadius, setBorderRadius] = useState<
     "sharp" | "rounded" | "pill"
   >("rounded");
-
   const [appearanceTheme, setAppearanceTheme] = useState<"light" | "dark">(
     "light"
   );
-
   const [template, setTemplate] = useState<string>("creator");
   const [sections, setSections] = useState<Section[]>([]);
   const [sectionToDelete, setSectionToDelete] = useState<string | null>(null);
@@ -202,8 +306,11 @@ export default function ProfileBuilderContent() {
   const appearanceEditedRef = useRef(false);
   const draftUpdatedAtRef = useRef<string | null>(null);
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
+  const profileMetaSnapshotRef = useRef<ProfileMetaSnapshot | null>(null);
+  const profileMetaSaveQueueRef = useRef<Promise<unknown>>(Promise.resolve());
   const appearanceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const lastPublishedSnapshotRef = useRef<string | null>(null);
+  const publishedVersionRef = useRef(publishedVersion);
 
   useEffect(() => {
     const isAppearanceReady =
@@ -245,16 +352,25 @@ export default function ProfileBuilderContent() {
               iconColor?: string;
             }
           | undefined;
+
         if (compApp) {
-          if (compApp.backgroundColour)
+          if (compApp.backgroundColour) {
             section.bgColor = compApp.backgroundColour;
-          else if (compApp.bgColor) section.bgColor = compApp.bgColor;
+          } else if (compApp.bgColor) {
+            section.bgColor = compApp.bgColor;
+          }
 
-          if (compApp.textColour) section.textColor = compApp.textColour;
-          else if (compApp.textColor) section.textColor = compApp.textColor;
+          if (compApp.textColour) {
+            section.textColor = compApp.textColour;
+          } else if (compApp.textColor) {
+            section.textColor = compApp.textColor;
+          }
 
-          if (compApp.accentColour) section.iconColor = compApp.accentColour;
-          else if (compApp.iconColor) section.iconColor = compApp.iconColor;
+          if (compApp.accentColour) {
+            section.iconColor = compApp.accentColour;
+          } else if (compApp.iconColor) {
+            section.iconColor = compApp.iconColor;
+          }
         }
       });
     }
@@ -325,7 +441,6 @@ export default function ProfileBuilderContent() {
       setTemplate(rawTemplate.toLowerCase());
     }
 
-    // Automatically initialize section if requested via URL search param and missing
     if (sectionParam) {
       const exists = loadedSections.some((s) => s.id === sectionParam);
       if (!exists) {
@@ -337,6 +452,21 @@ export default function ProfileBuilderContent() {
     }
 
     setSections(loadedSections);
+
+    const loadedBioSection = loadedSections.find(
+      (section) => section.type === "bio"
+    );
+
+    profileMetaSnapshotRef.current = {
+      fullName:
+        loadedBioSection?.fullName ?? dashboardProfile.data.fullName ?? "",
+      bio: getBioValueForProfileMeta(loadedBioSection, dashboardProfile.data),
+      photoUrl:
+        loadedBioSection?.photoUrl !== undefined
+          ? loadedBioSection.photoUrl
+          : (dashboardProfile.data.photoUrl ?? null),
+    };
+
     draftUpdatedAtRef.current = draftState.data.updatedAt ?? null;
   }, [
     profileContent.isSuccess,
@@ -351,102 +481,299 @@ export default function ProfileBuilderContent() {
     sectionParam,
   ]);
 
-  const { mutate: saveAppearance } = useMutation({
-    mutationKey: updateProfileAppearanceOption.mutationKey,
-    mutationFn: updateProfileAppearanceOption.mutationFn,
-    onSuccess() {
-      queryClient.invalidateQueries({
-        queryKey: dashboardProfileOption().queryKey,
-      });
-      queryClient.invalidateQueries({
-        queryKey: profileAppearanceOption().queryKey,
-      });
-    },
-    onError(error: unknown) {
-      const msg =
-        error instanceof Error
-          ? error.message
-          : "Failed to save appearance settings.";
-      toast.error(msg);
-    },
-  });
+  const { mutate: saveAppearance, mutateAsync: saveAppearanceAsync } =
+    useMutation({
+      mutationKey: updateProfileAppearanceOption.mutationKey,
+      mutationFn: updateProfileAppearanceOption.mutationFn,
+      onSuccess() {
+        queryClient.invalidateQueries({
+          queryKey: dashboardProfileOption().queryKey,
+        });
+        queryClient.invalidateQueries({
+          queryKey: profileAppearanceOption().queryKey,
+        });
+      },
+      onError(error: unknown) {
+        const msg =
+          error instanceof Error
+            ? error.message
+            : "Failed to save appearance settings.";
+        toast.error(msg);
+      },
+    });
 
-  const { mutate: saveDraft } = useMutation({
-    mutationKey: upsertDraftOption.mutationKey,
-    mutationFn: upsertDraftOption.mutationFn,
-    onSuccess(response: UpsertDraftResponse) {
-      const updatedAt = response?.data?.updatedAt;
-      if (updatedAt) {
-        draftUpdatedAtRef.current = updatedAt;
-      } else {
-        console.warn(
-          "[draft] Save succeeded but response did not contain an updatedAt timestamp."
-        );
-      }
-      queryClient.invalidateQueries({
-        queryKey: profileContentOption().queryKey,
-      });
-    },
-    onError(error: unknown) {
-      const errObj = error as Record<string, unknown>;
+  const persistDraftBeforeMeta = useCallback(
+    async (payload: UpsertDraftRequest, updatedAt: string | null) => {
+      try {
+        const response = await upsertDraft(payload, updatedAt);
+        const nextUpdatedAt = response?.data?.updatedAt;
 
-      // Backend verifies link URLs and returns 422 INVALID_LINKS when some fail
-      // (e.g. Twitter 403, Instagram blocks crawlers) but still saves the data.
-      // Treat this as a soft warning — the save succeeded.
-      if (
-        isApiError(error) &&
-        error.status === 422 &&
-        error.message?.includes("INVALID_LINKS")
-      ) {
+        if (nextUpdatedAt) {
+          draftUpdatedAtRef.current = nextUpdatedAt;
+        } else {
+          console.warn(
+            "[draft] Save succeeded but response did not contain an updatedAt timestamp."
+          );
+        }
+
         queryClient.invalidateQueries({
           queryKey: profileContentOption().queryKey,
         });
-        return;
+
+        return true;
+      } catch (error) {
+        if (
+          isApiError(error) &&
+          error.status === 422 &&
+          error.message?.includes("INVALID_LINKS")
+        ) {
+          queryClient.invalidateQueries({
+            queryKey: profileContentOption().queryKey,
+          });
+          return true;
+        }
+
+        console.error("[draft] Save FAILED! Full error object:", error);
+
+        if (isDraftConflictError(error)) {
+          toast.error(
+            "Draft was modified in another session. Reloading latest changes...",
+            { duration: 5000 }
+          );
+          queryClient.invalidateQueries({
+            queryKey: profileContentOption().queryKey,
+          });
+          queryClient.invalidateQueries({
+            queryKey: draftStateOption().queryKey,
+          });
+          return false;
+        }
+
+        const msg =
+          error instanceof Error ? error.message : "Failed to save draft.";
+        toast.error(msg);
+        return false;
       }
-
-      console.error("[draft] Save FAILED! Full error object:", error);
-
-      if (
-        errObj?.status === 409 ||
-        errObj?.statusCode === 409 ||
-        (error instanceof Error && error.message?.includes("409"))
-      ) {
-        toast.error(
-          "Draft was modified in another session. Reloading latest changes...",
-          { duration: 5000 }
-        );
-        queryClient.invalidateQueries({
-          queryKey: profileContentOption().queryKey,
-        });
-        queryClient.invalidateQueries({
-          queryKey: draftStateOption().queryKey,
-        });
-        return;
-      }
-
-      const msg =
-        error instanceof Error ? error.message : "Failed to save draft.";
-      toast.error(msg);
     },
-  });
-  const saveDraftRef = useRef(saveDraft);
+    [queryClient]
+  );
+
+  const enqueueProfileMetaSave = useCallback(
+    (variables: { username: string; next: ProfileMetaSnapshot }) => {
+      const runSave = async () => {
+        const previousProfileMeta = profileMetaSnapshotRef.current;
+
+        profileMetaSnapshotRef.current = variables.next;
+
+        try {
+          const response = await updateProfile(
+            variables.username,
+            variables.next
+          );
+
+          profileMetaSnapshotRef.current = variables.next;
+          queryClient.setQueryData(dashboardProfileOption().queryKey, response);
+          queryClient.invalidateQueries({
+            queryKey: dashboardProfileOption().queryKey,
+          });
+
+          return response;
+        } catch (error) {
+          profileMetaSnapshotRef.current = previousProfileMeta;
+          throw error;
+        }
+      };
+
+      const queuedSave = profileMetaSaveQueueRef.current.then(runSave, runSave);
+
+      profileMetaSaveQueueRef.current = queuedSave.catch(() => undefined);
+
+      return queuedSave;
+    },
+    [queryClient]
+  );
+
+  const saveProfileMetaQueued = useCallback(
+    async (variables: { username: string; next: ProfileMetaSnapshot }) => {
+      try {
+        await enqueueProfileMetaSave(variables);
+      } catch (error) {
+        const msg =
+          error instanceof Error
+            ? error.message
+            : "Failed to update profile details.";
+        toast.error(msg);
+        throw error;
+      }
+    },
+    [enqueueProfileMetaSave]
+  );
+
+  const saveProfileMetaQueuedRef = useRef(saveProfileMetaQueued);
   useEffect(() => {
-    saveDraftRef.current = saveDraft;
+    saveProfileMetaQueuedRef.current = saveProfileMetaQueued;
   });
 
   const sectionsRef = useRef(sections);
-
   useEffect(() => {
     sectionsRef.current = sections;
   }, [sections]);
+
+  const profileRef = useRef(profile);
+  useEffect(() => {
+    profileRef.current = profile;
+  }, [profile]);
+
+  const persistDraftBeforeMetaRef = useRef(persistDraftBeforeMeta);
+  useEffect(() => {
+    persistDraftBeforeMetaRef.current = persistDraftBeforeMeta;
+  });
 
   const sectionAppearanceDeps = sections
     .map((s) => `${s.id}-${s.bgColor}-${s.textColor}-${s.iconColor}-${s.font}`)
     .join("|");
 
+  const buildAppearancePayload = useCallback(() => {
+    const globalAppearance = {
+      template: template,
+      accentColour: normalizeColorForApi(iconColor),
+      backgroundColour: normalizeColorForApi(bgColor),
+      textColour: normalizeColorForApi(textColor),
+      font: mapFontToApi(font),
+      cornerStyle: mapCornerStyleToApi(borderRadius),
+      spacing: clampSpacingForApi(spacing),
+      theme: appearanceTheme,
+    };
+
+    const buildComponentAppearance = (sectionType: string) => {
+      const sec = sectionsRef.current.find((s) => s.type === sectionType);
+      if (!sec) return globalAppearance;
+
+      return {
+        ...globalAppearance,
+        ...(sec.bgColor && {
+          backgroundColour: normalizeColorForApi(sec.bgColor),
+        }),
+        ...(sec.textColor && {
+          textColour: normalizeColorForApi(sec.textColor),
+        }),
+        ...(sec.iconColor && {
+          accentColour: normalizeColorForApi(sec.iconColor),
+        }),
+        ...(sec.font && { font: mapFontToApi(sec.font) }),
+      };
+    };
+
+    return {
+      global: globalAppearance,
+      components: {
+        bio: buildComponentAppearance("bio"),
+        links: buildComponentAppearance("links"),
+        projects: buildComponentAppearance("projects"),
+        cta: buildComponentAppearance("cta"),
+      },
+    };
+  }, [
+    template,
+    iconColor,
+    bgColor,
+    textColor,
+    font,
+    borderRadius,
+    spacing,
+    appearanceTheme,
+  ]);
+
+  const flushDraftAndProfileMetaSave = useCallback(async () => {
+    const bioSection = sectionsRef.current.find((s) => s.type === "bio");
+    const updatedAt = draftUpdatedAtRef.current;
+    const currentProfile = profileRef.current;
+
+    const payload = {
+      bio: getBioValueForProfileMeta(bioSection, currentProfile),
+      content: sectionsToContent(sectionsRef.current),
+      themeSettings: { template },
+    };
+
+    const draftSaved = await persistDraftBeforeMetaRef.current(
+      payload,
+      updatedAt
+    );
+
+    if (!draftSaved) {
+      return;
+    }
+
+    const nextProfileMeta: ProfileMetaSnapshot = {
+      fullName: normalizeFullName(
+        bioSection?.fullName ?? currentProfile?.fullName ?? ""
+      ),
+      bio: getBioValueForProfileMeta(bioSection, currentProfile),
+      photoUrl:
+        bioSection?.photoUrl !== undefined
+          ? bioSection.photoUrl
+          : (currentProfile?.photoUrl ?? null),
+    };
+
+    const previousProfileMeta = profileMetaSnapshotRef.current;
+
+    const hasProfileMetaChanges =
+      !previousProfileMeta ||
+      previousProfileMeta.fullName !== nextProfileMeta.fullName ||
+      previousProfileMeta.bio !== nextProfileMeta.bio ||
+      previousProfileMeta.photoUrl !== nextProfileMeta.photoUrl;
+
+    const fullNameValidationError = validateFullName(nextProfileMeta.fullName);
+
+    if (
+      currentProfile?.username &&
+      !fullNameValidationError &&
+      hasProfileMetaChanges
+    ) {
+      await saveProfileMetaQueuedRef.current({
+        username: currentProfile.username,
+        next: nextProfileMeta,
+      });
+    }
+  }, [template]);
+
+  const flushPendingBuilderSaves = useCallback(async () => {
+    const shouldFlushAppearance = Boolean(appearanceTimerRef.current);
+    const shouldFlushDraft = Boolean(saveTimerRef.current);
+
+    if (appearanceTimerRef.current) {
+      clearTimeout(appearanceTimerRef.current);
+      appearanceTimerRef.current = null;
+    }
+
+    if (saveTimerRef.current) {
+      clearTimeout(saveTimerRef.current);
+      saveTimerRef.current = null;
+    }
+
+    if (shouldFlushAppearance) {
+      await saveAppearanceAsync(buildAppearancePayload());
+    }
+
+    if (shouldFlushDraft) {
+      await flushDraftAndProfileMetaSave();
+    }
+
+    await profileMetaSaveQueueRef.current;
+  }, [
+    buildAppearancePayload,
+    flushDraftAndProfileMetaSave,
+    saveAppearanceAsync,
+  ]);
+
+  useEffect(() => {
+    setBeforePublishHandler(flushPendingBuilderSaves);
+
+    return () => setBeforePublishHandler(null);
+  }, [flushPendingBuilderSaves, setBeforePublishHandler]);
+
   useEffect(() => {
     if (!contentLoadedRef.current) return;
-
     if (appearanceHydratingRef.current) return;
 
     if (!appearanceEditedRef.current) {
@@ -459,44 +786,7 @@ export default function ProfileBuilderContent() {
     }
 
     appearanceTimerRef.current = setTimeout(() => {
-      const globalAppearance = {
-        template: template,
-        accentColour: normalizeColorForApi(iconColor),
-        backgroundColour: normalizeColorForApi(bgColor),
-        textColour: normalizeColorForApi(textColor),
-        font: mapFontToApi(font),
-        cornerStyle: mapCornerStyleToApi(borderRadius),
-        spacing: clampSpacingForApi(spacing),
-        theme: "light",
-      };
-
-      const buildComponentAppearance = (sectionType: string) => {
-        const sec = sectionsRef.current.find((s) => s.type === sectionType);
-        if (!sec) return globalAppearance;
-        return {
-          ...globalAppearance,
-          ...(sec.bgColor && {
-            backgroundColour: normalizeColorForApi(sec.bgColor),
-          }),
-          ...(sec.textColor && {
-            textColour: normalizeColorForApi(sec.textColor),
-          }),
-          ...(sec.iconColor && {
-            accentColour: normalizeColorForApi(sec.iconColor),
-          }),
-          ...(sec.font && { font: mapFontToApi(sec.font) }),
-        };
-      };
-
-      saveAppearance({
-        global: globalAppearance,
-        components: {
-          bio: buildComponentAppearance("bio"),
-          links: buildComponentAppearance("links"),
-          projects: buildComponentAppearance("projects"),
-          cta: buildComponentAppearance("experience"),
-        },
-      });
+      saveAppearance(buildAppearancePayload());
       appearanceTimerRef.current = null;
     }, 1000);
 
@@ -505,18 +795,7 @@ export default function ProfileBuilderContent() {
         clearTimeout(appearanceTimerRef.current);
       }
     };
-  }, [
-    template,
-    font,
-    bgColor,
-    textColor,
-    iconColor,
-    spacing,
-    borderRadius,
-    appearanceTheme,
-    saveAppearance,
-    sectionAppearanceDeps,
-  ]);
+  }, [buildAppearancePayload, saveAppearance, sectionAppearanceDeps]);
 
   useEffect(() => {
     if (!contentLoadedRef.current) return;
@@ -530,15 +809,15 @@ export default function ProfileBuilderContent() {
     }
 
     saveTimerRef.current = setTimeout(() => {
-      const bioSection = sections.find((s) => s.type === "bio");
-      const updatedAt = draftUpdatedAtRef.current;
-      const payload = {
-        bio: bioSection?.bio ?? null,
-        content: sectionsToContent(sections),
-        themeSettings: { template },
-      };
-      saveDraftRef.current({ data: payload, draftVersion: updatedAt });
-      saveTimerRef.current = null;
+      void (async () => {
+        try {
+          await flushDraftAndProfileMetaSave();
+        } catch (error) {
+          console.error("[profile-meta] Save failed:", error);
+        } finally {
+          saveTimerRef.current = null;
+        }
+      })();
     }, 1000);
 
     return () => {
@@ -546,7 +825,7 @@ export default function ProfileBuilderContent() {
         clearTimeout(saveTimerRef.current);
       }
     };
-  }, [sections, template]);
+  }, [sections, template, flushDraftAndProfileMetaSave]);
 
   useEffect(() => {
     return () => {
@@ -554,35 +833,67 @@ export default function ProfileBuilderContent() {
         clearTimeout(saveTimerRef.current);
         const bioSection = sectionsRef.current.find((s) => s.type === "bio");
         const updatedAt = draftUpdatedAtRef.current;
-        // Appearance settings are persisted through updateProfileAppearance to avoid duplicate writes.
+
         const payload = {
-          bio: bioSection?.bio ?? null,
+          bio: getBioValueForProfileMeta(bioSection, profileRef.current),
           content: sectionsToContent(sectionsRef.current),
         };
-        upsertDraft(payload, updatedAt).catch((err) => {
-          console.error("[draft] Unmount direct save FAILED:", err);
-        });
+
+        void (async () => {
+          try {
+            const draftSaved = await persistDraftBeforeMetaRef.current(
+              payload,
+              updatedAt
+            );
+
+            if (!draftSaved) {
+              return;
+            }
+
+            const currentProfile = profileRef.current;
+
+            const nextProfileMeta: ProfileMetaSnapshot = {
+              fullName: normalizeFullName(
+                bioSection?.fullName ?? currentProfile?.fullName ?? ""
+              ),
+              bio: getBioValueForProfileMeta(bioSection, currentProfile),
+              photoUrl:
+                bioSection?.photoUrl !== undefined
+                  ? bioSection.photoUrl
+                  : (currentProfile?.photoUrl ?? null),
+            };
+
+            const previousProfileMeta = profileMetaSnapshotRef.current;
+
+            const hasProfileMetaChanges =
+              !previousProfileMeta ||
+              previousProfileMeta.fullName !== nextProfileMeta.fullName ||
+              previousProfileMeta.bio !== nextProfileMeta.bio ||
+              previousProfileMeta.photoUrl !== nextProfileMeta.photoUrl;
+
+            const fullNameValidationError = validateFullName(
+              nextProfileMeta.fullName
+            );
+
+            if (
+              currentProfile?.username &&
+              !fullNameValidationError &&
+              hasProfileMetaChanges
+            ) {
+              await saveProfileMetaQueuedRef.current({
+                username: currentProfile.username,
+                next: nextProfileMeta,
+              });
+            }
+          } catch (error) {
+            console.error("[profile-meta] Save on unmount failed:", error);
+          } finally {
+            saveTimerRef.current = null;
+          }
+        })();
       }
     };
   }, []);
-
-  // const { mutate: doPublish, isPending: isPublishing } = useMutation({
-  //   mutationKey: ["profile", "publish"],
-  //   mutationFn: publishProfile,
-  //   onSuccess() {
-  //     draftUpdatedAtRef.current = null;
-  //     queryClient.invalidateQueries({ queryKey: ["profile", "content"] });
-  //     queryClient.invalidateQueries({ queryKey: ["profile", "draft-state"] });
-  //     toast.success("Profile published successfully.");
-  //   },
-  //   onError(error: unknown) {
-  //     const msg =
-  //       error instanceof Error ? error.message : "Failed to publish profile.";
-  //     toast.error(msg);
-  //   },
-  // });
-
-  // const handlePublish = () => doPublish(undefined as never);
 
   const resolvedSections = sections.map((section) =>
     section.id === "bio"
@@ -593,6 +904,74 @@ export default function ProfileBuilderContent() {
         }
       : section
   );
+
+  const bioSectionForPreview = resolvedSections.find(
+    (section) => section.type === "bio"
+  );
+
+  const previewPhotoUrl =
+    bioSectionForPreview?.photoUrl !== undefined
+      ? bioSectionForPreview.photoUrl
+      : profile?.photoUrl;
+
+  const previewProfile = profile
+    ? {
+        ...profile,
+        fullName: bioSectionForPreview?.fullName ?? profile.fullName ?? "",
+        bio: bioSectionForPreview?.bio ?? profile.bio ?? "",
+        photoUrl: previewPhotoUrl,
+      }
+    : profile;
+
+  const currentPublishSnapshot = useMemo(
+    () =>
+      createPublishSnapshot({
+        sections: resolvedSections,
+        template,
+        font,
+        textColor,
+        bgColor,
+        iconColor,
+        spacing,
+        borderRadius,
+        appearanceTheme,
+      }),
+    [
+      resolvedSections,
+      template,
+      font,
+      textColor,
+      bgColor,
+      iconColor,
+      spacing,
+      borderRadius,
+      appearanceTheme,
+    ]
+  );
+
+  useEffect(() => {
+    if (!contentLoadedRef.current) return;
+    if (appearanceHydratingRef.current) return;
+
+    if (lastPublishedSnapshotRef.current === null) {
+      lastPublishedSnapshotRef.current = currentPublishSnapshot;
+      queueMicrotask(() => setHasUnpublishedChanges(false));
+      return;
+    }
+
+    const hasChanges =
+      lastPublishedSnapshotRef.current !== currentPublishSnapshot;
+
+    queueMicrotask(() => setHasUnpublishedChanges(hasChanges));
+  }, [currentPublishSnapshot, setHasUnpublishedChanges]);
+
+  useEffect(() => {
+    if (publishedVersionRef.current === publishedVersion) return;
+
+    publishedVersionRef.current = publishedVersion;
+    lastPublishedSnapshotRef.current = currentPublishSnapshot;
+    queueMicrotask(() => setHasUnpublishedChanges(false));
+  }, [currentPublishSnapshot, publishedVersion, setHasUnpublishedChanges]);
 
   useEffect(() => {
     if (sectionParam) {
@@ -612,6 +991,29 @@ export default function ProfileBuilderContent() {
     }
   }, [sectionParam]);
 
+  const handleSaveProfilePhoto = useCallback(
+    async (photoUrl: string | null) => {
+      const currentProfile = profileRef.current;
+      const currentMeta = profileMetaSnapshotRef.current;
+
+      if (!currentProfile?.username) return;
+
+      const nextProfileMeta: ProfileMetaSnapshot = {
+        fullName: normalizeFullName(
+          currentMeta?.fullName ?? currentProfile.fullName ?? ""
+        ),
+        bio: currentMeta?.bio ?? currentProfile.bio ?? null,
+        photoUrl,
+      };
+
+      await saveProfileMetaQueuedRef.current({
+        username: currentProfile.username,
+        next: nextProfileMeta,
+      });
+    },
+    []
+  );
+
   const handleSelectSection = (id: string) => {
     setSelectedSectionId(id);
   };
@@ -620,14 +1022,40 @@ export default function ProfileBuilderContent() {
     const newSection = createSection(type, title);
     if (!newSection) return;
 
+    const existingSection = sections.find(
+      (section) =>
+        section.id === newSection.id || section.type === newSection.type
+    );
+
     setSections((prev) => {
-      const exists = prev.some(
-        (s) => s.id === newSection.id || s.type === newSection.type
+      const existingInPrev = prev.find(
+        (section) =>
+          section.id === newSection.id || section.type === newSection.type
       );
-      if (exists) return prev;
-      return [...prev, newSection];
+
+      if (existingInPrev) {
+        return prev.map((section) =>
+          section.id === existingInPrev.id
+            ? { ...section, visible: true }
+            : section
+        );
+      }
+
+      const bioSection = prev.find((section) => section.type === "bio");
+      const nonBioSections = prev.filter((section) => section.type !== "bio");
+
+      if (newSection.type === "bio") {
+        return [newSection, ...nonBioSections];
+      }
+
+      if (!bioSection) {
+        return [...nonBioSections, newSection];
+      }
+
+      return [bioSection, ...nonBioSections, newSection];
     });
-    setSelectedSectionId(newSection.id);
+
+    setSelectedSectionId(existingSection?.id ?? newSection.id);
   };
 
   const handleRemoveSection = (id: string) => {
@@ -636,25 +1064,60 @@ export default function ProfileBuilderContent() {
 
   const handleConfirmDelete = () => {
     if (sectionToDelete) {
-      const updated = sections.filter((s) => s.id !== sectionToDelete);
-      setSections(updated);
-      if (selectedSectionId === sectionToDelete) {
-        setSelectedSectionId(updated[0]?.id || null);
+      const section = sections.find((item) => item.id === sectionToDelete);
+
+      if (section?.type === "bio") {
+        setSectionToDelete(null);
+        return;
       }
+
+      const updated = sections.filter((item) => item.id !== sectionToDelete);
+
+      setSections(updated);
+
+      if (selectedSectionId === sectionToDelete) {
+        const nextVisibleSection =
+          updated.find((item) => item.visible)?.id ?? "bio";
+
+        setSelectedSectionId(nextVisibleSection);
+      }
+
       setSectionToDelete(null);
     }
   };
 
   const handleToggleSectionVisibility = (id: string) => {
-    setSections((currentSections) =>
-      currentSections.map((section) =>
+    setSections((currentSections) => {
+      const targetSection = currentSections.find(
+        (section) => section.id === id
+      );
+
+      if (!targetSection || targetSection.type === "bio") {
+        return currentSections;
+      }
+
+      const willHideSection = targetSection.visible;
+
+      const updatedSections = currentSections.map((section) =>
         section.id === id ? { ...section, visible: !section.visible } : section
-      )
-    );
+      );
+
+      if (willHideSection) {
+        setSelectedSectionId((currentSelectedSectionId) =>
+          currentSelectedSectionId === id ? null : currentSelectedSectionId
+        );
+      }
+
+      return updatedSections;
+    });
   };
 
   const handleUpdateSection = (id: string, updates: Partial<Section>) => {
-    setSections(sections.map((s) => (s.id === id ? { ...s, ...updates } : s)));
+    setSections((currentSections) =>
+      currentSections.map((section) =>
+        section.id === id ? { ...section, ...updates } : section
+      )
+    );
   };
 
   const selectedSection =
@@ -671,7 +1134,6 @@ export default function ProfileBuilderContent() {
         </div>
 
         <div className="hidden w-full flex-1 gap-4 bg-[#FAFAFA] p-4 lg:flex lg:p-6 lg:px-8">
-          {/* Left Sidebar Skeleton */}
           <div className="flex w-[320px] shrink-0 flex-col gap-6 rounded-2xl bg-white p-6">
             <Skeleton className="h-8 w-1/2" />
             <div className="mt-4 flex flex-col gap-3">
@@ -681,12 +1143,10 @@ export default function ProfileBuilderContent() {
             </div>
           </div>
 
-          {/* Preview Canvas Skeleton */}
           <div className="flex flex-1 items-center justify-center rounded-2xl">
             <Skeleton className="h-[750px] w-[350px] rounded-[3rem]" />
           </div>
 
-          {/* Right Panel Skeleton */}
           <div className="flex w-[320px] shrink-0 flex-col gap-6 rounded-2xl bg-white p-6">
             <Skeleton className="h-8 w-1/2" />
             <div className="mt-4 flex flex-col gap-4">
@@ -718,8 +1178,6 @@ export default function ProfileBuilderContent() {
       </div>
 
       <div className="bg-primary-bg hidden w-full flex-1 flex-col overflow-hidden lg:flex">
-        {/* <BuilderHeader onPublish={handlePublish} isPublishing={isPublishing} /> */}
-
         <div className="bg-secondary-bg flex flex-1 gap-4 overflow-hidden p-4 lg:p-4 xl:p-6 xl:px-8">
           <LeftSidebar
             sections={resolvedSections}
@@ -733,7 +1191,8 @@ export default function ProfileBuilderContent() {
             onToggleSectionVisibility={handleToggleSectionVisibility}
             onReorderSections={setSections}
             onUpdateSection={handleUpdateSection}
-            profile={profile}
+            onSaveProfilePhoto={handleSaveProfilePhoto}
+            profile={previewProfile}
           />
 
           <PreviewCanvas
@@ -743,10 +1202,12 @@ export default function ProfileBuilderContent() {
             iconColor={iconColor}
             spacing={spacing}
             borderRadius={borderRadius}
+            appearanceTheme={appearanceTheme}
             template={template}
             sections={resolvedSections}
-            profile={profile}
+            profile={previewProfile}
             selectedSectionId={selectedSectionId}
+            onSelectSection={handleSelectSection}
             onToggleSectionVisibility={handleToggleSectionVisibility}
             onRemoveSection={handleRemoveSection}
           />
@@ -764,6 +1225,8 @@ export default function ProfileBuilderContent() {
             onChangeSpacing={setSpacing}
             borderRadius={borderRadius}
             onChangeBorderRadius={setBorderRadius}
+            appearanceTheme={appearanceTheme}
+            onChangeAppearanceTheme={setAppearanceTheme}
             onBackToGlobal={() => setSelectedSectionId(null)}
             selectedSection={selectedSection}
             onUpdateSection={handleUpdateSection}

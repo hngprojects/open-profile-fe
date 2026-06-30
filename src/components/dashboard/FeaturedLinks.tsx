@@ -1,10 +1,11 @@
 "use client";
 
 import Image from "next/image";
-import { ExternalLink, ImageIcon } from "lucide-react";
+import { ExternalLink } from "lucide-react";
 // import { useQuery } from "@tanstack/react-query";
 // import { profileContentOption } from "@/api/profile/profile.options";
 import { getImageUrl, sanitizeUrl } from "@/utils/profile";
+import { getLinkIcon } from "./shared/TemplateLinkCard";
 import { ProfileContentResponse } from "@/api/profile/profile.type";
 import { Skeleton } from "../ui/skeleton";
 
@@ -23,7 +24,7 @@ export default function FeaturedLinks({ content, isLoading }: Props) {
   }[];
 
   return (
-    <section className="rounded-[12px] border border-border bg-background p-6">
+    <section className="border-border bg-background rounded-[12px] border p-6">
       <h2 className="text-2xl font-bold">Featured Links</h2>
 
       {isLoading ? (
@@ -31,7 +32,7 @@ export default function FeaturedLinks({ content, isLoading }: Props) {
           {Array.from({ length: 1 }).map((_, i) => (
             <div
               key={i}
-              className="flex items-center justify-between rounded-[18px] border border-border p-4"
+              className="border-border flex items-center justify-between rounded-[18px] border p-4"
             >
               <div className="flex items-center gap-5">
                 <Skeleton className="h-14 w-14 shrink-0 rounded-[12px]" />
@@ -45,7 +46,7 @@ export default function FeaturedLinks({ content, isLoading }: Props) {
           ))}
         </div>
       ) : links.length === 0 ? (
-        <span className="mt-4 flex items-center justify-between text-sm text-secondary-text">
+        <span className="text-secondary-text mt-4 flex items-center justify-between text-sm">
           Add your links
         </span>
       ) : (
@@ -58,10 +59,10 @@ export default function FeaturedLinks({ content, isLoading }: Props) {
                 href={sanitizeUrl(item.url)}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center justify-between rounded-[18px] border border-border p-4 no-underline"
+                className="border-border flex items-center justify-between rounded-[18px] border p-4 no-underline"
               >
                 <div className="flex items-center gap-5">
-                  <span className="flex h-14 w-14 items-center justify-center overflow-hidden rounded-[12px] border border-border">
+                  <span className="border-border flex h-14 w-14 items-center justify-center overflow-hidden rounded-[12px] border">
                     {displayImg ? (
                       <Image
                         src={displayImg}
@@ -71,25 +72,32 @@ export default function FeaturedLinks({ content, isLoading }: Props) {
                         className="object-cover"
                         unoptimized
                       />
-                    ) : item.iconSrc ? (
-                      // item.iconSrc is guaranteed to be a client preloaded, absolute local SVG asset path
+                    ) : getImageUrl(item.iconSrc) ? (
                       <Image
-                        src={item.iconSrc}
+                        src={getImageUrl(item.iconSrc) || ""}
                         alt={item.title ?? "Link"}
                         width={24}
                         height={24}
                         unoptimized
                       />
                     ) : (
-                      <ImageIcon className="text-tertiary-text" size={24} />
+                      <span className="text-brand-hover-bg">
+                        {getLinkIcon(
+                          (item.url || "") + " " + (item.title || "")
+                        )}
+                      </span>
                     )}
                   </span>
                   <div className="min-w-0">
-                    <h3 className="font-bold text-primary-text break-all">{item.title}</h3>
-                    <p className="text-sm text-tertiary-text break-all">{item.url}</p>
+                    <h3 className="text-primary-text font-bold break-all">
+                      {item.title}
+                    </h3>
+                    <p className="text-tertiary-text text-sm break-all">
+                      {item.url}
+                    </p>
                   </div>
                 </div>
-                <span className="flex h-10 w-10 items-center justify-center rounded-full border border-border">
+                <span className="border-border flex h-10 w-10 items-center justify-center rounded-full border">
                   <ExternalLink className="text-tertiary-text" size={20} />
                 </span>
               </a>

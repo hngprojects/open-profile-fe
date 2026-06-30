@@ -282,7 +282,7 @@ export default function SectionOption({
             </div>
 
             {isIconMenuOpen && (
-              <div className="border-tertiary-b bg-background absolute z-20 mt-2 max-h-72 w-full overflow-auto rounded-xl border p-2 shadow-lg">
+              <div className="profile-builder-scrollbar border-tertiary-b bg-background absolute z-20 mt-2 max-h-72 w-full overflow-auto rounded-xl border p-2 shadow-lg">
                 <div className="text-secondary-text mb-2 px-2 text-xs font-semibold tracking-wide uppercase">
                   Preset icons
                 </div>

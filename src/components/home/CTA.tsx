@@ -17,9 +17,9 @@ export function CTA() {
   });
 
   return (
-    <section className="bg-[#FAFAFA] px-4 py-24 md:px-8 md:py-26">
-      <div className="mx-auto max-w-7xl">
-        <div className="bg-brand relative mx-auto flex w-full max-w-6xl items-center justify-between overflow-hidden rounded-[24px] px-8 py-9 md:rounded-[32px] lg:px-16 lg:py-18">
+    <section className="bg-[#FAFAFA] py-24 md:py-26">
+      <div className="mx-auto w-full max-w-[1100px] px-4 sm:px-6 lg:px-0">
+        <div className="bg-brand relative mx-auto flex w-full items-center justify-between overflow-hidden rounded-[24px] px-8 py-9 md:rounded-[32px] lg:px-16 lg:py-18">
           <div className="relative z-10 max-w-105 space-y-4">
             <h2 className="text-[28px] leading-[1.2] font-semibold tracking-tight text-[#FEFEFE] md:text-[32px] md:whitespace-nowrap">
               Be the profile people find first

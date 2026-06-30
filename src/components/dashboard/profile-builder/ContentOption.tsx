@@ -37,7 +37,7 @@ export default function ContentOption({
             value={title}
             onChange={(e) => onTitleChange(e.target.value)}
             placeholder="Add title"
-            className="border-accent-foreground/30 focus:ring-accent rounded-md border p-2 focus:ring-2 focus:ring-offset-1 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+            className="profile-builder-scrollbar border-accent-foreground/30 focus:ring-accent rounded-md border p-2 focus:ring-2 focus:ring-offset-1 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
           />
         </span>
         <span className="flex w-full flex-col gap-2">
@@ -50,7 +50,7 @@ export default function ContentOption({
             value={subtitle}
             onChange={(e) => onSubtitleChange(e.target.value)}
             placeholder="Add subtitle"
-            className="border-accent-foreground/30 focus:ring-accent rounded-md border p-2 focus:ring-2 focus:ring-offset-1 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+            className="profile-builder-scrollbar border-accent-foreground/30 focus:ring-accent rounded-md border p-2 focus:ring-2 focus:ring-offset-1 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
           />
         </span>
         <span className="flex w-full flex-col gap-2">
@@ -62,7 +62,7 @@ export default function ContentOption({
           </span>
           <div className="flex flex-col gap-3">
             {links.length === 0 ? (
-              <div className="border-tertiary-b bg-primary-bg rounded-xl border p-4 text-sm text-secondary-text">
+              <div className="border-tertiary-b bg-primary-bg text-secondary-text rounded-xl border p-4 text-sm">
                 No links saved yet. Create one in the Section tab.
               </div>
             ) : (
@@ -89,7 +89,7 @@ export default function ContentOption({
                         e.stopPropagation();
                         onDeleteLink(link.id);
                       }}
-                      className="hover:text-negative-text mr-10 flex shrink-0 justify-end p-1.5 text-secondary-text opacity-0 transition-all group-hover:opacity-100"
+                      className="hover:text-negative-text text-secondary-text mr-10 flex shrink-0 justify-end p-1.5 opacity-0 transition-all group-hover:opacity-100"
                       title="Delete link"
                       aria-label={`Delete link ${link.title}`}
                     >

@@ -66,7 +66,7 @@ export default async function UserProfilePage({ params }: Props) {
   const appearanceObj = (profile.appearance ||
     profile.themeSettings ||
     (content as LegacyContent | null)?.themeSettings ||
-    {}) as Record<string, any>;
+    {}) as Record<string, unknown>;
 
   const rawAppearance = (
     appearanceObj && "global" in appearanceObj && appearanceObj.global

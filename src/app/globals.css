@@ -8,6 +8,8 @@
   --font-afacad: var(--font-afacad);
   --font-dancing: var(--font-dancing);
   --font-inter: var(--font-inter);
+  --font-geologica: var(--font-geologica);
+  --font-playfair: var(--font-playfair);
 
   --color-brand: var(--brand);
   --color-background: var(--background);
@@ -391,9 +393,11 @@
   * {
     @apply border-border outline-ring/50;
   }
+
   body {
     @apply bg-background text-foreground;
   }
+
   html {
     @apply font-afacad;
   }
@@ -402,19 +406,23 @@
 .custom-slider:focus {
   outline: none;
 }
+
 .custom-slider:focus-visible::-webkit-slider-thumb {
   outline: 2px solid #087583;
   outline-offset: 2px;
 }
+
 .custom-slider:focus-visible::-moz-range-thumb {
   outline: 2px solid #087583;
   outline-offset: 2px;
 }
+
 .custom-slider::-webkit-slider-runnable-track {
   width: 100%;
   height: 48px;
   background: transparent;
 }
+
 .custom-slider::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
@@ -426,14 +434,17 @@
   cursor: pointer;
   transition: background-color 0.15s ease;
 }
+
 .custom-slider::-webkit-slider-thumb:hover {
   background-color: #a5a5a5;
 }
+
 .custom-slider::-moz-range-track {
   width: 100%;
   height: 48px;
   background: transparent;
 }
+
 .custom-slider::-moz-range-thumb {
   width: 6px;
   height: 48px;
@@ -443,6 +454,7 @@
   border: 0;
   transition: background-color 0.15s ease;
 }
+
 .custom-slider::-moz-range-thumb:hover {
   background-color: #a5a5a5;
 }
@@ -451,25 +463,98 @@
   from {
     transform: translateX(0);
   }
+
   to {
     transform: translateX(-25%);
   }
 }
+
 @keyframes marquee-right {
   from {
     transform: translateX(-25%);
   }
+
   to {
     transform: translateX(0);
   }
 }
+
 .animate-marquee-left {
   animation: marquee-left 35s linear infinite;
 }
+
 .animate-marquee-right {
   animation: marquee-right 35s linear infinite;
 }
+
 .animate-marquee-left:hover,
 .animate-marquee-right:hover {
   animation-play-state: paused;
+}
+
+/* Profile Builder scrollbars */
+.profile-builder-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+}
+
+.profile-builder-scrollbar:hover,
+.profile-builder-scrollbar:focus-within {
+  scrollbar-color: rgba(190, 190, 190, 0.4) transparent;
+}
+
+.profile-builder-scrollbar::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+.profile-builder-scrollbar::-webkit-scrollbar-track,
+.profile-builder-scrollbar::-webkit-scrollbar-track-piece {
+  background: transparent !important;
+  border: 0 !important;
+}
+
+.profile-builder-scrollbar::-webkit-scrollbar-thumb {
+  min-height: 36px;
+  border-radius: 9999px;
+  background: transparent !important;
+  background-color: transparent !important;
+  border-inline: 3px solid transparent;
+  border-block: 22px solid transparent;
+  background-clip: content-box;
+  box-shadow: none !important;
+}
+
+.profile-builder-scrollbar:hover::-webkit-scrollbar-thumb,
+.profile-builder-scrollbar:focus-within::-webkit-scrollbar-thumb,
+.profile-builder-scrollbar::-webkit-scrollbar-thumb:hover,
+.profile-builder-scrollbar::-webkit-scrollbar-thumb:active,
+.profile-builder-scrollbar::-webkit-scrollbar-thumb:window-inactive {
+  background: rgba(190, 190, 190, 0.4) !important;
+  background-color: rgba(190, 190, 190, 0.4) !important;
+  background-clip: content-box !important;
+  box-shadow: none !important;
+}
+
+.profile-builder-scrollbar::-webkit-scrollbar-button,
+.profile-builder-scrollbar::-webkit-scrollbar-button:single-button,
+.profile-builder-scrollbar::-webkit-scrollbar-button:vertical,
+.profile-builder-scrollbar::-webkit-scrollbar-button:horizontal,
+.profile-builder-scrollbar::-webkit-scrollbar-button:start,
+.profile-builder-scrollbar::-webkit-scrollbar-button:end,
+.profile-builder-scrollbar::-webkit-scrollbar-button:decrement,
+.profile-builder-scrollbar::-webkit-scrollbar-button:increment {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  background: transparent !important;
+  background-color: transparent !important;
+  border: 0 !important;
+  -webkit-appearance: none !important;
+}
+
+.profile-builder-scrollbar::-webkit-scrollbar-corner {
+  background: transparent !important;
 }

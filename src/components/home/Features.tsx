@@ -68,10 +68,7 @@ function FeatureCard({
         />
       </div>
 
-      <h3
-        className="text-lg leading-snug font-bold text-white sm:text-xl"
-        style={{ fontFamily: "'Inter', sans-serif" }}
-      >
+      <h3 className="text-lg leading-snug font-bold text-white sm:text-xl">
         {feature.title}
       </h3>
 
@@ -100,7 +97,7 @@ export function Features() {
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, amount: 0.2 }}
         transition={{ duration: 0.6 }}
-        className="mx-auto mb-10 flex max-w-7xl flex-col items-center gap-4 px-4 text-center md:px-8"
+        className="mx-auto mb-10 flex w-full max-w-[1100px] flex-col items-center gap-4 px-4 text-center sm:px-6 lg:px-0"
       >
         <span className="bg-brand-light-subtle-bg mx-auto flex h-7.5 w-fit items-center gap-1 rounded-[24px] pr-5.5 pl-3.5">
           <Image
@@ -109,7 +106,7 @@ export function Features() {
             width={16}
             height={16}
           />
-          <p className="text-brand font-sfpror text-[12px] leading-4 font-medium">
+          <p className="text-brand text-[12px] leading-4 font-medium">
             Powerful Features
           </p>
         </span>
@@ -122,7 +119,7 @@ export function Features() {
         </h2>
       </motion.div>
 
-      <div className="mx-auto max-w-7xl px-4 md:px-8">
+      <div className="mx-auto w-full max-w-[1100px] px-4 sm:px-6 lg:px-0">
         <div className="grid grid-cols-1 gap-x-6 gap-y-4 sm:gap-y-6 md:grid-cols-2 md:gap-x-16 md:gap-y-14">
           {features.map((feature, i) => (
             <FeatureCard
@@ -139,12 +136,11 @@ export function Features() {
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
         transition={{ duration: 0.6, delay: 0.8 }}
-        className="mx-auto mt-12 flex max-w-7xl justify-center px-4 md:mt-20 md:px-8"
+        className="mx-auto mt-12 flex w-full max-w-[1100px] justify-center px-4 sm:px-6 md:mt-20 lg:px-0"
       >
         <Link
           href={user ? ROUTES.dashboard.home : "/signup"}
           className="text-brand hover:bg-brand-light-subtle-bg mx-auto inline-flex w-fit cursor-pointer items-center justify-center rounded-lg bg-white px-6 py-3.5 text-center text-sm font-semibold whitespace-nowrap transition-all duration-200 hover:scale-105 active:scale-95 sm:px-8"
-          style={{ fontFamily: "'Inter', sans-serif" }}
         >
           {user ? "Go to Dashboard" : "Create Your Profile Now"}
         </Link>

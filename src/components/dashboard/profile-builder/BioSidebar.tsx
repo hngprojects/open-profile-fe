@@ -3,17 +3,17 @@
 import { ChevronLeft, Trash2, Upload } from "lucide-react";
 import Image from "next/image";
 import { useRef, useState } from "react";
-import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { getImageUrl } from "@/utils/profile";
+import { normalizeFullName, validateFullName } from "@/utils/nameValidation";
 import { uploadImage } from "@/api/uploads/uploads.service";
-import { updateProfile } from "@/api/profile/profile.service";
 import type { Section, ProfilePreview } from "./types";
 
 interface BioSidebarProps {
   returnTab: () => void;
   section: Section;
   onUpdateSection: (id: string, updates: Partial<Section>) => void;
+  onSaveProfilePhoto?: (photoUrl: string | null) => Promise<void>;
   profile?: ProfilePreview | null;
 }
 
@@ -21,16 +21,51 @@ export default function BioSidebar({
   returnTab,
   section,
   onUpdateSection,
+  onSaveProfilePhoto,
   profile,
 }: BioSidebarProps) {
-  const queryClient = useQueryClient();
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
 
-  const fullName = section.fullName ?? profile?.fullName ?? "";
+  const savedFullName = section.fullName ?? profile?.fullName ?? "";
+  const [fullNameDraftState, setFullNameDraftState] = useState<{
+    sectionId: string;
+    sourceValue: string;
+    value: string;
+  }>({
+    sectionId: section.id,
+    sourceValue: savedFullName,
+    value: savedFullName,
+  });
+
+  const fullNameDraft =
+    fullNameDraftState.sectionId === section.id &&
+    fullNameDraftState.sourceValue === savedFullName
+      ? fullNameDraftState.value
+      : savedFullName;
+
   const bio = section.bio ?? "";
   const profilePhotoUrl = getImageUrl(profile?.photoUrl);
+  const fullNameError = validateFullName(fullNameDraft);
+
+  const handleFullNameChange = (value: string) => {
+    setFullNameDraftState({
+      sectionId: section.id,
+      sourceValue: savedFullName,
+      value,
+    });
+
+    const validationError = validateFullName(value);
+
+    if (validationError) {
+      return;
+    }
+
+    onUpdateSection(section.id, {
+      fullName: normalizeFullName(value),
+    });
+  };
 
   const handleFileChange = async (
     event: React.ChangeEvent<HTMLInputElement>
@@ -53,13 +88,10 @@ export default function BioSidebar({
       const { url } = await uploadImage(file, "profiles");
       setUploadedImage(url);
       onUpdateSection(section.id, { photoUrl: url } as never);
-      if (profile?.username) {
-        await updateProfile(profile.username, { photoUrl: url });
-        queryClient.invalidateQueries({ queryKey: ["profile", "dashboard"] });
-      }
+      await onSaveProfilePhoto?.(url);
     } catch {
-      // Rollback optimistic image on failure!
       setUploadedImage(prevUploadedImage);
+      onUpdateSection(section.id, { photoUrl: prevUploadedImage } as never);
       toast.error("Failed to upload profile photo.");
     } finally {
       setUploading(false);
@@ -69,7 +101,7 @@ export default function BioSidebar({
   const displayImage = uploadedImage || profilePhotoUrl;
 
   return (
-    <aside className="border-tertiary-b animate-in fade-in bg-background hidden h-full w-72.5 shrink-0 flex-col rounded-2xl border p-6 shadow-sm duration-200 select-none lg:flex">
+    <aside className="border-tertiary-b animate-in fade-in bg-background hidden h-full w-72.5 shrink-0 flex-col border-r p-6 duration-200 select-none lg:flex">
       {/* Back Button */}
       <div className="pb-4">
         <button
@@ -82,7 +114,7 @@ export default function BioSidebar({
       </div>
 
       {/* Tab Content */}
-      <div className="flex-1 overflow-y-auto py-6 pr-1">
+      <div className="profile-builder-scrollbar flex-1 overflow-y-auto py-6 pr-1">
         <div className="flex flex-col gap-6">
           {/* Full name */}
           <div>
@@ -90,18 +122,27 @@ export default function BioSidebar({
               className="text-primary-text mb-2 block text-sm font-semibold"
               htmlFor="bio-fullname"
             >
-              <span className="text-[#D92D20]">*</span> Full name
+              <span className="text-danger-text">*</span> Full name
             </label>
             <input
               type="text"
               id="bio-fullname"
-              value={fullName}
-              onChange={(e) =>
-                onUpdateSection(section.id, { fullName: e.target.value })
-              }
+              value={fullNameDraft}
+              onChange={(e) => handleFullNameChange(e.target.value)}
               placeholder="Enter full name"
-              className="border-tertiary-b focus:border-brand-b bg-background w-full rounded-[10px] border px-4 py-3 text-sm text-[#050505] transition-colors outline-none"
+              aria-invalid={!!fullNameError}
+              className={`bg-background text-primary-text w-full rounded-[10px] border px-4 py-3 text-sm transition-colors outline-none ${
+                fullNameError
+                  ? "border-warning-b focus:border-warning-b"
+                  : "border-tertiary-b focus:border-brand-b"
+              }`}
             />
+
+            {fullNameError && (
+              <p className="text-danger-text mt-1 text-xs font-medium">
+                {fullNameError}
+              </p>
+            )}
           </div>
 
           {/* Bio */}
@@ -110,7 +151,7 @@ export default function BioSidebar({
               className="text-primary-text mb-2 block text-sm font-semibold"
               htmlFor="bio-text"
             >
-              <span className="text-[#D92D20]">*</span> Bio
+              <span className="text-danger-text">*</span> Bio
             </label>
             <textarea
               id="bio-text"
@@ -120,10 +161,18 @@ export default function BioSidebar({
               }
               rows={5}
               placeholder="Write a short bio..."
-              className={`border-tertiary-b focus:border-brand-b bg-background w-full resize-none rounded-[10px] border px-4 py-3 text-sm transition-colors outline-none ${bio.length > 300 ? "border-[#D92D20] text-[#D92D20] focus:border-[#D92D20]" : "text-[#050505]"}`}
+              className={`profile-builder-scrollbar border-tertiary-b focus:border-brand-b bg-background w-full resize-none rounded-[10px] border px-4 py-3 text-sm transition-colors outline-none ${
+                bio.length > 300
+                  ? "border-warning-b text-danger-text focus:border-warning-b"
+                  : "text-primary-text"
+              }`}
             />
             <p
-              className={`mt-1 text-right text-xs ${bio.length > 300 ? "font-medium text-[#D92D20]" : "text-[#A2A2A2]"}`}
+              className={`mt-1 text-right text-xs ${
+                bio.length > 300
+                  ? "text-danger-text font-medium"
+                  : "text-disabled-text"
+              }`}
             >
               {bio.length <= 300
                 ? `${bio.length} / 300 characters`
@@ -141,7 +190,7 @@ export default function BioSidebar({
               <button
                 type="button"
                 onClick={() => !displayImage && fileInputRef.current?.click()}
-                className="flex min-w-0 flex-1 items-center gap-3 p-1 text-left transition-colors hover:bg-[#F8FAFC]"
+                className="hover:bg-primary-foreground-bg flex min-w-0 flex-1 items-center gap-3 p-1 text-left transition-colors"
               >
                 {displayImage ? (
                   <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-full">
@@ -170,25 +219,24 @@ export default function BioSidebar({
                 disabled={uploading}
                 onClick={async () => {
                   if (displayImage) {
-                    setUploadedImage(null);
-                    onUpdateSection(section.id, { photoUrl: null } as never);
-                    if (profile?.username) {
-                      try {
-                        await updateProfile(profile.username, {
-                          photoUrl: null,
-                        });
-                        queryClient.invalidateQueries({
-                          queryKey: ["profile", "dashboard"],
-                        });
-                      } catch {
-                        toast.error("Failed to remove profile photo.");
-                      }
+                    const prevUploadedImage = uploadedImage;
+
+                    try {
+                      setUploadedImage(null);
+                      onUpdateSection(section.id, { photoUrl: null } as never);
+                      await onSaveProfilePhoto?.(null);
+                    } catch {
+                      setUploadedImage(prevUploadedImage);
+                      onUpdateSection(section.id, {
+                        photoUrl: prevUploadedImage,
+                      } as never);
+                      toast.error("Failed to remove profile photo.");
                     }
                   } else {
                     fileInputRef.current?.click();
                   }
                 }}
-                className="text-muted-foreground border-tertiary-b flex w-14 shrink-0 items-center justify-center border-l transition-colors hover:bg-[#F8FAFC] disabled:opacity-50"
+                className="text-muted-foreground border-tertiary-b hover:bg-primary-foreground-bg flex w-14 shrink-0 items-center justify-center border-l transition-colors disabled:opacity-50"
                 aria-label={displayImage ? "Remove image" : "Upload image"}
                 title={
                   uploading
@@ -199,9 +247,9 @@ export default function BioSidebar({
                 }
               >
                 {uploading ? (
-                  <span className="h-4 w-4 animate-spin rounded-full border-2 border-[#087583] border-t-transparent" />
+                  <span className="border-brand-hover-bg h-4 w-4 animate-spin rounded-full border-2 border-t-transparent" />
                 ) : displayImage ? (
-                  <Trash2 size={16} className="text-[#9F2B2B]" />
+                  <Trash2 size={16} className="text-negative-bold-text" />
                 ) : (
                   <Upload size={16} />
                 )}

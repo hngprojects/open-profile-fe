@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { motion } from "motion/react";
 import { useState, useTransition } from "react";
+import Link from "next/link";
 import { toast } from "sonner";
 import { joinWaitlistAction } from "@/app/actions/waitlist";
 import { Button } from "../ui/button";
@@ -80,14 +81,16 @@ export function WaitlistHero() {
 
       {/* Logo */}
       <motion.div {...fadeUp(0)} className="z-10 mt-10 mb-16 md:mb-24">
-        <Image
-          src="/logo.svg"
-          alt="Open Profile"
-          width={170}
-          height={32}
-          className="h-[32px] w-auto"
-          style={{ width: "auto" }}
-        />
+        <Link href="/">
+          <Image
+            src="/logo.svg"
+            alt="Open Profile"
+            width={170}
+            height={32}
+            className="h-[32px] w-auto cursor-pointer"
+            style={{ width: "auto" }}
+          />
+        </Link>
       </motion.div>
 
       {/* Content */}

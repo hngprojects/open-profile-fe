@@ -92,7 +92,7 @@ export function Proof() {
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true, margin: "-100px" }}
-        className="mx-auto mb-10 flex max-w-7xl flex-col items-center px-4 md:px-8"
+        className="mx-auto mb-10 flex w-full max-w-[1100px] flex-col items-center px-4 sm:px-6 lg:px-0"
       >
         <motion.div
           variants={headerVariants}
@@ -104,7 +104,7 @@ export function Proof() {
             width={16}
             height={16}
           />
-          <p className="text-brand font-sfpror text-sm leading-4 font-medium">
+          <p className="text-brand text-sm leading-4 font-medium">
             Social Proof
           </p>
         </motion.div>
@@ -117,40 +117,40 @@ export function Proof() {
         </motion.h2>
       </motion.div>
 
-      {/* Row 1: scrolls left */}
-      <div className="relative mb-4 overflow-hidden mask-[linear-gradient(to_right,transparent,black_10%,black_90%,transparent)]">
-        <motion.div
-          className="flex w-max"
-          animate={{ x: ["0%", "-25%"] }}
-          transition={{
-            duration: 35,
-            ease: "linear",
-            repeat: Infinity,
-            repeatType: "loop",
-          }}
-        >
-          {[...row1, ...row1, ...row1, ...row1].map((t, i) => (
-            <TestimonialCard key={i} t={t} />
-          ))}
-        </motion.div>
-      </div>
+      <div className="mx-auto w-full max-w-[1100px] overflow-hidden px-4 sm:px-6 lg:px-0">
+        <div className="relative mb-4 overflow-hidden mask-[linear-gradient(to_right,transparent,black_10%,black_90%,transparent)]">
+          <motion.div
+            className="flex w-max"
+            animate={{ x: ["0%", "-25%"] }}
+            transition={{
+              duration: 35,
+              ease: "linear",
+              repeat: Infinity,
+              repeatType: "loop",
+            }}
+          >
+            {[...row1, ...row1, ...row1, ...row1].map((t, i) => (
+              <TestimonialCard key={i} t={t} />
+            ))}
+          </motion.div>
+        </div>
 
-      {/* Row 2: scrolls right */}
-      <div className="relative overflow-hidden mask-[linear-gradient(to_right,transparent,black_10%,black_90%,transparent)]">
-        <motion.div
-          className="flex w-max"
-          animate={{ x: ["-25%", "0%"] }}
-          transition={{
-            duration: 35,
-            ease: "linear",
-            repeat: Infinity,
-            repeatType: "loop",
-          }}
-        >
-          {[...row2, ...row2, ...row2, ...row2].map((t, i) => (
-            <TestimonialCard key={i} t={t} />
-          ))}
-        </motion.div>
+        <div className="relative overflow-hidden mask-[linear-gradient(to_right,transparent,black_10%,black_90%,transparent)]">
+          <motion.div
+            className="flex w-max"
+            animate={{ x: ["-25%", "0%"] }}
+            transition={{
+              duration: 35,
+              ease: "linear",
+              repeat: Infinity,
+              repeatType: "loop",
+            }}
+          >
+            {[...row2, ...row2, ...row2, ...row2].map((t, i) => (
+              <TestimonialCard key={i} t={t} />
+            ))}
+          </motion.div>
+        </div>
       </div>
     </section>
   );

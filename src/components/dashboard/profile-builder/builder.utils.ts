@@ -8,6 +8,35 @@ import type {
 import type { Section, SavedLink, ProjectItem } from "./types";
 import { encodeUrlForBackend, decodeUrlForFrontend } from "@/utils/profile";
 
+export function deserializeTitleAndSubtitle(
+  rawTitle: string,
+  defaultTitle: string
+): { title: string; subtitle: string } {
+  if (!rawTitle) {
+    return { title: defaultTitle, subtitle: "" };
+  }
+  if (rawTitle.includes("///")) {
+    const delimiterIndex = rawTitle.indexOf("///");
+    const titlePart = rawTitle.slice(0, delimiterIndex);
+    const subtitlePart = rawTitle.slice(delimiterIndex + 3);
+    return {
+      title: titlePart || defaultTitle,
+      subtitle: subtitlePart || "",
+    };
+  }
+  const isDefaultTitle = [
+    "links",
+    "featured links",
+    "selected projects",
+    "projects",
+    "portfolio",
+  ].includes(rawTitle.toLowerCase().trim());
+  if (isDefaultTitle) {
+    return { title: rawTitle, subtitle: "" };
+  }
+  return { title: defaultTitle, subtitle: rawTitle };
+}
+
 export function contentToSections(
   rawContent: ProfileContentResponse,
   profile: DashboardProfileResponse
@@ -61,12 +90,17 @@ export function contentToSections(
     }
 
     if (key === "links") {
+      const rawTitle = content?.links?.sectionTitle || "Featured Links";
+      const { title, subtitle } = deserializeTitleAndSubtitle(
+        rawTitle,
+        "Featured Links"
+      );
       return {
         id: "links",
-        title: content?.links?.sectionTitle || "Links - Featured Links",
+        title,
         type: "links" as const,
         visible: content?.links?.visible ?? true,
-        subtitle: content?.links?.sectionTitle ?? "",
+        subtitle,
         links: (content?.links?.items ?? []).map(
           (l: Record<string, unknown>) => ({
             ...l,
@@ -101,12 +135,17 @@ export function contentToSections(
     }
 
     if (key === "projects") {
+      const rawTitle = content?.projects?.sectionTitle || "Selected Projects";
+      const { title, subtitle } = deserializeTitleAndSubtitle(
+        rawTitle,
+        "Selected Projects"
+      );
       return {
         id: "projects",
-        title: content?.projects?.sectionTitle || "Projects - Portfolio",
+        title,
         type: "projects" as const,
         visible: content?.projects?.visible ?? true,
-        subtitle: content?.projects?.sectionTitle ?? "",
+        subtitle,
         projects: (content?.projects?.items ?? []).map(
           (p: Record<string, unknown>) => {
             const isHl = String(p.id).startsWith("hl_");
@@ -152,7 +191,7 @@ export function contentToSections(
     return {
       id: "cta",
       title: content?.cta?.title || "Let's build something",
-      type: "experience" as const,
+      type: "cta" as const,
       visible: content?.cta?.visible ?? true,
       subtitle: content?.cta?.subtitle ?? "",
       layout: content?.cta?.layout ?? "1",
@@ -244,14 +283,12 @@ export const isValidUrl = (urlString: string, iconId?: string | null) => {
 export function sectionsToContent(
   sections: Section[]
 ): NonNullable<UpsertDraftRequest["content"]> {
-  const sectionOrder = sections.map((s) =>
-    s.type === "experience" ? "cta" : s.id
-  );
+  const sectionOrder = sections.map((s) => s.id);
 
   const bioSection = sections.find((s) => s.type === "bio");
   const linksSection = sections.find((s) => s.type === "links");
   const projectsSection = sections.find((s) => s.type === "projects");
-  const ctaSection = sections.find((s) => s.type === "experience");
+  const ctaSection = sections.find((s) => s.type === "cta");
 
   const sectionStyleFields = (s: Section) => ({
     ...(s.textColor && { textColor: s.textColor }),
@@ -276,7 +313,7 @@ export function sectionsToContent(
     links: linksSection
       ? {
           visible: linksSection.visible,
-          sectionTitle: linksSection.subtitle ?? "Links",
+          sectionTitle: `${linksSection.title ?? "Featured Links"}///${linksSection.subtitle ?? ""}`,
           items: (linksSection.links ?? []).map((l) => ({
             id: l.id,
             label: l.title || "",
@@ -289,7 +326,7 @@ export function sectionsToContent(
     projects: projectsSection
       ? {
           visible: projectsSection.visible,
-          sectionTitle: projectsSection.subtitle ?? "Projects",
+          sectionTitle: `${projectsSection.title ?? "Selected Projects"}///${projectsSection.subtitle ?? ""}`,
           ...(projectsSection.layout && { layout: projectsSection.layout }),
           ...sectionStyleFields(projectsSection),
           items: (projectsSection.projects ?? []).map((p) => {

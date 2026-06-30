@@ -1,6 +1,6 @@
 import React from "react";
 import Image from "next/image";
-import { ArrowRight, Mail } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 
 import {
   DashboardProfileResponse,
@@ -92,21 +92,30 @@ export default function PortfolioDashboardView({
   }
 
   const rawSections = contentToSections(
-    content || ({ content: {} } as any),
-    profile || ({} as any)
+    content || ({ content: {} } as ProfileContentResponse),
+    profile || ({} as DashboardProfileResponse)
   );
 
   // Patch sections with overrides from profile appearance components
 
+  type ComponentsAppearance = Record<
+    string,
+    Record<string, string | undefined>
+  >;
   const componentsAppearance =
-    (appearance as any)?.components ||
-    (profile as any)?.appearance?.components ||
-    {};
+    ((appearance as Record<string, unknown>)
+      ?.components as ComponentsAppearance) ||
+    ((
+      (profile as unknown as Record<string, unknown>)?.appearance as Record<
+        string,
+        unknown
+      >
+    )?.components as ComponentsAppearance) ||
+    ({} as ComponentsAppearance);
 
   const sections = rawSections.map((section) => {
-    // Map 'experience' section type back to 'cta' for appearance lookups
-    const appearanceKey = section.type === "experience" ? "cta" : section.type;
-    const secAppearance = componentsAppearance[appearanceKey] || {};
+    const appearanceKey = section.type;
+    const secAppearance = componentsAppearance[appearanceKey] ?? {};
     return {
       ...section,
       bgColor:
@@ -121,23 +130,9 @@ export default function PortfolioDashboardView({
         secAppearance.accentColour ||
         secAppearance.iconColor ||
         section.iconColor,
-      font: (secAppearance as any).font || section.font,
+      font: secAppearance.font || section.font,
     };
   });
-
-  const ctaSection = sections.find(
-    (s) => s.type === "experience" || s.type === "cta"
-  );
-
-  const ctaHref = !ctaSection?.url
-    ? null
-    : ctaSection.ctaType === "email"
-      ? `mailto:${ctaSection.url}`
-      : ctaSection.ctaType === "phone"
-        ? `tel:${ctaSection.url}`
-        : ctaSection.ctaType === "whatsapp"
-          ? `https://wa.me/${ctaSection.url.replace(/\D/g, "")}`
-          : sanitizeUrl(ctaSection.url);
 
   return (
     <div className="flex w-full flex-col px-4 sm:px-6">
@@ -150,16 +145,15 @@ export default function PortfolioDashboardView({
 
           if (section.type === "bio") {
             return (
-              <div
+              <section
                 key={section.id}
-                className={`group relative rounded-2xl transition-opacity duration-200 ${section.font ? getFontClass(section.font) : ""}`}
+                className={`group hover:border-border hover:bg-background/50 relative w-full rounded-2xl border border-transparent p-6 transition-colors ${section.font ? getFontClass(section.font) : ""}`}
                 style={getSectionStyle(section)}
               >
                 <header
-                  className="hover:border-border hover:bg-background/50 relative flex w-full flex-col justify-between rounded-2xl border border-transparent transition-colors sm:flex-row sm:items-start"
+                  className="relative flex w-full flex-col justify-between sm:flex-row sm:items-start"
                   style={{
                     gap: "var(--op-spacing, 24px)",
-                    padding: "var(--op-spacing, 24px)",
                   }}
                 >
                   <div
@@ -193,42 +187,14 @@ export default function PortfolioDashboardView({
                       </p>
                     </div>
                   </div>
-
-                  {ctaSection?.visible && ctaHref && (
-                    <a
-                      href={ctaHref}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="border-brand-hover-bg bg-background text-brand-hover-bg hover:bg-brand-hover-bg/5 inline-flex h-9 items-center justify-center gap-2 rounded-md border px-4 text-[13px] font-semibold transition-colors"
-                    >
-                      {ctaSection.iconSrc ? (
-                        <div
-                          className="bg-brand-hover-bg h-4 w-4"
-                          style={{
-                            maskImage: `url(${getImageUrl(ctaSection.iconSrc)})`,
-                            WebkitMaskImage: `url(${getImageUrl(ctaSection.iconSrc)})`,
-                            maskSize: "contain",
-                            WebkitMaskSize: "contain",
-                            maskRepeat: "no-repeat",
-                            WebkitMaskRepeat: "no-repeat",
-                            maskPosition: "center",
-                            WebkitMaskPosition: "center",
-                          }}
-                        />
-                      ) : (
-                        <Mail size={16} />
-                      )}
-                      {ctaSection.buttonText || "Email"}
-                    </a>
-                  )}
                 </header>
 
-                <section className="mt-8 px-6">
-                  <p className="text-secondary-text max-w-3xl text-[15px] leading-relaxed whitespace-pre-wrap">
+                <div className="mt-8">
+                  <p className="text-secondary-text max-w-3xl text-[15px] leading-relaxed break-words whitespace-pre-wrap">
                     {section.bio || "Write a little bit about yourself here..."}
                   </p>
-                </section>
-              </div>
+                </div>
+              </section>
             );
           }
 
@@ -249,9 +215,16 @@ export default function PortfolioDashboardView({
                   return rest;
                 })()}
               >
-                <h2 className="text-tertiary-text mb-4 text-[13px]">
-                  {section.subtitle || "Links"}
-                </h2>
+                <div className="mb-4 flex flex-col gap-1">
+                  <h2 className="text-tertiary-text text-[13px]">
+                    {section.title || "Links"}
+                  </h2>
+                  {section.subtitle && (
+                    <p className="text-secondary-text text-xs">
+                      {section.subtitle}
+                    </p>
+                  )}
+                </div>
                 {links.length > 0 ? (
                   <div
                     className="grid min-w-0 grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4"
@@ -310,107 +283,123 @@ export default function PortfolioDashboardView({
                     return rest;
                   })()}
                 >
-                  <div className="mb-6 flex flex-col gap-1">
-                    {section.title && (
-                      <h2 className="text-primary-text text-[26px] font-bold">
-                        {section.title}
-                      </h2>
-                    )}
-                    {(section.subtitle || !section.title) && (
-                      <h3 className="text-tertiary-text text-[13px]">
-                        {section.subtitle || "Featured Projects"}
-                      </h3>
+                  <div className="mb-4 flex flex-col gap-1">
+                    <h2 className="text-tertiary-text text-[13px]">
+                      {section.title || "Featured Projects"}
+                    </h2>
+                    {section.subtitle && (
+                      <p className="text-secondary-text text-xs">
+                        {section.subtitle}
+                      </p>
                     )}
                   </div>
                   {remainingProjects.length > 0 ? (
                     <div
                       className={`grid gap-6 ${
-                        section.layout === "1"
-                          ? "grid-cols-1"
-                          : section.layout === "3"
-                            ? "grid-cols-1 sm:grid-cols-2"
-                            : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
+                        section.layout === "2"
+                          ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-2"
+                          : "grid-cols-1"
                       }`}
                       style={{
                         gap: section.gap ? `${section.gap}px` : undefined,
                       }}
                     >
-                      {remainingProjects.map(
-                        (project: ProjectItem, idx: number) => {
-                          const numberStr = String(idx + 1).padStart(2, "0");
+                      {remainingProjects.map((project: ProjectItem) => {
+                        const layoutType = section.layout || "2";
+                        const isSideBySide =
+                          layoutType === "3" || layoutType === "4";
+                        const desc = project.description || "";
+                        const newlineIndex = desc.indexOf("\n");
+                        const hasCategory = newlineIndex !== -1;
+                        const categoryText = hasCategory
+                          ? desc.substring(0, newlineIndex)
+                          : "";
+                        const descriptionText = hasCategory
+                          ? desc.substring(newlineIndex + 1)
+                          : desc;
 
-                          const card = (
+                        const card = (
+                          <div
+                            className={`group/proj border-border bg-background flex h-full overflow-hidden rounded-[12px] border shadow-sm transition-shadow hover:shadow-md ${
+                              isSideBySide
+                                ? `flex-col gap-4 p-4 lg:gap-6 lg:p-6 ${
+                                    layoutType === "3"
+                                      ? "md:flex-row md:items-center"
+                                      : "md:flex-row-reverse md:items-center"
+                                  }`
+                                : "flex-col"
+                            }`}
+                          >
                             <div
-                              className={`group/proj border-border bg-background flex h-full overflow-hidden rounded-[12px] border shadow-sm transition-shadow hover:shadow-md ${
-                                section.layout === "1"
-                                  ? "flex-col sm:flex-row"
-                                  : "flex-col"
+                              className={`bg-secondary-bg border-border relative overflow-hidden ${
+                                isSideBySide
+                                  ? "aspect-[16/10] w-full rounded-xl border md:w-[240px] lg:w-[320px]"
+                                  : "aspect-16/10 w-full border-b"
                               }`}
                             >
-                              <div
-                                className={`bg-secondary-bg border-border relative overflow-hidden ${
-                                  section.layout === "1"
-                                    ? "w-full shrink-0 border-b sm:w-[320px] sm:border-r sm:border-b-0"
-                                    : "aspect-16/10 w-full border-b"
-                                }`}
-                              >
-                                {getImageUrl(project.imageSrc) ? (
-                                  <Image
-                                    src={getImageUrl(project.imageSrc) || ""}
-                                    alt={project.title || "Project"}
-                                    fill
-                                    className="object-cover transition-transform duration-500 group-hover/proj:scale-[1.02]"
-                                    unoptimized
-                                  />
-                                ) : (
-                                  <div className="h-full w-full bg-neutral-200 transition-transform duration-500 group-hover/proj:scale-[1.02]" />
-                                )}
-                              </div>
-
-                              <div className="flex flex-1 flex-col p-6">
-                                <div className="mb-1 flex items-start gap-2">
-                                  <span className="text-primary-text text-[16px] font-bold">
-                                    {numberStr}
-                                  </span>
-                                  <h3 className="text-primary-text text-[16px] font-bold">
-                                    {project.title}
-                                  </h3>
-                                </div>
-
-                                {project.description && (
-                                  <p className="text-secondary-text mb-6 ml-6 line-clamp-2 text-[13px]">
-                                    {project.description}
-                                  </p>
-                                )}
-
-                                {project.url && (
-                                  <span className="text-brand-hover-bg mt-auto ml-6 inline-flex items-center gap-1.5 text-[13px] font-bold hover:underline">
-                                    {project.buttonText || "View Project"}
-                                    <ArrowRight size={14} strokeWidth={2.5} />
-                                  </span>
-                                )}
-                              </div>
-                            </div>
-                          );
-
-                          return (
-                            <div key={project.id} className="w-full">
-                              {project.url ? (
-                                <a
-                                  href={sanitizeUrl(project.url)}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="block h-full no-underline"
-                                >
-                                  {card}
-                                </a>
+                              {getImageUrl(project.imageSrc) ? (
+                                <Image
+                                  src={getImageUrl(project.imageSrc) || ""}
+                                  alt={project.title || "Project"}
+                                  fill
+                                  className="object-cover transition-transform duration-500 group-hover/proj:scale-[1.02]"
+                                  unoptimized
+                                />
                               ) : (
-                                <div className="h-full">{card}</div>
+                                <div className="h-full w-full bg-neutral-200 transition-transform duration-500 group-hover/proj:scale-[1.02]" />
                               )}
                             </div>
-                          );
-                        }
-                      )}
+
+                            <div
+                              className={`flex min-w-0 flex-1 flex-col ${
+                                isSideBySide ? "justify-center" : "p-6"
+                              }`}
+                            >
+                              <div className="mb-1 flex items-start gap-2">
+                                <h3 className="text-primary-text text-[16px] font-bold">
+                                  {project.title}
+                                </h3>
+                              </div>
+
+                              {hasCategory && (
+                                <span className="text-brand-hover-bg text-[12px] font-semibold">
+                                  {categoryText}
+                                </span>
+                              )}
+
+                              {descriptionText && (
+                                <p className="text-secondary-text mb-6 line-clamp-2 text-[13px]">
+                                  {descriptionText}
+                                </p>
+                              )}
+
+                              {project.url && (
+                                <span className="text-brand-hover-bg mt-auto inline-flex items-center gap-1.5 text-[13px] font-bold hover:underline">
+                                  {project.buttonText || "View Project"}
+                                  <ArrowRight size={14} strokeWidth={2.5} />
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        );
+
+                        return (
+                          <div key={project.id} className="w-full">
+                            {project.url ? (
+                              <a
+                                href={sanitizeUrl(project.url)}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="block h-full no-underline"
+                              >
+                                {card}
+                              </a>
+                            ) : (
+                              <div className="h-full">{card}</div>
+                            )}
+                          </div>
+                        );
+                      })}
                     </div>
                   ) : (
                     <p className="text-tertiary-text border-border rounded-xl border border-dashed py-4 text-center text-sm">
@@ -422,7 +411,7 @@ export default function PortfolioDashboardView({
             );
           }
 
-          if (section.type === "experience") {
+          if (section.type === "cta") {
             return (
               <section
                 key={section.id}
@@ -468,7 +457,7 @@ export default function PortfolioDashboardView({
                     }
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="bg-brand-hover-bg hover:bg-button-brand-bg inline-flex h-12 items-center justify-center rounded-xl px-8 text-[15px] font-bold text-white shadow-sm transition-all"
+                    className="op-brand-fill bg-brand-hover-bg hover:bg-button-brand-bg inline-flex h-12 items-center justify-center rounded-xl px-8 text-[15px] font-bold text-white shadow-sm transition-all"
                   >
                     {section.buttonText || "Let's Connect"}
                   </a>

@@ -33,34 +33,46 @@ export default function HighlightPreviewCard({
       : getImageUrl(rawImageSrc)
     : null;
 
+  const containerClass =
+    variant === "default"
+      ? "border-border bg-background w-full rounded-2xl border p-6 shadow-sm"
+      : "group hover:border-border hover:bg-background/50 relative w-full rounded-2xl border border-transparent p-6 transition-colors";
+
   return (
     <section
-      className={`${variant === "default" ? "border-border bg-background rounded-[12px] border p-4 shadow-sm sm:p-6" : ""} transition-opacity duration-200 ${!projectsSection?.visible ? "opacity-50 grayscale" : ""} ${projectsSection?.font ? getFontClass(projectsSection.font) : ""}`}
+      className={`${containerClass} transition-opacity duration-200 ${!projectsSection?.visible ? "opacity-50 grayscale" : ""} ${projectsSection?.font ? getFontClass(projectsSection.font) : ""}`}
       style={projectsSection ? getSectionStyle(projectsSection) : undefined}
     >
-      <h2 className="text-xl font-bold">Highlight</h2>
-      <div className="mt-4 flex flex-col gap-6 md:flex-row md:items-center">
-        <div className="bg-secondary-bg flex flex-1 justify-center overflow-hidden rounded-[12px] p-4">
+      {variant === "default" && (
+        <h2 className="text-primary-text mb-6 text-[20px] font-bold tracking-tight">
+          Highlight
+        </h2>
+      )}
+      <div className="flex flex-col gap-4 xl:flex-row xl:items-center 2xl:gap-6">
+        <div className="bg-secondary-bg border-border relative aspect-[16/10] w-full shrink-0 overflow-hidden rounded-xl border xl:w-[240px] 2xl:w-[320px]">
           {displayImg ? (
             <Image
               src={displayImg}
               alt={highlightedProject.title ?? "Project highlight"}
-              width={160}
-              height={120}
-              className="h-auto w-full max-w-[160px] rounded-[12px] object-cover"
+              fill
+              className="object-cover transition-transform duration-500 hover:scale-[1.02]"
               unoptimized
             />
           ) : (
-            <div className="text-tertiary-text flex h-[120px] w-full max-w-[160px] items-center justify-center rounded-[12px] bg-neutral-200 text-sm">
+            <div
+              className={`${
+                variant === "default" ? "bg-background" : "bg-neutral-200"
+              } text-tertiary-text flex h-full w-full items-center justify-center text-sm`}
+            >
               No image
             </div>
           )}
         </div>
-        <div className="min-w-0 flex-1">
-          <h3 className="text-xl font-bold wrap-break-word">
+        <div className="flex min-w-0 flex-1 flex-col items-start">
+          <h3 className="text-primary-text text-[20px] font-bold wrap-break-word">
             {highlightedProject.title}
           </h3>
-          <p className="text-secondary-text mt-2 text-sm wrap-break-word">
+          <p className="text-secondary-text mt-3 text-[14px] leading-relaxed wrap-break-word">
             {highlightedProject.description}
           </p>
           {highlightedProject.url && (
@@ -68,7 +80,7 @@ export default function HighlightPreviewCard({
               href={sanitizeUrl(highlightedProject.url)}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-brand-hover-bg mt-4 flex items-center gap-1 text-sm font-semibold hover:underline"
+              className="op-brand-fill bg-brand-hover-bg hover:bg-button-brand-bg mt-6 inline-flex h-11 items-center justify-center gap-2 rounded-xl px-5 text-[14px] font-bold text-white shadow-sm transition-all"
             >
               {highlightedProject.buttonText || "View project"}
               <ExternalLink size={16} />

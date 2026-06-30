@@ -17,6 +17,7 @@ import {
 } from "@/api/profile/profile.options";
 import { isApiError } from "@/api/base";
 import { uploadImage } from "@/api/uploads/uploads.service";
+import { isValidFullName, normalizeFullName } from "@/utils/nameValidation";
 
 type UsernameStatus = "available" | "taken" | "error" | "checking" | "";
 
@@ -26,8 +27,7 @@ export default function CreateProfileForm() {
   const [currentStep, setCurrentStep] = useState(1);
   const [username, setUsername] = useState("");
   const [bio, setBio] = useState("");
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
+  const [fullName, setFullName] = useState("");
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [photoUrl, setPhotoUrl] = useState("");
   const [isUploadingImage, setIsUploadingImage] = useState(false);
@@ -87,10 +87,11 @@ export default function CreateProfileForm() {
   });
 
   async function submitProfile() {
+    const normalizedFullName = normalizeFullName(fullName);
+
     if (
       currentStep !== 2 ||
-      !firstName.trim() ||
-      !lastName.trim() ||
+      !isValidFullName(normalizedFullName) ||
       !bio.trim() ||
       bio.length > 300
     )
@@ -103,17 +104,23 @@ export default function CreateProfileForm() {
         const { url } = await uploadImage(photoFile, "profiles");
         finalPhotoUrl = url;
         setPhotoUrl(url);
-      } catch {
-        toast.error("Failed to upload photo. You can try again later.");
+      } catch (error: unknown) {
+        toast.error(
+          isApiError(error)
+            ? error.message
+            : error instanceof Error
+              ? error.message
+              : "Failed to upload photo. Please check the selected image and try again."
+        );
         setIsUploadingImage(false);
-        return; // Halt if upload fails to ensure we don't create profile without requested photo
+        return;
       }
       setIsUploadingImage(false);
     }
 
     createProfile.mutate({
       username,
-      fullName: `${firstName.trim()} ${lastName.trim()}`,
+      fullName: normalizedFullName,
       bio,
       ...(finalPhotoUrl && finalPhotoUrl.startsWith("http")
         ? { photoUrl: finalPhotoUrl }
@@ -125,6 +132,10 @@ export default function CreateProfileForm() {
     e.preventDefault();
     submitProfile();
   }
+
+  const normalizedFullName = normalizeFullName(fullName);
+  const [firstName = "", ...otherNames] = normalizedFullName.split(" ");
+  const lastName = otherNames.join(" ");
 
   return (
     <AuthLayout>
@@ -158,10 +169,8 @@ export default function CreateProfileForm() {
           <CreateProfileInfo
             bio={bio}
             onUpdateBio={(e) => setBio(e.target.value)}
-            firstName={firstName}
-            lastName={lastName}
-            onUpdateFirstName={(e) => setFirstName(e.target.value)}
-            onUpdateLastName={(e) => setLastName(e.target.value)}
+            fullName={fullName}
+            onUpdateFullName={(e) => setFullName(e.target.value)}
             onUpdateStep={submitProfile}
             isPending={createProfile.isPending || isUploadingImage}
             photoUrl={photoUrl}

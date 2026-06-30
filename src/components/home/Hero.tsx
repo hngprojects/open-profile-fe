@@ -25,7 +25,7 @@ const profiles = [
     mobileImg: "/hero/mobile-profilei.jpg",
   },
   {
-    name: "David Mensah",
+    name: "Sandra Mensah",
     role: "Indie Hacker • Solo Founder",
     img: "/hero/large-profile2.jpg",
     mobileImg: "/hero/mobile-profileii.jpg",
@@ -109,14 +109,11 @@ export function Hero() {
 
   return (
     <section className="w-full overflow-hidden bg-white">
-      <div className="max-w-9xl relative mx-auto flex flex-col items-start gap-8 px-6 pt-[60px] pb-[40px] md:px-12 md:pt-[80px] lg:flex-row lg:items-center lg:gap-4 lg:px-16 xl:px-[125px]">
-        {/* ───────────────── LEFT COLUMN ───────────────── */}
+      <div className="relative mx-auto flex w-full max-w-[1100px] flex-col items-start gap-8 px-4 pt-[60px] pb-[40px] sm:px-6 md:pt-[80px] lg:flex-row lg:items-center lg:gap-4 lg:px-0">
         <div className="z-10 flex w-full shrink-0 flex-col gap-4 lg:max-w-[450px] xl:max-w-[500px]">
-          {/* Heading */}
           <motion.h1
             {...fadeUp(0.05)}
             className="text-primary-text text-[38px] leading-[1.12] font-semibold tracking-[-1px] sm:text-[46px] md:text-[56px]"
-            style={{ fontFamily: "'Afacad', sans-serif" }}
           >
             Create{" "}
             <span className="relative mx-2 inline-block">
@@ -133,27 +130,21 @@ export function Hero() {
             Searchable Profile People Can Find And Trust
           </motion.h1>
 
-          {/* Subtext */}
           <motion.p
             {...fadeUp(0.12)}
             className="text-primary-text max-w-[538px] text-[16px] leading-[26px] font-normal md:text-[18px]"
-            style={{ fontFamily: "'Afacad', sans-serif" }}
           >
             Turn your scattered online presence into one searchable profile that
             can show who you are, what you do, and why people should trust you.
           </motion.p>
 
-          {/* Search */}
           <motion.div
             {...fadeUp(0.2)}
             className="relative flex w-full max-w-[512px] flex-col items-stretch gap-1.75 sm:flex-row"
             ref={searchContainerRef}
           >
             <div className="border-secondary-b bg-primary-bg focus-within:ring-brand-hover-bg/40 relative flex h-12 min-h-12 flex-1 items-center rounded-[5.57px] border px-3.5 focus-within:ring-2 lg:h-12.5 lg:min-h-12.5">
-              <span
-                className="text-label-text shrink-0 text-[16px] leading-6 select-none"
-                style={{ fontFamily: "'Afacad', sans-serif" }}
-              >
+              <span className="text-label-text shrink-0 text-[16px] leading-6 select-none">
                 {displayUrl}/
               </span>
               <input
@@ -164,7 +155,6 @@ export function Hero() {
                 onKeyDown={(e) => e.key === "Enter" && handleSearch()}
                 placeholder="Search by name or username..."
                 className="text-label-text placeholder:text-secondary-b h-full min-w-0 flex-1 bg-transparent pl-1 text-[16px] leading-6 outline-none disabled:opacity-50"
-                style={{ fontFamily: "'Afacad', sans-serif" }}
               />
               {isFetching && debouncedQuery.trim().length >= 3 && (
                 <Loader2 className="ml-2 h-4 w-4 shrink-0 animate-spin text-[#666]" />
@@ -174,12 +164,10 @@ export function Hero() {
               onClick={handleSearch}
               disabled={query.trim().length < 3}
               className="bg-link-hover-text hover:bg-button-brand-bg h-12 w-full rounded-[8px] px-4 text-[16px] leading-6 whitespace-nowrap text-white transition-colors disabled:cursor-not-allowed disabled:bg-[#E5E5E5] disabled:text-[#A3A3A3] sm:w-auto lg:h-12.5"
-              style={{ fontFamily: "'Afacad', sans-serif" }}
             >
               Search a Profile
             </Button>
 
-            {/* Dropdown */}
             <AnimatePresence>
               {showDropdown && (
                 <motion.div
@@ -190,17 +178,11 @@ export function Hero() {
                   className="border-border absolute top-full left-0 z-50 mt-2 w-full overflow-hidden rounded-lg border bg-white shadow-lg"
                 >
                   {isSearchPending && searchResults.length === 0 ? (
-                    <div
-                      className="text-secondary-text p-4 text-center text-sm"
-                      style={{ fontFamily: "'Afacad', sans-serif" }}
-                    >
+                    <div className="text-secondary-text p-4 text-center text-sm">
                       Searching...
                     </div>
                   ) : searchResults.length === 0 ? (
-                    <div
-                      className="text-secondary-text p-4 text-center text-sm"
-                      style={{ fontFamily: "'Afacad', sans-serif" }}
-                    >
+                    <div className="text-secondary-text p-4 text-center text-sm">
                       No profiles found for &quot;{debouncedQuery}&quot;.
                     </div>
                   ) : (
@@ -234,18 +216,12 @@ export function Hero() {
                             </AvatarFallback>
                           </Avatar>
                           <div className="flex flex-col overflow-hidden">
-                            <span
-                              className="text-primary-text truncate text-[15px] font-semibold"
-                              style={{ fontFamily: "'Afacad', sans-serif" }}
-                            >
+                            <span className="text-primary-text truncate text-[15px] font-semibold">
                               {result.fullName ||
                                 result.name ||
                                 result.username}
                             </span>
-                            <span
-                              className="text-secondary-text truncate text-[13px]"
-                              style={{ fontFamily: "'Afacad', sans-serif" }}
-                            >
+                            <span className="text-secondary-text truncate text-[13px]">
                               @{result.username}
                             </span>
                           </div>
@@ -255,7 +231,6 @@ export function Hero() {
                         href={`/search?q=${encodeURIComponent(debouncedQuery)}`}
                         onClick={() => setInputFocused(false)}
                         className="border-border border-t bg-[#FEFEFE] p-3 text-center text-[14px] font-medium text-[#087583] transition-colors hover:bg-[#FAFAFA]"
-                        style={{ fontFamily: "'Afacad', sans-serif" }}
                       >
                         {remainingCount > 0
                           ? `${remainingCount} more results, see more...`
@@ -268,7 +243,6 @@ export function Hero() {
             </AnimatePresence>
           </motion.div>
 
-          {/* Character Hint */}
           <AnimatePresence>
             {query.trim().length > 0 && query.trim().length < 3 && (
               <motion.div
@@ -276,7 +250,6 @@ export function Hero() {
                 animate={{ opacity: 1, height: "auto" }}
                 exit={{ opacity: 0, height: 0 }}
                 className="mt-1 ml-1 flex items-center gap-1.5 overflow-hidden text-[13px] text-[#FF3158]"
-                style={{ fontFamily: "'Afacad', sans-serif" }}
               >
                 <AlertCircle size={14} />
                 <span>Please enter at least 3 characters to search</span>
@@ -284,7 +257,6 @@ export function Hero() {
             )}
           </AnimatePresence>
 
-          {/* Social proof */}
           <motion.div
             {...fadeUp(0.28)}
             className="mt-4 flex flex-row items-center gap-3"
@@ -314,19 +286,14 @@ export function Hero() {
                 </div>
               ))}
             </div>
-            <p
-              className="text-secondary-text text-[14px] leading-[24px] font-normal md:text-[16px]"
-              style={{ fontFamily: "'Afacad', sans-serif" }}
-            >
+            <p className="text-secondary-text text-[14px] leading-[24px] font-normal md:text-[16px]">
               Join over Creators and freelancers that trusts us all over the
               world.
             </p>
           </motion.div>
         </div>
 
-        {/* ───────────────── RIGHT COLUMN — desktop only ───────────────── */}
         <div className="relative hidden w-full flex-1 overflow-visible lg:block">
-          {/* LEFT fade */}
           <div
             style={{
               position: "absolute",
@@ -340,7 +307,7 @@ export function Hero() {
               pointerEvents: "none",
             }}
           />
-          {/* RIGHT fade */}
+
           <div
             style={{
               position: "absolute",
@@ -392,10 +359,7 @@ export function Hero() {
                       />
                       <div className="absolute bottom-0 left-0 z-10 flex flex-col gap-1 p-[15px_18px]">
                         <div className="flex items-center gap-1">
-                          <span
-                            className="text-span-text text-[20px] leading-[26px] font-bold"
-                            style={{ fontFamily: "'Afacad', sans-serif" }}
-                          >
+                          <span className="text-span-text text-[20px] leading-[26px] font-bold">
                             {p.name}
                           </span>
                           <CircleCheck
@@ -403,10 +367,7 @@ export function Hero() {
                             style={{ color: "#98FAC3" }}
                           />
                         </div>
-                        <span
-                          className="text-span-text-100 text-[14px] leading-[24px] font-medium"
-                          style={{ fontFamily: "'Afacad', sans-serif" }}
-                        >
+                        <span className="text-span-text-100 text-[14px] leading-[24px] font-medium">
                           {p.role}
                         </span>
                       </div>
@@ -418,9 +379,7 @@ export function Hero() {
           </div>
         </div>
 
-        {/* ───────────────── MOBILE CARDS ───────────────── */}
         <div className="relative w-full lg:hidden">
-          {/* LEFT fade */}
           <div
             style={{
               position: "absolute",
@@ -434,7 +393,7 @@ export function Hero() {
               pointerEvents: "none",
             }}
           />
-          {/* RIGHT fade */}
+
           <div
             style={{
               position: "absolute",
@@ -489,10 +448,7 @@ export function Hero() {
                   />
                   <div className="absolute bottom-0 left-0 z-10 flex flex-col gap-0.5 p-[10px_12px]">
                     <div className="flex items-center gap-1">
-                      <span
-                        className="text-span-text text-[13px] leading-[18px] font-bold whitespace-nowrap"
-                        style={{ fontFamily: "'Afacad', sans-serif" }}
-                      >
+                      <span className="text-span-text text-[13px] leading-[18px] font-bold whitespace-nowrap">
                         {p.name}
                       </span>
                       <CircleCheck
@@ -500,10 +456,7 @@ export function Hero() {
                         style={{ color: "#98FAC3" }}
                       />
                     </div>
-                    <span
-                      className="text-span-text-100 text-[11px] leading-[16px] font-medium whitespace-nowrap"
-                      style={{ fontFamily: "'Afacad', sans-serif" }}
-                    >
+                    <span className="text-span-text-100 text-[11px] leading-[16px] font-medium whitespace-nowrap">
                       {p.role}
                     </span>
                   </div>
@@ -514,7 +467,7 @@ export function Hero() {
         </div>
       </div>
 
-      <div className="hidden px-[125px] pt-[40px] pb-[80px] lg:block">
+      <div className="mx-auto hidden w-full max-w-[1100px] pt-[40px] pb-[80px] lg:block">
         <div className="border-secondary-b border-t" />
       </div>
     </section>

@@ -3,21 +3,18 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import { Reorder, useDragControls } from "motion/react";
-import {
-  ChevronLeft,
-  Search,
-  Plus,
-  GripVertical,
-  Trash2,
-  Eye,
-  EyeOff,
-} from "lucide-react";
+import { ChevronLeft, Search, Plus, GripVertical } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import LinkSidebar from "./LinkSidebar";
 import BioSidebar from "./BioSidebar";
 import ProjectsSidebar from "./ProjectsSidebar";
 import CtaSidebar from "./CtaSidebar";
-import type { Section, ProfilePreview } from "./types";
+import {
+  SECTION_TYPE,
+  type Section,
+  type ProfilePreview,
+  type SectionType,
+} from "./types";
 
 interface LeftSidebarProps {
   sections: Section[];
@@ -26,25 +23,27 @@ interface LeftSidebarProps {
   initialEditingSectionId?: string | null;
   onSelectSection: (id: string) => void;
   onDeselectSection: () => void;
-  onAddSection: (title: string, type: string) => void;
+  onAddSection: (title: string, type: SectionType) => void;
   onRemoveSection: (id: string) => void;
   onToggleSectionVisibility: (id: string) => void;
   onReorderSections: (sections: Section[]) => void;
   onUpdateSection: (id: string, updates: Partial<Section>) => void;
-  profile?: {
-    fullName?: string;
-  } | null;
+  onSaveProfilePhoto?: (photoUrl: string | null) => Promise<void>;
+  profile?: ProfilePreview | null;
 }
+
+const SECTION_STATIC_LABELS: Record<string, string> = {
+  [SECTION_TYPE.BIO]: "Bio",
+  [SECTION_TYPE.LINKS]: "Links",
+  [SECTION_TYPE.PROJECTS]: "Projects",
+  [SECTION_TYPE.CTA]: "CTA",
+};
 
 function getDisplayTitle(
   section: Section,
-  profile: ProfilePreview | null | undefined
+  _profile: ProfilePreview | null | undefined
 ) {
-  const isBioTitle =
-    section.title === "Bio - John Smith" || section.title === "Bio";
-  return section.type === "bio" && isBioTitle && profile?.fullName
-    ? `Bio - ${profile.fullName}`
-    : section.title;
+  return SECTION_STATIC_LABELS[section.type] ?? section.title;
 }
 
 export default function LeftSidebar({
@@ -55,10 +54,9 @@ export default function LeftSidebar({
   onSelectSection,
   onDeselectSection,
   onAddSection,
-  onRemoveSection,
-  onToggleSectionVisibility,
   onReorderSections,
   onUpdateSection,
+  onSaveProfilePhoto,
   profile,
 }: LeftSidebarProps) {
   const [searchQuery, setSearchQuery] = useState("");
@@ -68,23 +66,22 @@ export default function LeftSidebar({
   );
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setEditingSectionId(initialEditingSectionId ?? null);
-  }, [initialEditingSectionId]);
+    const sectionToEdit = selectedSectionId ?? initialEditingSectionId ?? null;
 
-  const [newExpRole, setNewExpRole] = useState("");
-  const [newExpCompany, setNewExpCompany] = useState("");
-  const [newExpDuration, setNewExpDuration] = useState("");
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setEditingSectionId(sectionToEdit);
+  }, [initialEditingSectionId, selectedSectionId]);
+
+  const [linkSidebarOpen, setLinkSidebarOpen] = useState(false);
 
   const editingSection =
     sections.find((section) => section.id === editingSectionId) ?? null;
 
   function getSectionDescriptor(section: Section) {
-    if (section.type === "bio") return "Add name";
-    if (section.type === "links") return "Add links";
-    if (section.type === "projects") return "Add projects";
-    if (section.type === "experience") return "Add CTA";
-    if (section.type === "cta") return "Add CTA";
+    if (section.type === SECTION_TYPE.BIO) return "Add name";
+    if (section.type === SECTION_TYPE.LINKS) return "Add links";
+    if (section.type === SECTION_TYPE.PROJECTS) return "Add projects";
+    if (section.type === SECTION_TYPE.CTA) return "Add CTA";
 
     return "Customize section";
   }
@@ -98,33 +95,45 @@ export default function LeftSidebar({
     setEditingSectionId(null);
     onDeselectSection();
   }
-  const [linkSidebarOpen, setLinkSidebarOpen] = useState(false);
 
-  const filteredSections = sections.filter((section) => {
+  const orderedSections = [
+    ...sections.filter((section) => section.type === SECTION_TYPE.BIO),
+    ...sections.filter((section) => section.type !== SECTION_TYPE.BIO),
+  ];
+
+  const filteredSections = orderedSections.filter((section) => {
     const displayTitle = getDisplayTitle(section, profile);
     return displayTitle.toLowerCase().includes(searchQuery.toLowerCase());
   });
 
-  const handleSelectCard = (title: string, type: string) => {
+  const handleSelectCard = (title: string, type: SectionType) => {
     onAddSection(title, type);
     setIsAddingSection(false);
   };
 
-  const isLinksDisabled = sections.some((s) => s.type === "links");
-  const isBioDisabled = sections.some((s) => s.type === "bio");
-  const isProjectsDisabled = sections.some((s) => s.type === "projects");
-  const isCtaDisabled = sections.some((s) => s.type === "experience");
+  const isLinksDisabled = sections.some(
+    (section) => section.type === SECTION_TYPE.LINKS
+  );
+  const isBioDisabled = sections.some(
+    (section) => section.type === SECTION_TYPE.BIO
+  );
+  const isProjectsDisabled = sections.some(
+    (section) => section.type === SECTION_TYPE.PROJECTS
+  );
+  const isCtaDisabled = sections.some(
+    (section) => section.type === SECTION_TYPE.CTA
+  );
   const isDisabled = isLinksDisabled;
 
   const handleSwitchToAddLinkSection = () => {
-    handleSelectCard("Links", "links");
+    handleSelectCard("Links", SECTION_TYPE.LINKS);
     setIsAddingSection(false);
     setLinkSidebarOpen(true);
   };
 
   if (isAddingSection) {
     return (
-      <aside className="border-tertiary-b animate-in fade-in bg-background hidden h-full w-[260px] shrink-0 flex-col rounded-2xl border p-6 shadow-sm duration-200 select-none lg:flex xl:w-[290px]">
+      <aside className="border-tertiary-b animate-in fade-in bg-background hidden h-full w-[260px] shrink-0 flex-col border-r p-6 duration-200 select-none lg:flex xl:w-[290px]">
         {/* Back Button */}
         <div className="mb-6">
           <button
@@ -145,11 +154,11 @@ export default function LeftSidebar({
         </div>
 
         {/* Grid outline of Cards */}
-        <div className="grid auto-rows-max grid-cols-2 gap-4 overflow-y-auto pr-1">
+        <div className="profile-builder-scrollbar grid auto-rows-max grid-cols-2 gap-4 overflow-y-auto pr-1">
           {/* Card 1: Bio */}
           <button
             type="button"
-            onClick={() => handleSelectCard("Bio", "bio")}
+            onClick={() => handleSelectCard("Bio", SECTION_TYPE.BIO)}
             disabled={isBioDisabled}
             className={`group border-tertiary-b bg-background flex h-35 w-full flex-col overflow-hidden rounded-[16px] border text-left transition-all duration-200 ${isBioDisabled ? "bg-secondary-bg cursor-not-allowed opacity-70" : "hover:border-brand-b cursor-pointer hover:shadow-sm"}`}
           >
@@ -201,7 +210,7 @@ export default function LeftSidebar({
           {/* Card 3: Portfolio */}
           <button
             type="button"
-            onClick={() => handleSelectCard("Portfolio", "projects")}
+            onClick={() => handleSelectCard("Portfolio", SECTION_TYPE.PROJECTS)}
             disabled={isProjectsDisabled}
             className={`group border-tertiary-b bg-background flex h-35 w-full flex-col overflow-hidden rounded-[16px] border text-left transition-all duration-200 ${isProjectsDisabled ? "bg-secondary-bg cursor-not-allowed opacity-70" : "hover:border-brand-b cursor-pointer hover:shadow-sm"}`}
           >
@@ -222,7 +231,7 @@ export default function LeftSidebar({
           {/* Card 4: CTA */}
           <button
             type="button"
-            onClick={() => handleSelectCard("CTA", "experience")}
+            onClick={() => handleSelectCard("CTA", SECTION_TYPE.CTA)}
             disabled={isCtaDisabled}
             className={`group border-tertiary-b bg-background flex h-35 w-full flex-col overflow-hidden rounded-[16px] border text-left transition-all duration-200 ${isCtaDisabled ? "bg-secondary-bg cursor-not-allowed opacity-70" : "hover:border-brand-b cursor-pointer hover:shadow-sm"}`}
           >
@@ -245,18 +254,19 @@ export default function LeftSidebar({
   }
 
   if (editingSection) {
-    if (editingSection.type === "bio") {
+    if (editingSection.type === SECTION_TYPE.BIO) {
       return (
         <BioSidebar
           returnTab={handleReturnToList}
           section={editingSection}
           onUpdateSection={onUpdateSection}
+          onSaveProfilePhoto={onSaveProfilePhoto}
           profile={profile}
         />
       );
     }
 
-    if (editingSection.type === "links") {
+    if (editingSection.type === SECTION_TYPE.LINKS) {
       return (
         <LinkSidebar
           returnTab={handleReturnToList}
@@ -266,7 +276,7 @@ export default function LeftSidebar({
       );
     }
 
-    if (editingSection.type === "projects") {
+    if (editingSection.type === SECTION_TYPE.PROJECTS) {
       return (
         <ProjectsSidebar
           returnTab={handleReturnToList}
@@ -276,7 +286,7 @@ export default function LeftSidebar({
       );
     }
 
-    if (editingSection.type === "experience" || editingSection.type === "cta") {
+    if (editingSection.type === SECTION_TYPE.CTA) {
       return (
         <CtaSidebar
           returnTab={handleReturnToList}
@@ -287,7 +297,7 @@ export default function LeftSidebar({
     }
 
     return (
-      <aside className="border-tertiary-b animate-in fade-in bg-background flex h-full w-[260px] shrink-0 flex-col rounded-2xl border p-6 shadow-sm duration-200 select-none xl:w-[290px]">
+      <aside className="border-tertiary-b animate-in fade-in bg-background flex h-full w-[260px] shrink-0 flex-col border-r p-6 duration-200 select-none xl:w-[290px]">
         <div className="mb-6">
           <button
             type="button"
@@ -296,7 +306,9 @@ export default function LeftSidebar({
           >
             <ChevronLeft size={20} />
             <span>
-              {editingSection.type === "bio" ? "Bio" : editingSection.title}
+              {editingSection.type === SECTION_TYPE.BIO
+                ? "Bio"
+                : editingSection.title}
             </span>
           </button>
         </div>
@@ -327,14 +339,16 @@ export default function LeftSidebar({
               }
               className="border-border bg-background text-primary-text focus:border-brand-hover-bg w-full rounded-[10px] border px-4 py-3 text-sm font-semibold outline-none"
             >
-              <option value="bio">Bio / Header</option>
-              <option value="links">Links</option>
-              <option value="projects">Projects / Portfolio</option>
-              <option value="experience">CTA / Experience</option>
+              <option value={SECTION_TYPE.BIO}>Bio / Header</option>
+              <option value={SECTION_TYPE.LINKS}>Links</option>
+              <option value={SECTION_TYPE.PROJECTS}>
+                Projects / Portfolio
+              </option>
+              <option value={SECTION_TYPE.CTA}>CTA</option>
             </select>
           </div>
 
-          {editingSection.type === "bio" && (
+          {editingSection.type === SECTION_TYPE.BIO && (
             <div className="border-secondary-b rounded-[12px] border border-dashed p-4">
               <label className="text-primary-text mb-2 block text-sm font-bold">
                 Full name
@@ -373,112 +387,10 @@ export default function LeftSidebar({
             </div>
           )}
 
-          {editingSection.type === "experience" && (
-            <div className="border-secondary-b flex flex-col gap-4 rounded-[12px] border border-dashed p-4">
-              <h4 className="text-primary-text text-sm font-bold">
-                Experience / CTA List
-              </h4>
-
-              {/* Existing Experience Items */}
-              <div className="flex max-h-48 flex-col gap-2 overflow-y-auto">
-                {editingSection.experience &&
-                editingSection.experience.length > 0 ? (
-                  editingSection.experience.map((exp) => (
-                    <div
-                      key={exp.id}
-                      className="bg-secondary-bg flex items-center justify-between rounded-lg border p-2"
-                    >
-                      <div className="min-w-0 flex-1">
-                        <p className="truncate text-xs font-semibold">
-                          {exp.role} at {exp.company}
-                        </p>
-                        <p className="text-secondary-text truncate text-[10px]">
-                          {exp.duration}
-                        </p>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          const updated = (
-                            editingSection.experience || []
-                          ).filter((e) => e.id !== exp.id);
-                          onUpdateSection(editingSection.id, {
-                            experience: updated,
-                          });
-                        }}
-                        className="shrink-0 p-1 text-red-500 hover:text-red-700"
-                        title="Delete experience"
-                      >
-                        <Trash2 size={14} />
-                      </button>
-                    </div>
-                  ))
-                ) : (
-                  <p className="text-secondary-text py-2 text-center text-xs italic">
-                    No items added yet.
-                  </p>
-                )}
-              </div>
-
-              {/* Add New Experience Form */}
-              <div className="flex flex-col gap-2 border-t pt-3">
-                <h5 className="text-secondary-text text-xs font-bold">
-                  Add New Experience
-                </h5>
-                <input
-                  type="text"
-                  placeholder="Role/Title * (e.g. Lead Designer)"
-                  value={newExpRole}
-                  onChange={(e) => setNewExpRole(e.target.value)}
-                  className="border-border focus:border-brand-hover-bg w-full rounded-[8px] border px-3 py-2 text-xs outline-none"
-                />
-                <input
-                  type="text"
-                  placeholder="Company Name * (e.g. Acme Corp)"
-                  value={newExpCompany}
-                  onChange={(e) => setNewExpCompany(e.target.value)}
-                  className="border-border focus:border-brand-hover-bg w-full rounded-[8px] border px-3 py-2 text-xs outline-none"
-                />
-                <input
-                  type="text"
-                  placeholder="Duration * (e.g. 2024 - Present)"
-                  value={newExpDuration}
-                  onChange={(e) => setNewExpDuration(e.target.value)}
-                  className="border-border focus:border-brand-hover-bg w-full rounded-[8px] border px-3 py-2 text-xs outline-none"
-                />
-                <Button
-                  type="button"
-                  onClick={() => {
-                    if (!newExpRole || !newExpCompany || !newExpDuration)
-                      return;
-                    const newItem = {
-                      id: Math.random().toString(36).substr(2, 9),
-                      role: newExpRole,
-                      company: newExpCompany,
-                      duration: newExpDuration,
-                    };
-                    const updated = [
-                      ...(editingSection.experience || []),
-                      newItem,
-                    ];
-                    onUpdateSection(editingSection.id, { experience: updated });
-                    setNewExpRole("");
-                    setNewExpCompany("");
-                    setNewExpDuration("");
-                  }}
-                  disabled={!newExpRole || !newExpCompany || !newExpDuration}
-                  className="bg-brand-hover-bg hover:bg-button-brand-bg h-8 w-full rounded-[6px] text-xs text-white"
-                >
-                  Add Experience
-                </Button>
-              </div>
-            </div>
-          )}
-
-          {editingSection.type !== "bio" &&
-            editingSection.type !== "links" &&
-            editingSection.type !== "projects" &&
-            editingSection.type !== "experience" && (
+          {editingSection.type !== SECTION_TYPE.BIO &&
+            editingSection.type !== SECTION_TYPE.LINKS &&
+            editingSection.type !== SECTION_TYPE.PROJECTS &&
+            editingSection.type !== SECTION_TYPE.CTA && (
               <div className="border-secondary-b rounded-[12px] border border-dashed p-6 text-center">
                 <p className="text-secondary-text text-xs font-semibold">
                   Additional dynamic items editor will display here based on
@@ -492,7 +404,8 @@ export default function LeftSidebar({
   }
 
   if (linkSidebarOpen) {
-    const linksSection = sections.find((s) => s.type === "links") ?? null;
+    const linksSection =
+      sections.find((s) => s.type === SECTION_TYPE.LINKS) ?? null;
     return (
       <LinkSidebar
         returnTab={() => {
@@ -506,7 +419,7 @@ export default function LeftSidebar({
   }
 
   return (
-    <aside className="border-tertiary-b animate-in fade-in bg-background hidden h-full w-[260px] shrink-0 flex-col rounded-2xl border p-6 shadow-sm duration-200 select-none lg:flex xl:w-[290px]">
+    <aside className="border-tertiary-b animate-in fade-in bg-background hidden h-full w-[260px] shrink-0 flex-col border-r p-6 duration-200 select-none lg:flex xl:w-[290px]">
       {/* Search Input */}
       <div className="relative mb-6">
         <span className="text-tertiary-text absolute inset-y-0 left-3 flex items-center">
@@ -533,13 +446,23 @@ export default function LeftSidebar({
       </div>
 
       {/* Sections List */}
-      <div className="flex-1 overflow-y-auto pr-1">
+      <div className="profile-builder-scrollbar flex-1 overflow-y-auto pr-1">
         <Reorder.Group
           axis="y"
-          values={searchQuery ? filteredSections : sections}
+          values={searchQuery ? filteredSections : orderedSections}
           onReorder={(newOrder) => {
             if (!searchQuery) {
-              onReorderSections(newOrder);
+              const bioSection = sections.find(
+                (section) => section.type === SECTION_TYPE.BIO
+              );
+              const reorderedNonBioSections = newOrder.filter(
+                (section) => section.type !== SECTION_TYPE.BIO
+              );
+
+              onReorderSections([
+                ...(bioSection ? [bioSection] : []),
+                ...reorderedNonBioSections,
+              ]);
             }
           }}
           className="flex flex-col gap-3"
@@ -551,8 +474,6 @@ export default function LeftSidebar({
                 key={section.id}
                 section={section}
                 isSelected={isSelected}
-                onToggleSectionVisibility={onToggleSectionVisibility}
-                onRemoveSection={onRemoveSection}
                 handleOpenSectionForm={handleOpenSectionForm}
                 searchQuery={searchQuery}
                 profile={profile}
@@ -575,8 +496,6 @@ export default function LeftSidebar({
 function SortableSectionItem({
   section,
   isSelected,
-  onToggleSectionVisibility,
-  onRemoveSection,
   handleOpenSectionForm,
   searchQuery,
   profile,
@@ -584,11 +503,9 @@ function SortableSectionItem({
 }: {
   section: Section;
   isSelected: boolean;
-  onToggleSectionVisibility: (id: string) => void;
-  onRemoveSection: (id: string) => void;
   handleOpenSectionForm: (id: string) => void;
   searchQuery: string;
-  profile?: { fullName?: string } | null;
+  profile?: ProfilePreview | null;
   getSectionDescriptor: (section: Section) => string;
 }) {
   const dragControls = useDragControls();
@@ -607,14 +524,14 @@ function SortableSectionItem({
       }}
       role="button"
       tabIndex={0}
-      className={`group flex cursor-pointer items-center justify-between overflow-hidden rounded-xl border transition-colors duration-200 focus:outline-none ${
+      className={`group flex cursor-pointer items-center justify-between overflow-hidden rounded-xl border transition-colors duration-200 focus:outline-none ${!section.visible ? "opacity-50 grayscale" : ""} ${
         isSelected
           ? "border-brand-b bg-brand-light-subtle-bg shadow-sm"
           : "border-tertiary-b hover:border-brand-b hover:bg-primary-bg bg-background"
       }`}
     >
       <div className="flex min-w-0 flex-1 items-center justify-between px-4 py-3">
-        <div className="w-20">
+        <div className="min-w-0 flex-1 pr-3">
           <p
             className={`truncate text-sm font-semibold transition-colors ${
               !section.visible
@@ -630,33 +547,6 @@ function SortableSectionItem({
           <p className="text-secondary-text mt-0.5 truncate text-xs">
             {getSectionDescriptor(section)}
           </p>
-        </div>
-        <div>
-          <button
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              onToggleSectionVisibility(section.id);
-            }}
-            className="hover:bg-hover-bg text-secondary-text shrink-0 rounded-lg p-1.5 opacity-40 transition-all group-hover:opacity-100 hover:opacity-100"
-            title={section.visible ? "Hide section" : "Show section"}
-            aria-label={`${section.visible ? "Hide" : "Show"} section ${section.title}`}
-          >
-            {section.visible ? <Eye size={15} /> : <EyeOff size={15} />}
-          </button>
-
-          <button
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              onRemoveSection(section.id);
-            }}
-            className="hover:bg-hover-bg hover:text-negative-text text-secondary-text shrink-0 rounded-lg p-1.5 opacity-40 transition-all group-hover:opacity-100 hover:opacity-100"
-            title="Delete Section"
-            aria-label={`Delete section ${section.title}`}
-          >
-            <Trash2 size={15} />
-          </button>
         </div>
       </div>
 

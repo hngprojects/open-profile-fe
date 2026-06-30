@@ -1,4 +1,11 @@
-export type SectionType = "bio" | "links" | "projects" | "experience";
+export const SECTION_TYPE = {
+  BIO: "bio",
+  LINKS: "links",
+  PROJECTS: "projects",
+  CTA: "cta",
+} as const;
+
+export type SectionType = (typeof SECTION_TYPE)[keyof typeof SECTION_TYPE];
 
 export interface SavedLink {
   id: string;
@@ -21,13 +28,6 @@ export interface ProjectItem {
   highlighted?: boolean;
 }
 
-export interface ExperienceItem {
-  id: string;
-  role: string;
-  company: string;
-  duration: string;
-}
-
 export interface Section {
   id: string;
   title: string;
@@ -35,10 +35,10 @@ export interface Section {
   visible: boolean;
   fullName?: string;
   bio?: string;
+  photoUrl?: string | null;
   subtitle?: string;
   links?: SavedLink[];
   projects?: ProjectItem[];
-  experience?: ExperienceItem[];
   font?: string;
   textColor?: string;
   bgColor?: string;

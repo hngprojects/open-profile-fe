@@ -2,8 +2,8 @@
 
 import React, { useState } from "react";
 import Image from "next/image";
-import { MessageSquare, ChevronRight } from "lucide-react";
-import { TemplateLinkCard, getLinkIcon } from "../shared/TemplateLinkCard";
+import { ChevronRight } from "lucide-react";
+import { CreatorLinkCard, getLinkIcon } from "../shared/TemplateLinkCard";
 import {
   DashboardProfileResponse,
   ProfileContentResponse,
@@ -47,7 +47,7 @@ const DEFAULT_PROJECTS = [
     id: "proj-1",
     title: "Summer Campaign x [Pitaya]",
     description:
-      "A cross-platform content series reaching over 2M views, focusing on sustainable lifestyle.",
+      "Brand Partnership\nA cross-platform content series reaching over 2M views, focusing on sustainable lifestyle.",
     buttonText: "View Project",
     url: "#",
     imageSrc: "/profile-preview/feature1.jpg",
@@ -55,7 +55,8 @@ const DEFAULT_PROJECTS = [
   {
     id: "proj-2",
     title: "The 30-Day Creative Challenge",
-    description: "Launched a guided workshop series for 10,000+ creators.",
+    description:
+      "Digital Product / Community\nLaunched a guided workshop series for 10,000+ creators.",
     buttonText: "View Project",
     url: "#",
     imageSrc: "/profile-preview/feature2.jpg",
@@ -63,7 +64,8 @@ const DEFAULT_PROJECTS = [
   {
     id: "proj-3",
     title: "Documentary Series",
-    description: "A 3-part YouTube series exploring the creator economy.",
+    description:
+      "Video Production & Storytelling\nA 5-part YouTube series exploring the creator economy.",
     buttonText: "View Project",
     url: "#",
     imageSrc: "/profile-preview/feature3.jpg",
@@ -91,18 +93,28 @@ export default function CreatorDashboardView({
   }
 
   const rawSections = contentToSections(
-    content || ({ content: {} } as any),
-    profile || ({} as any)
+    content || ({ content: {} } as ProfileContentResponse),
+    profile || ({} as DashboardProfileResponse)
   );
 
+  type ComponentsAppearance = Record<
+    string,
+    Record<string, string | undefined>
+  >;
   const componentsAppearance =
-    (appearance as any)?.components ||
-    (profile as any)?.appearance?.components ||
-    {};
+    ((appearance as Record<string, unknown>)
+      ?.components as ComponentsAppearance) ||
+    ((
+      (profile as unknown as Record<string, unknown>)?.appearance as Record<
+        string,
+        unknown
+      >
+    )?.components as ComponentsAppearance) ||
+    ({} as ComponentsAppearance);
 
   const sections = rawSections.map((section) => {
-    const appearanceKey = section.type === "experience" ? "cta" : section.type;
-    const secAppearance = componentsAppearance[appearanceKey] || {};
+    const appearanceKey = section.type;
+    const secAppearance = componentsAppearance[appearanceKey] ?? {};
     return {
       ...section,
       bgColor:
@@ -117,7 +129,7 @@ export default function CreatorDashboardView({
         secAppearance.accentColour ||
         secAppearance.iconColor ||
         section.iconColor,
-      font: (secAppearance as any).font || section.font,
+      font: secAppearance.font || section.font,
     };
   });
 
@@ -125,7 +137,7 @@ export default function CreatorDashboardView({
 
   const bioSection = sections.find((s) => s.type === "bio");
   const linksSection = sections.find((s) => s.type === "links");
-  const ctaSection = sections.find((s) => s.type === "experience");
+  const ctaSection = sections.find((s) => s.type === "cta");
   const resolvedName = profile?.fullName || "Micaela Robinson";
 
   const allLinks = (
@@ -220,9 +232,9 @@ export default function CreatorDashboardView({
                 href={ctaHref}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="bg-brand-hover-bg hover:bg-button-brand-bg inline-flex h-10 items-center justify-center gap-2 rounded-md px-6 text-sm font-semibold text-white shadow-sm transition-all"
+                className="op-brand-fill bg-brand-hover-bg hover:bg-button-brand-bg inline-flex h-10 items-center justify-center gap-2 rounded-md px-6 text-sm font-semibold text-white shadow-sm transition-all"
               >
-                {ctaSection.iconSrc ? (
+                {ctaSection.iconSrc && (
                   <Image
                     src={getImageUrl(ctaSection.iconSrc) || ""}
                     alt="CTA Icon"
@@ -231,8 +243,6 @@ export default function CreatorDashboardView({
                     className="h-4 w-4 object-contain brightness-0 invert"
                     unoptimized
                   />
-                ) : (
-                  <MessageSquare size={16} />
                 )}
                 {ctaSection.buttonText || "Let's Collaborate"}
               </a>
@@ -302,7 +312,11 @@ export default function CreatorDashboardView({
                 key={section.id}
                 className={`relative mx-auto flex w-full max-w-4xl flex-col gap-6 rounded-3xl ${section.font ? getFontClass(section.font) : ""}`}
                 style={(() => {
-                  const { gap: _gap, ...rest } = getSectionStyle(section);
+                  const {
+                    gap: _gap,
+                    backgroundColor: _bg,
+                    ...rest
+                  } = getSectionStyle(section);
                   return rest;
                 })()}
               >
@@ -316,90 +330,94 @@ export default function CreatorDashboardView({
                 <div className="relative w-full">
                   {remainingProjects.length > 0 ? (
                     <div
-                      className={`grid gap-6 ${
-                        remainingProjects.length === 1
-                          ? "grid-cols-[minmax(0,420px)] justify-center"
-                          : section.layout === "1"
-                            ? "grid-cols-1"
-                            : section.layout === "3"
-                              ? "grid-cols-1 sm:grid-cols-2"
-                              : section.layout === "4"
-                                ? "grid-cols-1 sm:grid-cols-2"
-                                : "grid-cols-1 sm:grid-cols-2 md:grid-cols-3"
+                      className={`grid w-full gap-6 ${
+                        section.layout === "2"
+                          ? "grid-cols-1 sm:grid-cols-2"
+                          : "grid-cols-1"
                       }`}
                       style={{
                         gap: section.gap ? `${section.gap}px` : undefined,
                       }}
                     >
                       {remainingProjects.map((project) => {
-                        const layoutType = section.layout || "2";
                         const hasUrl = Boolean(project.url);
                         const displayImg = getImageUrl(project.imageSrc);
+                        const layoutType = section.layout || "2";
+
+                        const desc = project.description || "";
+                        const newlineIndex = desc.indexOf("\n");
+                        const hasCategory = newlineIndex !== -1;
+                        const categoryText = hasCategory
+                          ? desc.substring(0, newlineIndex)
+                          : "";
+                        const descriptionText = hasCategory
+                          ? desc.substring(newlineIndex + 1)
+                          : desc;
+
+                        const isSideBySide =
+                          layoutType === "3" || layoutType === "4";
 
                         const card = (
                           <div
-                            className={`group border-border bg-background hover:border-brand-hover-bg/30 flex h-full rounded-3xl border p-4 shadow-sm transition-shadow hover:shadow-md ${
-                              layoutType === "1"
-                                ? "flex-col justify-between sm:flex-row sm:items-center"
-                                : layoutType === "3"
-                                  ? "flex-col sm:flex-row sm:items-start"
-                                  : layoutType === "4"
-                                    ? "flex-col sm:flex-row-reverse sm:items-start"
-                                    : "flex-col" // Layout 2
+                            className={`group border-border bg-background hover:border-brand-hover-bg/30 flex h-full overflow-hidden rounded-3xl border shadow-sm transition-shadow hover:shadow-md ${
+                              isSideBySide
+                                ? `flex-col gap-4 p-4 lg:gap-6 lg:p-6 ${
+                                    layoutType === "3"
+                                      ? "md:flex-row md:items-center"
+                                      : "md:flex-row-reverse md:items-center"
+                                  }`
+                                : "flex-col"
                             }`}
                           >
                             {/* IMAGE */}
-                            {layoutType !== "1" && (
-                              <div
-                                className={`border-border bg-secondary-bg relative mb-4 shrink-0 overflow-hidden rounded-lg border ${
-                                  layoutType === "2"
-                                    ? "aspect-video w-full"
-                                    : "h-[120px] w-full sm:mb-0 sm:w-[140px]"
-                                } ${layoutType === "3" ? "sm:mr-5" : ""} ${layoutType === "4" ? "sm:ml-5" : ""}`}
-                              >
-                                {displayImg ? (
-                                  <Image
-                                    src={displayImg}
-                                    alt={project.title ?? "Project"}
-                                    className="object-cover"
-                                    fill
-                                    unoptimized
-                                  />
-                                ) : (
-                                  <div className="text-tertiary-text flex h-full w-full items-center justify-center text-xs">
-                                    No image
-                                  </div>
-                                )}
-                              </div>
-                            )}
+                            <div
+                              className={`bg-secondary-bg border-border relative shrink-0 overflow-hidden ${
+                                isSideBySide
+                                  ? "aspect-[16/10] w-full rounded-xl border md:w-[240px] lg:w-[320px]"
+                                  : "aspect-video w-full border-b"
+                              }`}
+                            >
+                              {displayImg ? (
+                                <Image
+                                  src={displayImg}
+                                  alt={project.title ?? "Project"}
+                                  className="object-cover"
+                                  fill
+                                  unoptimized
+                                />
+                              ) : (
+                                <div className="text-tertiary-text flex h-full w-full items-center justify-center text-xs">
+                                  No image
+                                </div>
+                              )}
+                            </div>
 
                             {/* CONTENT */}
-                            <div className="flex min-w-0 flex-1 flex-col items-start">
-                              <h5 className="text-primary-text text-xl font-bold break-all">
+                            <div
+                              className={`flex min-w-0 flex-1 flex-col items-start ${
+                                isSideBySide ? "justify-center" : "p-5"
+                              }`}
+                            >
+                              <h5 className="text-primary-text text-xl font-bold break-words">
                                 {project.title}
                               </h5>
-                              <p
-                                className={`text-secondary-text mt-1 break-all ${layoutType === "1" ? "line-clamp-1" : "line-clamp-2"}`}
-                              >
-                                {project.description}
+
+                              {hasCategory && (
+                                <span className="text-tertiary-text mt-1 text-[13px] font-medium">
+                                  {categoryText}
+                                </span>
+                              )}
+
+                              <p className="text-secondary-text mt-2 line-clamp-3 text-[14px] leading-relaxed break-words">
+                                {descriptionText}
                               </p>
-                              {layoutType !== "1" && hasUrl && (
-                                <span className="text-brand-hover-bg mt-3 flex items-center gap-1 text-sm font-semibold hover:underline">
+                              {hasUrl && (
+                                <span className="text-brand-hover-bg mt-4 flex items-center gap-1 text-[14px] font-bold hover:underline">
                                   {project.buttonText || "View project"}
                                   <ChevronRight size={16} />
                                 </span>
                               )}
                             </div>
-
-                            {/* BUTTON FOR LAYOUT 1 */}
-                            {layoutType === "1" && hasUrl && (
-                              <div className="mt-4 shrink-0 sm:mt-0 sm:ml-6">
-                                <span className="text-brand-hover-bg flex items-center gap-1 text-sm font-bold hover:underline">
-                                  {project.buttonText || "View project"}
-                                  <ChevronRight size={16} />
-                                </span>
-                              </div>
-                            )}
                           </div>
                         );
 
@@ -436,25 +454,25 @@ export default function CreatorDashboardView({
             return (
               <div
                 key={section.id}
-                className={`relative mx-auto flex w-full max-w-4xl flex-col gap-4 rounded-3xl ${section.font ? getFontClass(section.font) : ""}`}
+                className={`relative mx-auto flex w-full max-w-2xl flex-col gap-4 rounded-3xl ${section.font ? getFontClass(section.font) : ""}`}
                 style={(() => {
-                  const { gap: _gap, ...rest } = getSectionStyle(section);
+                  const {
+                    gap: _gap,
+                    backgroundColor: _bg,
+                    ...rest
+                  } = getSectionStyle(section);
                   return rest;
                 })()}
               >
                 {allLinks.length > 0 ? (
                   <div
-                    className={`grid gap-4 ${
-                      allLinks.length === 1
-                        ? "grid-cols-[minmax(0,220px)] justify-center"
-                        : "w-full grid-cols-1 sm:grid-cols-2 lg:grid-cols-4"
-                    }`}
+                    className="flex w-full flex-col gap-3"
                     style={{
                       gap: section.gap ? `${section.gap}px` : undefined,
                     }}
                   >
                     {allLinks.map((link) => (
-                      <TemplateLinkCard
+                      <CreatorLinkCard
                         key={link.id}
                         id={link.id}
                         title={link.title || link.label || ""}
@@ -479,7 +497,7 @@ export default function CreatorDashboardView({
                 className={`border-border mx-auto max-w-4xl rounded-3xl border p-8 sm:p-10 ${section.font ? getFontClass(section.font) : ""}`}
                 style={getSectionStyle(section)}
               >
-                <p className="text-secondary-text text-center text-[15px] leading-relaxed break-all whitespace-pre-wrap">
+                <p className="text-secondary-text text-center text-[15px] leading-relaxed break-words whitespace-pre-wrap">
                   {section.bio || "Write a little bit about yourself here..."}
                 </p>
               </div>

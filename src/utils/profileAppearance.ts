@@ -39,7 +39,7 @@ export function createProfileAppearanceRequest(
   values: Partial<ProfileAppearanceValues>
 ): ProfileAppearanceRequest {
   const global: ProfileAppearanceValues = {
-    template: values.template ?? "professional",
+    template: values.template ?? "default",
     accentColour: values.accentColour ?? "#087583",
     backgroundColour: values.backgroundColour ?? "#FFFFFF",
     textColour: values.textColour ?? "#050505",

@@ -1,13 +1,6 @@
 import React from "react";
 import Image from "next/image";
-import {
-  ArrowRight,
-  Eye,
-  EyeOff,
-  Trash2,
-  MoreHorizontal,
-  Mail,
-} from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import {
   getImageUrl,
   sanitizeUrl,
@@ -19,6 +12,7 @@ import type { Section, ProfilePreview, SavedLink, ProjectItem } from "../types";
 import { getFontClass } from "../../templates/TemplateAppearanceProvider";
 import { TemplateLinkCard } from "../../shared/TemplateLinkCard";
 import HighlightPreviewCard from "./HighlightPreviewCard";
+import PreviewSectionControls from "./PreviewSectionControls";
 
 interface PortfolioPreviewProps {
   sections: Section[];
@@ -26,6 +20,7 @@ interface PortfolioPreviewProps {
   selectedSectionId?: string | null;
   onToggleSectionVisibility: (id: string) => void;
   onRemoveSection: (id: string) => void;
+  onSelectSection: (id: string) => void;
 }
 
 export default function PortfolioPreview({
@@ -34,74 +29,64 @@ export default function PortfolioPreview({
   selectedSectionId: _selectedSectionId,
   onToggleSectionVisibility,
   onRemoveSection,
+  onSelectSection,
 }: PortfolioPreviewProps) {
-  const ctaSection = sections.find(
-    (s) => s.type === "experience" || s.type === "cta"
-  );
+  const visibleSections = sections;
 
-  const renderControls = (section?: Section, isBio: boolean = false) => {
-    if (!section) return null;
-    return (
-      <div className="group/menu absolute -top-12 right-0 z-50">
-        <button className="text-tertiary-text hover:text-primary-text hover:bg-hover-bg flex h-8 w-8 cursor-pointer items-center justify-center rounded-[8px] transition-colors">
-          <MoreHorizontal size={18} />
-        </button>
-
-        <div className="border-border bg-background invisible absolute top-full right-0 mt-2 flex w-40 flex-col overflow-hidden rounded-xl border opacity-0 shadow-lg transition-all group-hover/menu:visible group-hover/menu:opacity-100">
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              onToggleSectionVisibility(section.id);
-            }}
-            className="text-secondary-text hover:bg-hover-bg hover:text-primary-text flex w-full items-center gap-3 px-4 py-2.5 text-sm font-medium transition-colors"
-          >
-            {section.visible ? (
-              <>
-                <EyeOff size={16} /> Hide Section
-              </>
-            ) : (
-              <>
-                <Eye size={16} /> Show Section
-              </>
-            )}
-          </button>
-          <button
-            onClick={(e) => {
-              if (!isBio) {
-                e.stopPropagation();
-                onRemoveSection(section.id);
-              }
-            }}
-            disabled={isBio}
-            className={`flex w-full items-center gap-3 px-4 py-2.5 text-sm font-medium transition-colors ${isBio ? "text-negative-text cursor-not-allowed opacity-50" : "text-negative-text hover:bg-negative-bg/20"}`}
-          >
-            <Trash2 size={16} /> Delete
-          </button>
-        </div>
-      </div>
-    );
+  const handleSelectSection = (
+    event: React.MouseEvent<HTMLElement>,
+    section: Section
+  ) => {
+    event.preventDefault();
+    onSelectSection(section.id);
   };
+
+  const handleSectionKeyDown = (
+    event: React.KeyboardEvent<HTMLElement>,
+    section: Section
+  ) => {
+    if (event.key !== "Enter" && event.key !== " ") return;
+    if (event.target !== event.currentTarget) return;
+
+    event.preventDefault();
+    onSelectSection(section.id);
+  };
+
+  const renderControls = (
+    section?: Section,
+    positionClass = "top-4 right-4",
+    hoverTarget: "section" | "cta" = "section"
+  ) => (
+    <PreviewSectionControls
+      section={section}
+      positionClass={positionClass}
+      hoverTarget={hoverTarget}
+      onToggleSectionVisibility={onToggleSectionVisibility}
+      onRemoveSection={onRemoveSection}
+    />
+  );
 
   return (
     <div
       className="text-primary-text mx-auto flex w-full max-w-5xl flex-col py-8 pt-6"
       style={{ gap: "var(--op-spacing, 2rem)" }}
     >
-      {sections.map((section) => {
+      {visibleSections.map((section) => {
         if (section.type === "bio") {
           return (
-            <div
+            <section
               key={section.id}
-              className={`group relative rounded-2xl transition-opacity duration-200 ${!section.visible ? "opacity-50 grayscale" : ""} ${section.font ? getFontClass(section.font) : ""}`}
+              role="button"
+              tabIndex={0}
+              onClick={(event) => handleSelectSection(event, section)}
+              onKeyDown={(event) => handleSectionKeyDown(event, section)}
+              className={`group hover:border-border hover:bg-background/50 relative w-full cursor-pointer rounded-2xl border border-transparent p-6 transition-colors ${section.font ? getFontClass(section.font) : ""}`}
               style={getSectionStyle(section)}
             >
-              {renderControls(section, true)}
-
               <header
-                className="hover:border-border hover:bg-background/50 relative flex w-full flex-col justify-between rounded-2xl border border-transparent transition-colors sm:flex-row sm:items-start"
+                className="relative flex w-full flex-col justify-between sm:flex-row sm:items-start"
                 style={{
                   gap: "var(--op-spacing, 24px)",
-                  padding: "var(--op-spacing, 24px)",
                 }}
               >
                 <div
@@ -119,9 +104,7 @@ export default function PortfolioPreview({
                       />
                     ) : (
                       <div className="bg-brand-subtle-bg text-brand-hover-bg flex h-full w-full items-center justify-center text-[32px] font-bold">
-                        {(profile?.fullName || "John Smith")
-                          .charAt(0)
-                          .toUpperCase()}
+                        {(profile?.fullName ?? "").charAt(0).toUpperCase()}
                       </div>
                     )}
                   </div>
@@ -129,49 +112,22 @@ export default function PortfolioPreview({
                   <div className="flex flex-col">
                     <div className="flex items-center gap-2">
                       <h1 className="text-primary-text text-[26px] leading-tight font-bold tracking-tight">
-                        {profile?.fullName || "John Smith"}
+                        {profile?.fullName ?? ""}
                       </h1>
                     </div>
-                    <p className="text-secondary-text mt-1 text-[14px]">
+                    <p className="text-brand-hover-bg mt-1 text-[14px]">
                       {getDisplayProfileUrl(profile?.username || "johnsmith")}
                     </p>
                   </div>
                 </div>
-
-                {ctaSection?.visible && ctaSection?.url && (
-                  <a
-                    href="#"
-                    onClick={(e) => e.preventDefault()}
-                    className="border-brand-hover-bg bg-background text-brand-hover-bg hover:bg-brand-hover-bg/5 inline-flex h-9 items-center justify-center gap-2 rounded-md border px-4 text-[13px] font-semibold transition-colors"
-                  >
-                    {ctaSection.iconSrc ? (
-                      <div
-                        className="bg-brand-hover-bg h-4 w-4"
-                        style={{
-                          maskImage: `url(${ctaSection.iconSrc})`,
-                          WebkitMaskImage: `url(${ctaSection.iconSrc})`,
-                          maskSize: "contain",
-                          WebkitMaskSize: "contain",
-                          maskRepeat: "no-repeat",
-                          WebkitMaskRepeat: "no-repeat",
-                          maskPosition: "center",
-                          WebkitMaskPosition: "center",
-                        }}
-                      />
-                    ) : (
-                      <Mail size={16} />
-                    )}
-                    {ctaSection.buttonText || "Email"}
-                  </a>
-                )}
               </header>
 
-              <section className="mt-8 px-6">
-                <p className="text-secondary-text max-w-3xl text-[15px] leading-relaxed whitespace-pre-wrap">
+              <div className="mt-8">
+                <p className="text-secondary-text max-w-3xl text-[15px] leading-relaxed break-words whitespace-pre-wrap">
                   {section.bio || "Write a little bit about yourself here..."}
                 </p>
-              </section>
-            </div>
+              </div>
+            </section>
           );
         }
 
@@ -179,7 +135,11 @@ export default function PortfolioPreview({
           return (
             <section
               key={section.id}
-              className={`group hover:border-border hover:bg-background/50 relative w-full rounded-2xl border border-transparent p-6 transition-colors ${!section.visible ? "opacity-50 grayscale" : ""} ${section.font ? getFontClass(section.font) : ""}`}
+              role="button"
+              tabIndex={0}
+              onClick={(event) => handleSelectSection(event, section)}
+              onKeyDown={(event) => handleSectionKeyDown(event, section)}
+              className={`group hover:border-border hover:bg-background/50 relative w-full cursor-pointer rounded-2xl border border-transparent p-6 transition-colors ${!section.visible ? "opacity-50 grayscale" : ""} ${section.font ? getFontClass(section.font) : ""}`}
               style={(() => {
                 const { gap: _gap, ...rest } = getSectionStyle(section);
                 return rest;
@@ -192,7 +152,7 @@ export default function PortfolioPreview({
               </h2>
               {section.links && section.links.length > 0 ? (
                 <div
-                  className="grid min-w-0 grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4"
+                  className="grid min-w-0 grid-cols-1 gap-4 sm:grid-cols-2"
                   style={{
                     gap: section.gap ? `${section.gap}px` : undefined,
                   }}
@@ -224,109 +184,131 @@ export default function PortfolioPreview({
           );
 
           return (
-            <div key={section.id} className="flex flex-col gap-6">
+            <div
+              key={section.id}
+              role="button"
+              tabIndex={0}
+              onClick={(event) => handleSelectSection(event, section)}
+              onKeyDown={(event) => handleSectionKeyDown(event, section)}
+              className={`group relative flex cursor-pointer flex-col gap-6 ${!section.visible ? "opacity-50 grayscale" : ""}`}
+            >
+              {renderControls(section)}
               <HighlightPreviewCard
                 projectsSection={section}
                 variant="transparent"
               />
               <section
-                className={`group hover:border-border hover:bg-background/50 relative w-full rounded-2xl border border-transparent p-6 transition-colors ${!section.visible ? "opacity-50 grayscale" : ""} ${section.font ? getFontClass(section.font) : ""}`}
+                className={`group hover:border-border hover:bg-background/50 relative w-full rounded-2xl border border-transparent p-6 transition-colors ${section.font ? getFontClass(section.font) : ""}`}
                 style={(() => {
                   const { gap: _gap, ...rest } = getSectionStyle(section);
                   return rest;
                 })()}
               >
-                {renderControls(section)}
-
-                <div className="mb-6 flex flex-col gap-1">
-                  {section.title && (
-                    <h2 className="text-primary-text text-[26px] font-bold">
-                      {section.title}
-                    </h2>
-                  )}
-                  {(section.subtitle || !section.title) && (
-                    <h3 className="text-tertiary-text text-[13px]">
-                      {section.subtitle || "Featured Projects"}
-                    </h3>
+                <div className="mb-4 flex flex-col gap-1">
+                  <h2 className="text-tertiary-text text-[13px]">
+                    {section.title || "Featured Projects"}
+                  </h2>
+                  {section.subtitle && (
+                    <p className="text-secondary-text text-xs">
+                      {section.subtitle}
+                    </p>
                   )}
                 </div>
                 {remainingProjects.length > 0 ? (
                   <div
                     className={`grid gap-6 ${
-                      section.layout === "1"
-                        ? "grid-cols-1"
-                        : section.layout === "3"
-                          ? "grid-cols-1 sm:grid-cols-2"
-                          : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
+                      section.layout === "2"
+                        ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-2"
+                        : "grid-cols-1"
                     }`}
                     style={{
                       gap: section.gap ? `${section.gap}px` : undefined,
                     }}
                   >
-                    {remainingProjects.map(
-                      (project: ProjectItem, idx: number) => {
-                        const numberStr = String(idx + 1).padStart(2, "0");
-                        return (
+                    {remainingProjects.map((project: ProjectItem) => {
+                      const layoutType = section.layout || "2";
+                      const isSideBySide =
+                        layoutType === "3" || layoutType === "4";
+                      const desc = project.description || "";
+                      const newlineIndex = desc.indexOf("\n");
+                      const hasCategory = newlineIndex !== -1;
+                      const categoryText = hasCategory
+                        ? desc.substring(0, newlineIndex)
+                        : "";
+                      const descriptionText = hasCategory
+                        ? desc.substring(newlineIndex + 1)
+                        : desc;
+                      return (
+                        <div
+                          key={project.id}
+                          className={`group/proj border-border bg-background flex h-full overflow-hidden rounded-[12px] border shadow-sm transition-shadow hover:shadow-md ${
+                            isSideBySide
+                              ? `flex-col gap-4 p-4 2xl:gap-6 2xl:p-6 ${
+                                  layoutType === "3"
+                                    ? "xl:flex-row xl:items-center"
+                                    : "xl:flex-row-reverse xl:items-center"
+                                }`
+                              : "flex-col"
+                          }`}
+                        >
                           <div
-                            key={project.id}
-                            className={`group/proj border-border bg-background flex overflow-hidden rounded-[12px] border shadow-sm transition-shadow hover:shadow-md ${
-                              section.layout === "1"
-                                ? "flex-col sm:flex-row"
-                                : "flex-col"
+                            className={`bg-secondary-bg border-border relative overflow-hidden ${
+                              isSideBySide
+                                ? "aspect-[16/10] w-full rounded-xl border xl:w-[240px] 2xl:w-[320px]"
+                                : "aspect-16/10 w-full border-b"
                             }`}
                           >
-                            <div
-                              className={`bg-secondary-bg border-border relative overflow-hidden ${
-                                section.layout === "1"
-                                  ? "w-full shrink-0 border-b sm:w-[320px] sm:border-r sm:border-b-0"
-                                  : "aspect-16/10 w-full border-b"
-                              }`}
-                            >
-                              {getImageUrl(project.imageSrc) ? (
-                                <Image
-                                  src={getImageUrl(project.imageSrc) || ""}
-                                  alt={project.title || "Project"}
-                                  fill
-                                  className="object-cover transition-transform duration-500 group-hover/proj:scale-[1.02]"
-                                  unoptimized
-                                />
-                              ) : (
-                                <div className="h-full w-full bg-neutral-200 transition-transform duration-500 group-hover/proj:scale-[1.02]" />
-                              )}
-                            </div>
-
-                            <div className="flex flex-1 flex-col p-6">
-                              <div className="mb-1 flex items-start gap-2">
-                                <span className="text-primary-text text-[16px] font-bold">
-                                  {numberStr}
-                                </span>
-                                <h3 className="text-primary-text text-[16px] font-bold">
-                                  {project.title}
-                                </h3>
-                              </div>
-
-                              {project.description && (
-                                <p className="text-secondary-text mb-6 ml-6 line-clamp-2 text-[13px]">
-                                  {project.description}
-                                </p>
-                              )}
-
-                              {project.url && (
-                                <a
-                                  href={sanitizeUrl(project.url)}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="text-brand-hover-bg mt-auto ml-6 inline-flex items-center gap-1.5 text-[13px] font-bold hover:underline"
-                                >
-                                  {project.buttonText || "View Project"}
-                                  <ArrowRight size={14} strokeWidth={2.5} />
-                                </a>
-                              )}
-                            </div>
+                            {getImageUrl(project.imageSrc) ? (
+                              <Image
+                                src={getImageUrl(project.imageSrc) || ""}
+                                alt={project.title || "Project"}
+                                fill
+                                className="object-cover transition-transform duration-500 group-hover/proj:scale-[1.02]"
+                                unoptimized
+                              />
+                            ) : (
+                              <div className="h-full w-full bg-neutral-200 transition-transform duration-500 group-hover/proj:scale-[1.02]" />
+                            )}
                           </div>
-                        );
-                      }
-                    )}
+
+                          <div
+                            className={`flex min-w-0 flex-1 flex-col ${
+                              isSideBySide ? "justify-center" : "p-6"
+                            }`}
+                          >
+                            <div className="mb-1 flex items-start gap-2">
+                              <h3 className="text-primary-text text-[16px] font-bold">
+                                {project.title}
+                              </h3>
+                            </div>
+
+                            {hasCategory && (
+                              <span className="text-brand-hover-bg text-[12px] font-semibold">
+                                {categoryText}
+                              </span>
+                            )}
+
+                            {descriptionText && (
+                              <p className="text-secondary-text mb-6 line-clamp-2 text-[13px]">
+                                {descriptionText}
+                              </p>
+                            )}
+
+                            {project.url && (
+                              <a
+                                href={sanitizeUrl(project.url)}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-brand-hover-bg mt-auto inline-flex items-center gap-1.5 text-[13px] font-bold hover:underline"
+                              >
+                                {project.buttonText || "View Project"}
+                                <ArrowRight size={14} strokeWidth={2.5} />
+                              </a>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
                 ) : (
                   <p className="text-tertiary-text border-border rounded-xl border border-dashed py-4 text-center text-sm">
@@ -338,11 +320,15 @@ export default function PortfolioPreview({
           );
         }
 
-        if (section.type === "experience") {
+        if (section.type === "cta") {
           return (
             <section
               key={section.id}
-              className={`group hover:border-border hover:bg-background/50 relative w-full rounded-2xl border border-transparent p-6 transition-colors ${!section.visible ? "opacity-50 grayscale" : ""} ${section.font ? getFontClass(section.font) : ""}`}
+              role="button"
+              tabIndex={0}
+              onClick={(event) => handleSelectSection(event, section)}
+              onKeyDown={(event) => handleSectionKeyDown(event, section)}
+              className={`group hover:border-border hover:bg-background/50 relative w-full cursor-pointer rounded-2xl border border-transparent p-6 transition-colors ${!section.visible ? "opacity-50 grayscale" : ""} ${section.font ? getFontClass(section.font) : ""}`}
               style={getSectionStyle(section)}
             >
               {renderControls(section)}
@@ -378,7 +364,7 @@ export default function PortfolioPreview({
                   href={sanitizeUrl(section.url || "#")}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="bg-brand-hover-bg hover:bg-button-brand-bg inline-flex h-12 items-center justify-center rounded-xl px-8 text-[15px] font-bold text-white shadow-sm transition-all"
+                  className="op-brand-fill bg-brand-hover-bg hover:bg-button-brand-bg inline-flex h-12 items-center justify-center rounded-xl px-8 text-[15px] font-bold text-white shadow-sm transition-all"
                 >
                   {section.buttonText || "Let's Connect"}
                 </a>

@@ -55,8 +55,7 @@ const fadeUp = {
 
 export default function Target() {
   return (
-    <div className="text-primary font-afacad w-full">
-      {/* header */}
+    <div className="text-primary w-full">
       <motion.div
         variants={fadeUp}
         initial="hidden"
@@ -71,17 +70,16 @@ export default function Target() {
             width={16}
             height={16}
           />
-          <p className="text-brand font-sfpror text-[12px] leading-4 font-medium">
+          <p className="text-brand text-[12px] leading-4 font-medium">
             Target Audience
           </p>
         </div>
 
-        <p className="font-afacad mx-auto mt-2 max-w-[450px] text-center text-[28px] leading-9 font-semibold md:max-w-full md:text-[40px] md:leading-12 lg:text-[48px] lg:leading-14">
+        <p className="mx-auto mt-2 max-w-[450px] text-center text-[28px] leading-9 font-semibold md:max-w-full md:text-[40px] md:leading-12 lg:text-[48px] lg:leading-14">
           Built for people who need to be discovered early
         </p>
       </motion.div>
 
-      {/* cards grid */}
       <div className="mt-10 grid grid-cols-1 items-center justify-center gap-6 lg:grid-cols-3">
         {audiences.map(
           ({ bg, right, icon, checkIcon, title, description, items }, i) => (
@@ -95,7 +93,6 @@ export default function Target() {
               transition={{ duration: 0.5, delay: i * 0.15 }}
               className="relative mx-auto flex h-full w-full max-w-112.5 flex-col space-y-4 overflow-hidden rounded-[16px] px-6 pt-20 pb-6 transition-all duration-200 hover:shadow-lg"
             >
-              {/* top icon */}
               <div className={`absolute top-0 ${right}`}>
                 <Image
                   src={icon}
@@ -106,15 +103,12 @@ export default function Target() {
                 />
               </div>
 
-              {/* title */}
-              <p className="font-afacad text-[24px] leading-8 font-semibold tracking-[-0.5px]">
+              <p className="text-[24px] leading-8 font-semibold tracking-[-0.5px]">
                 {title}
               </p>
 
-              {/* description */}
-              <p className="font-afacad text-label-text">{description}</p>
+              <p className="text-label-text">{description}</p>
 
-              {/* checklist — pushed to bottom */}
               <div className="mt-auto space-y-2">
                 {items.map((item, j) => (
                   <motion.div
@@ -127,7 +121,7 @@ export default function Target() {
                     className="flex items-center gap-2"
                   >
                     <Image src={checkIcon} alt="check" width={16} height={16} />
-                    <p className="font-afacad text-label-text">{item}</p>
+                    <p className="text-label-text">{item}</p>
                   </motion.div>
                 ))}
               </div>

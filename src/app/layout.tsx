@@ -1,6 +1,12 @@
 import { Providers } from "@/components/shared/providers";
 import type { Metadata } from "next";
-import { Afacad, Dancing_Script, Inter } from "next/font/google";
+import {
+  Afacad,
+  Dancing_Script,
+  Geologica,
+  Inter,
+  Playfair_Display,
+} from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 import { env } from "@/env/client";
@@ -12,6 +18,14 @@ const dancing = Dancing_Script({
   variable: "--font-dancing",
 });
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
+const geologica = Geologica({
+  subsets: ["latin"],
+  variable: "--font-geologica",
+});
+const playfair = Playfair_Display({
+  subsets: ["latin"],
+  variable: "--font-playfair",
+});
 
 export const metadata: Metadata = {
   metadataBase: new URL(env.NEXT_PUBLIC_APP_URL),
@@ -34,7 +48,7 @@ export default function RootLayout({
       className={cn("font-afacad h-full antialiased", afacad.variable)}
     >
       <body
-        className={`flex min-h-full flex-col ${afacad.variable} ${dancing.variable} ${inter.variable}`}
+        className={`flex min-h-full flex-col ${afacad.variable} ${dancing.variable} ${inter.variable} ${geologica.variable} ${playfair.variable}`}
       >
         <Providers>
           {children}
