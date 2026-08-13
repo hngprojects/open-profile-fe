@@ -2,11 +2,13 @@
 
 import { useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
-import { Loader2, SearchX } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import Link from "next/link";
 import { getBaseDisplayUrl } from "@/utils/profile";
+
+import SearchEmptyState from "@/app/search/_components/SearchEmptyState";
 
 export function ProfileNotFound() {
   const pathname = usePathname();
@@ -90,29 +92,7 @@ export function ProfileNotFound() {
         </div>
 
         {/* Error state */}
-        <div className="flex flex-col items-center gap-3 text-center">
-          <div className="bg-brand-hover-bg/8 flex h-14 w-14 items-center justify-center rounded-full">
-            <SearchX className="text-link-hover-text h-6 w-6" />
-          </div>
-          <div className="flex flex-col gap-1">
-            <p
-              className="text-primary-text text-[18px] font-semibold"
-              style={{ fontFamily: "'Afacad', sans-serif" }}
-            >
-              Your search for{" "}
-              <span className="text-link-hover-text">
-                &quot;{searched}&quot;
-              </span>{" "}
-              was not found
-            </p>
-            <p
-              className="text-label-text text-[15px]"
-              style={{ fontFamily: "'Afacad', sans-serif" }}
-            >
-              Double-check the username or try a different one.
-            </p>
-          </div>
-        </div>
+        <SearchEmptyState query={searched} />
       </div>
     </main>
   );

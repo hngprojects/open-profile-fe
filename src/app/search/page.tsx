@@ -3,7 +3,9 @@ import { Search, AlertCircle } from "lucide-react";
 import { Navbar } from "@/components/layout/Navbar";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import Footer from "@/components/layout/Footer";
-import { searchProfiles, SearchResult } from "@/api/search/search.service";
+import { SearchResult } from "@/api/search/search.service";
+import { searchProfilesServer } from "@/api/search/search.server";
+import SearchEmptyState from "./_components/SearchEmptyState";
 import SearchHeader from "./_components/SearchHeader";
 import PaginationControls from "./_components/PaginationControls";
 import SearchRetryButton from "./_components/SearchRetryButton";
@@ -32,7 +34,7 @@ export default async function SearchPage(props: PageProps) {
 
   if (queryIsValid) {
     try {
-      const data = await searchProfiles({
+      const data = await searchProfilesServer({
         q: q.trim(),
         page: currentPage,
         limit,
@@ -112,17 +114,7 @@ export default async function SearchPage(props: PageProps) {
                 <SearchRetryButton />
               </div>
             ) : results.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-16 text-center">
-                <div className="bg-secondary-bg mx-auto mb-6 flex h-[64px] w-[64px] items-center justify-center rounded-full">
-                  <Search className="text-disabled-text" size={32} />
-                </div>
-                <h3 className="text-primary-text text-[22px] font-semibold">
-                  No profiles found for &quot;{q}&quot;.
-                </h3>
-                <p className="text-secondary-text mt-3 text-[16px]">
-                  Try a different name or username.
-                </p>
-              </div>
+              <SearchEmptyState query={q} />
             ) : (
               <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
                 {results.map((user: SearchResult, index: number) => {
